@@ -17,8 +17,9 @@ async function login(page: Page, email = 'sahara@example.com'): Promise<void> {
 async function answer(page: Page, questionId: string, value: 'yes' | 'no'): Promise<void> {
   const input = page.locator(`input[name="answer-${questionId}"][value="${value}"]`);
   await expect(input).toBeEnabled();
-  await input.check();
+  await input.click();
   await expect.poll(async () => (await dataset(page)).assessments[draftId]?.answers[questionId]).toBe(value);
+  await expect(input).toBeChecked();
 }
 
 test('registration validates, verifies, and creates a company before assessment', async ({ page }) => {
