@@ -26,9 +26,8 @@ export function Layout() {
   const staff = isStaff(user);
   const items = staff ? [
     ['/app/portfolio','chart','Portfolio overview'], ['/app/organizations','company','Organizations'],
-    ['/app/compare','grid','Compare results'], ['/app/frameworks','file','Framework library'],
-    ...(canManage(user) ? [['/app/cycles','calendar','Assessment cycles'], ['/app/access','users','People & access']] : []),
-    ...(user.role === 'admin' ? [['/app/audit','clock','Audit activity'], ['/app/data','settings','Demo data controls']] : []),
+    ['/app/compare','grid','Compare results'],
+    ...(canManage(user) ? [['/app/access','users','People & access']] : []),
   ] : [['/app/dashboard','grid','My workspace'], ['/app/history','clock','Assessment history'], ['/app/profile','company','Company profile']];
   const org = user.orgId ? db.organizations[user.orgId] : null;
   return <div className="app-shell"><a className="skip-link" href="#main-content" onClick={(event) => { event.preventDefault(); document.getElementById('main-content')?.focus(); }}>Skip to content</a>

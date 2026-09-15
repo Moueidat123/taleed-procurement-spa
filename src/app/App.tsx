@@ -22,10 +22,7 @@ const Portfolio=lazy(()=>import('../features/staff/Portfolio'));
 const Organizations=lazy(()=>import('../features/staff/Organizations').then((m)=>({default:m.Organizations})));
 const OrganizationDetail=lazy(()=>import('../features/staff/Organizations').then((m)=>({default:m.OrganizationDetail})));
 const Compare=lazy(()=>import('../features/staff/Compare'));
-const Frameworks=lazy(()=>import('../features/staff/Frameworks'));
-const Cycles=lazy(()=>import('../features/staff/Administration').then((m)=>({default:m.Cycles})));
 const Access=lazy(()=>import('../features/staff/Administration').then((m)=>({default:m.Access})));
-const Audit=lazy(()=>import('../features/staff/Administration').then((m)=>({default:m.Audit})));
 function Guard({roles}:{roles?:Role[]}) {
   const user=useAppSelector(selectUser);
   if(!user?.active)return <Navigate to="/login" replace/>;
@@ -47,9 +44,8 @@ export default function App() {
     <Route element={<Guard/>}><Route path="/app" element={<Layout/>}><Route index element={<WorkspaceRedirect/>}/>
       <Route element={<Guard roles={['champion']}/>}><Route path="dashboard" element={<Dashboard/>}/><Route path="profile" element={<Profile/>}/><Route path="history" element={<History/>}/><Route path="assessment/:id/review" element={<Review/>}/><Route path="assessment/:id/:section" element={<Assessment/>}/></Route>
       <Route path="results/:id" element={<Results/>}/><Route path="recommendations/:id" element={<Results mode="recommendations"/>}/><Route path="responses/:id" element={<Results mode="responses"/>}/><Route path="report/:id" element={<Results mode="report"/>}/>
-      <Route element={<Guard roles={['analyst','admin']}/>}><Route path="portfolio" element={<Portfolio/>}/><Route path="organizations" element={<Organizations/>}/><Route path="organizations/:id" element={<OrganizationDetail/>}/><Route path="compare" element={<Compare/>}/><Route path="frameworks" element={<Frameworks/>}/></Route>
-      <Route element={<Guard roles={['admin']}/>}><Route path="cycles" element={<Cycles/>}/><Route path="access" element={<Access/>}/></Route>
-      <Route element={<Guard roles={['admin']}/>}><Route path="audit" element={<Audit/>}/><Route path="data" element={<DataControls/>}/></Route>
+      <Route element={<Guard roles={['analyst','admin']}/>}><Route path="portfolio" element={<Portfolio/>}/><Route path="organizations" element={<Organizations/>}/><Route path="organizations/:id" element={<OrganizationDetail/>}/><Route path="compare" element={<Compare/>}/></Route>
+      <Route element={<Guard roles={['admin']}/>}><Route path="access" element={<Access/>}/></Route>
       <Route path="*" element={<EmptyState title="Page not found" action={<LinkButton to="/app">Go to workspace</LinkButton>}>This route does not exist in the prototype.</EmptyState>}/>
     </Route></Route><Route path="*" element={<div className="guidance-layout"><EmptyState title="Page not found" action={<LinkButton to="/">Return to the introduction</LinkButton>}>Check the address or return to the prototype.</EmptyState></div>}/>
   </Routes>}</Suspense></AppErrorBoundary></HashRouter>;

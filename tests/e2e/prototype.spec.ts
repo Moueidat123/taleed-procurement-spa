@@ -178,14 +178,6 @@ test('corrupt persistence preserves original bytes and enters explicit recovery'
   await expect.poll(async () => (await dataset(page)).schemaVersion).toBe(1);
 });
 
-test('invalid JSON import cannot enable dataset replacement', async ({ page }) => {
-  await login(page, 'admin@example.com');
-  await page.goto('/#/app/data');
-  await page.getByLabel('Backup file', { exact: true }).setInputFiles({ name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from('{"schemaVersion":99}') });
-  await expect(page.getByRole('button', { name: 'Review and replace local data' })).toHaveCount(0);
-  expect((await dataset(page)).schemaVersion).toBe(1);
-});
-
 test('desktop and mobile layout has no document-level horizontal overflow', async ({ page }) => {
   await login(page);
   const dimensions = await page.evaluate(() => ({ viewport: window.innerWidth, document: document.documentElement.scrollWidth }));
