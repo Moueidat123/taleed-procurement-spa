@@ -1,0 +1,182 @@
+
+> taleed-procurement-spa@1.0.0-prototype test:core
+> node scripts/test-core.mjs
+
+TAP version 13
+# Subtest: source catalogue: 40 distinct string IDs, 64 recommendations and 4 interpretations
+ok 1 - source catalogue: 40 distinct string IDs, 64 recommendations and 4 interpretations
+  ---
+  duration_ms: 1.138988
+  type: 'test'
+  ...
+# Subtest: seed is valid, deterministic, synthetic and contains a 12-answer draft
+ok 2 - seed is valid, deterministic, synthetic and contains a 12-answer draft
+  ---
+  duration_ms: 15.391166
+  type: 'test'
+  ...
+# Subtest: all No and all Yes produce exactly 0% and 100%
+ok 3 - all No and all Yes produce exactly 0% and 100%
+  ---
+  duration_ms: 0.235574
+  type: 'test'
+  ...
+# Subtest: unrounded maturity boundaries are inclusive on the upper bound
+ok 4 - unrounded maturity boundaries are inclusive on the upper bound
+  ---
+  duration_ms: 0.367752
+  type: 'test'
+  ...
+# Subtest: 40-question total boundaries: 16/17, 26/27 and 32/33 Yes answers
+ok 5 - 40-question total boundaries: 16/17, 26/27 and 32/33 Yes answers
+  ---
+  duration_ms: 0.764756
+  type: 'test'
+  ...
+# Subtest: known 6/4/8/6 fixture: 60% Developing; Spend, Category, SRM priorities
+ok 6 - known 6/4/8/6 fixture: 60% Developing; Spend, Category, SRM priorities
+  ---
+  duration_ms: 0.174872
+  type: 'test'
+  ...
+# Subtest: all 14,641 domain-count combinations preserve score, exact band, unique stable priorities and correct recommendation groups
+ok 7 - all 14,641 domain-count combinations preserve score, exact band, unique stable priorities and correct recommendation groups
+  ---
+  duration_ms: 415.16854
+  type: 'test'
+  ...
+# Subtest: unanswered is not No; incomplete submissions cannot be scored
+ok 8 - unanswered is not No; incomplete submissions cannot be scored
+  ---
+  duration_ms: 0.501262
+  type: 'test'
+  ...
+# Subtest: unknown/missing IDs, invalid values and duplicate framework IDs are rejected
+ok 9 - unknown/missing IDs, invalid values and duplicate framework IDs are rejected
+  ---
+  duration_ms: 0.754522
+  type: 'test'
+  ...
+# Subtest: partial save and clear update only the draft, with no final snapshot
+ok 10 - partial save and clear update only the draft, with no final snapshot
+  ---
+  duration_ms: 12.085209
+  type: 'test'
+  ...
+# Subtest: submission requires all answers and declaration, then snapshots immediately
+ok 11 - submission requires all answers and declaration, then snapshots immediately
+  ---
+  duration_ms: 10.390599
+  type: 'test'
+  ...
+# Subtest: submitted answers cannot be edited; old profile snapshots do not change
+ok 12 - submitted answers cannot be edited; old profile snapshots do not change
+  ---
+  duration_ms: 7.037862
+  type: 'test'
+  ...
+# Subtest: correction remains a draft while original stays effective; resubmission advances effective revision
+ok 13 - correction remains a draft while original stays effective; resubmission advances effective revision
+  ---
+  duration_ms: 14.511849
+  type: 'test'
+  ...
+# Subtest: duplicate drafts/correction requests are blocked
+ok 14 - duplicate drafts/correction requests are blocked
+  ---
+  duration_ms: 7.114236
+  type: 'test'
+  ...
+# Subtest: company scoping blocks another company; staff cannot edit or see draft answers in read policy
+ok 15 - company scoping blocks another company; staff cannot edit or see draft answers in read policy
+  ---
+  duration_ms: 5.688629
+  type: 'test'
+  ...
+# Subtest: closed cycles and paused organizations block editing and submission
+ok 16 - closed cycles and paused organizations block editing and submission
+  ---
+  duration_ms: 10.18438
+  type: 'test'
+  ...
+# Subtest: registration normalizes email, requires consent, never accepts role escalation or password storage
+ok 17 - registration normalizes email, requires consent, never accepts role escalation or password storage
+  ---
+  duration_ms: 8.253605
+  type: 'test'
+  ...
+# Subtest: unverified account cannot start; verification and complete profile enable a new cycle draft
+ok 18 - unverified account cannot start; verification and complete profile enable a new cycle draft
+  ---
+  duration_ms: 14.352079
+  type: 'test'
+  ...
+# Subtest: duplicate company names and registration references are rejected
+ok 19 - duplicate company names and registration references are rejected
+  ---
+  duration_ms: 3.713488
+  type: 'test'
+  ...
+# Subtest: framework clone/publication preserves content and historical snapshots
+ok 20 - framework clone/publication preserves content and historical snapshots
+  ---
+  duration_ms: 9.031361
+  type: 'test'
+  ...
+# Subtest: analyst export grants are explicit; only management can grant them
+ok 21 - analyst export grants are explicit; only management can grant them
+  ---
+  duration_ms: 9.19715
+  type: 'test'
+  ...
+# Subtest: administrator/self-access protection is enforced
+ok 22 - administrator/self-access protection is enforced
+  ---
+  duration_ms: 4.346838
+  type: 'test'
+  ...
+# Subtest: persistence hydrates unchanged data, checks revisions and never silently resets corruption
+ok 23 - persistence hydrates unchanged data, checks revisions and never silently resets corruption
+  ---
+  duration_ms: 21.55659
+  type: 'test'
+  ...
+# Subtest: quota failures do not claim success or overwrite the saved revision
+ok 24 - quota failures do not claim success or overwrite the saved revision
+  ---
+  duration_ms: 10.766303
+  type: 'test'
+  ...
+# Subtest: corrupt/unknown-schema/tampered/unsafe backups are rejected before restoration
+ok 25 - corrupt/unknown-schema/tampered/unsafe backups are rejected before restoration
+  ---
+  duration_ms: 8.649269
+  type: 'test'
+  ...
+# Subtest: CSV formulas, quotes, newlines and non-ASCII values are handled safely
+ok 26 - CSV formulas, quotes, newlines and non-ASCII values are handled safely
+  ---
+  duration_ms: 0.326549
+  type: 'test'
+  ...
+# Subtest: audit caps at 500 events and never includes answer values in answer details
+ok 27 - audit caps at 500 events and never includes answer values in answer details
+  ---
+  duration_ms: 499.394943
+  type: 'test'
+  ...
+# Subtest: draft content editing is validated and cannot mutate published content or source IDs
+ok 28 - draft content editing is validated and cannot mutate published content or source IDs
+  ---
+  duration_ms: 14.472889
+  type: 'test'
+  ...
+1..28
+# tests 28
+# suites 0
+# pass 28
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1179.109513

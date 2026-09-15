@@ -1,0 +1,12 @@
+/* Foundations extracted from the approved procurement prototype's shared Taleed system.
+   No external font files or unverified official logo assets are redistributed. */
+:root {
+  --navy:#0a1d5c; --blue:#1741c9; --blue-dark:#1335a3; --blue-tint:#eef2fb;
+  --amber:#f0a93b; --amber-tint:#fff6e5; --amber-text:#7e4b0e;
+  --bg:#eef1f5; --surface:#fff; --text:#1e293b; --muted:#64748b;
+  --line:#e2e8f0; --slate-50:#f8fafc; --slate-300:#cbd5e1; --slate-700:#334155;
+  --success:#177245; --success-tint:#eaf7ef; --danger:#b42318; --danger-tint:#fff0ee;
+  --font:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --radius-sm:4px; --radius-md:6px; --radius-lg:8px;
+  --shadow:0 1px 2px rgba(15,23,42,.04); --shadow-lg:0 16px 36px rgba(15,23,42,.12);
+}
