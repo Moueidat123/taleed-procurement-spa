@@ -1,7 +1,7 @@
 import type { Assessment, Cycle, Database, Organization, User } from './types';
 
 export const isStaff = (user: User): boolean => user.role !== 'champion';
-export const canManage = (user: User): boolean => user.role === 'manager' || user.role === 'admin';
+export const canManage = (user: User): boolean => user.role === 'admin';
 export const canExport = (user: User): boolean => isStaff(user) && (canManage(user) || user.canExport);
 export function canReadAssessment(user: User, assessment: Assessment): boolean {
   return user.active && user.verified && (user.role === 'champion'
@@ -15,7 +15,7 @@ export function requireUser(db: Database, actorId: string | null, verified = tru
   return user;
 }
 export function requireManager(user: User): void {
-  if (!canManage(user)) throw new Error('Program Manager or Super Admin access is required.');
+  if (!canManage(user)) throw new Error('Super Admin access is required.');
 }
 export function requireEditable(db: Database, user: User, assessmentId: string, now: string): Assessment {
   const assessment = db.assessments[assessmentId];

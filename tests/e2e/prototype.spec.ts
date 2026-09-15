@@ -101,8 +101,8 @@ test('analyst sees portfolio but not draft answers or exports', async ({ page })
   await expect(page.getByRole('heading', { name: 'No submitted result is available' })).toBeVisible();
 });
 
-test('manager creates a correction draft without replacing the effective submission', async ({ page }) => {
-  await login(page, 'manager@example.com');
+test('admin creates a correction draft without replacing the effective submission', async ({ page }) => {
+  await login(page, 'admin@example.com');
   await page.goto('/#/app/organizations/org-namaa');
   await page.getByRole('button', { name: 'Open correction', exact: true }).click();
   await page.locator('#correction-reason').fill('Demonstration: update the supplier practice answers.');
@@ -112,8 +112,8 @@ test('manager creates a correction draft without replacing the effective submiss
   expect(db.assessments['assessment-namaa-2026']?.snapshot?.result.overall).toBe(60);
 });
 
-test('manager CSV export contains only current filtered effective submissions', async ({ page }) => {
-  await login(page, 'manager@example.com');
+test('admin CSV export contains only current filtered effective submissions', async ({ page }) => {
+  await login(page, 'admin@example.com');
   await page.locator('#portfolio-sector').selectOption('Logistics');
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'CSV', exact: true }).click();
@@ -159,6 +159,9 @@ test('cross-tab writes pause a stale editor until it reloads', async ({ page, co
 
 test('corrupt persistence preserves original bytes and enters explicit recovery', async ({ page }) => {
   await page.goto('/');
+  // Wait for the initial bootstrap write before corrupting storage, so the async seed
+  // write cannot land after our injection and mask the corruption.
+  await page.waitForFunction((storageKey) => !!localStorage.getItem(storageKey), key);
   await page.evaluate((storageKey) => localStorage.setItem(storageKey, '{broken-json'), key);
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Your local data needs attention' })).toBeVisible();
@@ -168,6 +171,10 @@ test('corrupt persistence preserves original bytes and enters explicit recovery'
   await page.getByLabel('Type REPLACE to confirm').fill('REPLACE');
   await page.getByRole('button', { name: 'Replace local dataset' }).click();
   await expect(page).toHaveURL(/#\/$/);
+  // The reset triggers a full window.location.reload(); wait for the fresh document to
+  // settle (public landing rendered) before evaluating, to avoid a destroyed context.
+  await page.waitForLoadState('load');
+  await expect(page.locator('.public-page')).toBeVisible();
   await expect.poll(async () => (await dataset(page)).schemaVersion).toBe(1);
 });
 

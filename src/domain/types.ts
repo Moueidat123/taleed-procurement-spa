@@ -1,7 +1,7 @@
 export type Answer = 'yes' | 'no' | null;
 export type Answers = Record<string, Answer>;
 export type Band = 'foundational' | 'developing' | 'advanced' | 'best_in_class';
-export type Role = 'champion' | 'analyst' | 'manager' | 'admin';
+export type Role = 'champion' | 'analyst' | 'admin';
 export interface Question { id: string; text: string; sourceCell: string }
 export interface Action { id: string; text: string; sourceCell: string }
 export interface Domain {

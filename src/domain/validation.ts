@@ -90,7 +90,7 @@ export function validateDatabase(input: unknown): Database {
     for (const field of ['id','name','email','jobTitle','role']) string(user[field], 254);
     if (id !== user.id || !isEmail(user.email) || emails.has(user.email.toLowerCase())) fail('Invalid or duplicate user.');
     emails.add(user.email.toLowerCase());
-    if (!['champion','analyst','manager','admin'].includes(user.role)) fail('Unknown role.');
+    if (!['champion','analyst','admin'].includes(user.role)) fail('Unknown role.');
     if (user.orgId !== null && !db.organizations[user.orgId]) fail('Unknown user organization.');
     if (user.role !== 'champion' && user.orgId !== null) fail('Staff users cannot have a company membership.');
     bool(user.verified); bool(user.active); bool(user.canExport);

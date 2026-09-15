@@ -90,18 +90,18 @@ test('submitted answers cannot be edited; old profile snapshots do not change',(
 });
 test('correction remains a draft while original stays effective; resubmission advances effective revision',()=>{
   const db=seedDatabase();const original='assessment-namaa-2026';const old=JSON.stringify(db.assessments[original]);
-  const corrected=change(db,{type:'openCorrection',assessmentId:original,reason:'Correcting a misunderstood source question.'},'user-manager','correction-1');
+  const corrected=change(db,{type:'openCorrection',assessmentId:original,reason:'Correcting a misunderstood source question.'},'user-admin','correction-1');
   assert.equal(corrected.assessments['correction-1'].revision,2);assert.equal(effectiveSubmissions(corrected,'2026').find(a=>a.orgId==='org-namaa').id,original);
   assert.equal(JSON.stringify(corrected.assessments[original]),old);
   const edited=change(corrected,{type:'answer',assessmentId:'correction-1',questionId:'1.1',value:'no'},'user-namaa');
   const submitted=change(edited,{type:'submit',assessmentId:'correction-1',declaration:true},'user-namaa');
   assert.equal(effectiveSubmissions(submitted,'2026').find(a=>a.orgId==='org-namaa').id,'correction-1');assert.equal(JSON.stringify(submitted.assessments[original]),old);
-  assert.throws(()=>applyCommand(submitted,{type:'openCorrection',assessmentId:original,reason:'Outdated revision should be rejected.'},context('user-manager')));
+  assert.throws(()=>applyCommand(submitted,{type:'openCorrection',assessmentId:original,reason:'Outdated revision should be rejected.'},context('user-admin')));
 });
 test('duplicate drafts/correction requests are blocked',()=>{
   const db=seedDatabase();assert.throws(()=>applyCommand(db,{type:'startAssessment',cycleId:'2026'},context()));
-  const corrected=change(db,{type:'openCorrection',assessmentId:'assessment-namaa-2026',reason:'Valid correction explanation.'},'user-manager');
-  assert.throws(()=>applyCommand(corrected,{type:'openCorrection',assessmentId:'assessment-namaa-2026',reason:'Second concurrent correction.'},context('user-manager')));
+  const corrected=change(db,{type:'openCorrection',assessmentId:'assessment-namaa-2026',reason:'Valid correction explanation.'},'user-admin');
+  assert.throws(()=>applyCommand(corrected,{type:'openCorrection',assessmentId:'assessment-namaa-2026',reason:'Second concurrent correction.'},context('user-admin')));
 });
 test('company scoping blocks another company; staff cannot edit or see draft answers in read policy',()=>{
   const db=seedDatabase();const draft=db.assessments['assessment-sahara-2026'];const submitted=db.assessments['assessment-namaa-2026'];
@@ -111,9 +111,9 @@ test('company scoping blocks another company; staff cannot edit or see draft ans
   assert.throws(()=>applyCommand(db,{type:'answer',assessmentId:draft.id,questionId:'1.1',value:'yes'},context('user-admin')));
 });
 test('closed cycles and paused organizations block editing and submission',()=>{
-  const db=seedDatabase();const closed=change(db,{type:'saveCycle',cycle:{...db.cycles['2026'],status:'closed'}},'user-manager');
+  const db=seedDatabase();const closed=change(db,{type:'saveCycle',cycle:{...db.cycles['2026'],status:'closed'}},'user-admin');
   assert.throws(()=>applyCommand(closed,{type:'answer',assessmentId:'assessment-sahara-2026',questionId:'1.1',value:'yes'},context()));
-  const paused=change(db,{type:'setOrganizationActive',orgId:'org-sahara',active:false},'user-manager');
+  const paused=change(db,{type:'setOrganizationActive',orgId:'org-sahara',active:false},'user-admin');
   assert.throws(()=>applyCommand(paused,{type:'submit',assessmentId:'assessment-sahara-2026',declaration:true},context()));
   assert.equal(isCycleOpen(db.cycles['2026'],'2027-01-01T00:00:00.000Z'),false);
   assert.equal(isCycleOpen(db.cycles['2026'],'2026-12-31T23:59:59.999Z'),true);
@@ -142,23 +142,23 @@ test('duplicate company names and registration references are rejected',()=>{
 });
 test('framework clone/publication preserves content and historical snapshots',()=>{
   const db=seedDatabase();const old=JSON.stringify(db.assessments['assessment-namaa-2026'].snapshot);
-  const cloned=change(db,{type:'cloneFramework',sourceVersion:'1.0.0',version:'1.1.0'},'user-manager');assert.equal(cloned.frameworks['1.1.0'].status,'draft');
-  assert.throws(()=>applyCommand(cloned,{type:'publishFramework',version:'1.1.0',approvalReference:'short'},context('user-manager')));
-  const published=change(cloned,{type:'publishFramework',version:'1.1.0',approvalReference:'DEMO-APPROVAL-002'},'user-manager');
+  const cloned=change(db,{type:'cloneFramework',sourceVersion:'1.0.0',version:'1.1.0'},'user-admin');assert.equal(cloned.frameworks['1.1.0'].status,'draft');
+  assert.throws(()=>applyCommand(cloned,{type:'publishFramework',version:'1.1.0',approvalReference:'short'},context('user-admin')));
+  const published=change(cloned,{type:'publishFramework',version:'1.1.0',approvalReference:'DEMO-APPROVAL-002'},'user-admin');
   assert.equal(published.frameworks['1.1.0'].status,'published');assert.equal(JSON.stringify(published.assessments['assessment-namaa-2026'].snapshot),old);
-  assert.throws(()=>applyCommand(published,{type:'saveCycle',cycle:{...published.cycles['2026'],frameworkVersion:'1.1.0'}},context('user-manager')));
+  assert.throws(()=>applyCommand(published,{type:'saveCycle',cycle:{...published.cycles['2026'],frameworkVersion:'1.1.0'}},context('user-admin')));
 });
 test('analyst export grants are explicit; only management can grant them',()=>{
-  const db=seedDatabase();assert.equal(canExport(db.users['user-analyst']),false);assert.equal(canExport(db.users['user-manager']),true);
+  const db=seedDatabase();assert.equal(canExport(db.users['user-analyst']),false);assert.equal(canExport(db.users['user-admin']),true);
   assert.throws(()=>applyCommand(db,{type:'recordExport',format:'csv',count:4},context('user-analyst')));
-  const updated=change(db,{type:'setUserAccess',userId:'user-analyst',active:true,canExport:true},'user-manager');assert.equal(canExport(updated.users['user-analyst']),true);
+  const updated=change(db,{type:'setUserAccess',userId:'user-analyst',active:true,canExport:true},'user-admin');assert.equal(canExport(updated.users['user-analyst']),true);
   const logged=change(updated,{type:'recordExport',format:'csv',count:4},'user-analyst');assert.equal(logged.audit[0].action,'recordExport');
   assert.throws(()=>applyCommand(db,{type:'setUserAccess',userId:'user-analyst',active:true,canExport:true},context()));
 });
 test('administrator/self-access protection is enforced',()=>{
   const db=seedDatabase();assert.throws(()=>applyCommand(db,{type:'setUserAccess',userId:'user-admin',active:false,canExport:false},context('user-admin')));
-  assert.throws(()=>applyCommand(db,{type:'setUserAccess',userId:'user-admin',active:false,canExport:false},context('user-manager')));
-  assert.throws(()=>applyCommand(db,{type:'createStaff',name:'Bad admin',email:'bad@example.com',role:'admin'},context('user-manager')));
+  assert.throws(()=>applyCommand(db,{type:'setUserAccess',userId:'user-admin',active:false,canExport:false},context('user-admin')));
+  assert.throws(()=>applyCommand(db,{type:'createStaff',name:'Bad staff',email:'bad@example.com',role:'analyst'},context('user-analyst')));
 });
 test('persistence hydrates unchanged data, checks revisions and never silently resets corruption',()=>{
   const memory=new MemoryStorage();const repo=new LocalRepository(()=>memory);const db=repo.initialize(seedDatabase('a'));
@@ -189,13 +189,13 @@ test('audit caps at 500 events and never includes answer values in answer detail
   assert.equal(db.audit.length,500);assert(db.audit[0].detail.includes('answer content omitted'));validateDatabase(db);
 });
 test('draft content editing is validated and cannot mutate published content or source IDs',()=>{
-  const db=seedDatabase();assert.throws(()=>applyCommand(db,{type:'updateDraftContent',version:'1.0.0',contentType:'question',targetId:'1.1',text:'An attempt to alter published content.'},context('user-manager')));
-  const cloned=change(db,{type:'cloneFramework',sourceVersion:'1.0.0',version:'1.1.0'},'user-manager');
-  assert.throws(()=>applyCommand(cloned,{type:'updateDraftContent',version:'1.1.0',contentType:'question',targetId:'1.1',text:'short'},context('user-manager')));
-  const edited=change(cloned,{type:'updateDraftContent',version:'1.1.0',contentType:'question',targetId:'1.1',text:'Demonstration replacement question requiring formal content review?'},'user-manager');
+  const db=seedDatabase();assert.throws(()=>applyCommand(db,{type:'updateDraftContent',version:'1.0.0',contentType:'question',targetId:'1.1',text:'An attempt to alter published content.'},context('user-admin')));
+  const cloned=change(db,{type:'cloneFramework',sourceVersion:'1.0.0',version:'1.1.0'},'user-admin');
+  assert.throws(()=>applyCommand(cloned,{type:'updateDraftContent',version:'1.1.0',contentType:'question',targetId:'1.1',text:'short'},context('user-admin')));
+  const edited=change(cloned,{type:'updateDraftContent',version:'1.1.0',contentType:'question',targetId:'1.1',text:'Demonstration replacement question requiring formal content review?'},'user-admin');
   assert.equal(edited.frameworks['1.0.0'].content.domains[0].questions[0].text,F.domains[0].questions[0].text);
   assert.equal(edited.frameworks['1.1.0'].content.domains[0].questions[0].id,'1.1');
   assert(edited.frameworks['1.1.0'].content.domains[0].questions[0].text.startsWith('Demonstration replacement'));
-  const published=change(edited,{type:'publishFramework',version:'1.1.0',approvalReference:'DEMO-CONTENT-APPROVAL'},'user-manager');
-  assert.throws(()=>applyCommand(published,{type:'updateDraftContent',version:'1.1.0',contentType:'question',targetId:'1.1',text:'Another attempt after publication.'},context('user-manager')));
+  const published=change(edited,{type:'publishFramework',version:'1.1.0',approvalReference:'DEMO-CONTENT-APPROVAL'},'user-admin');
+  assert.throws(()=>applyCommand(published,{type:'updateDraftContent',version:'1.1.0',contentType:'question',targetId:'1.1',text:'Another attempt after publication.'},context('user-admin')));
 });

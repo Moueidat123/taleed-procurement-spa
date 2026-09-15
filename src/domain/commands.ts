@@ -168,7 +168,7 @@ export function applyCommand(previous: Database, command: Command, context: Comm
       case 'createStaff': {
         requireManager(user);
         if (command.role === 'admin' && user.role !== 'admin') throw new Error('Only a Super Admin can create another administrator.');
-        if (!['analyst','manager','admin'].includes(command.role)) throw new Error('Select a staff role.');
+        if (!['analyst','admin'].includes(command.role)) throw new Error('Select a staff role.');
         const email = command.email.trim().toLowerCase();
         if (!isEmail(email) || Object.values(db.users).some((u) => u.email.toLowerCase() === email)) throw new Error('Use a valid, unique email.');
         db.users[context.id] = { id: context.id, name: requireText(command.name, 2), email, jobTitle: 'Taleed program team',

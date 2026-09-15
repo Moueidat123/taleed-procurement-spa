@@ -13,7 +13,6 @@ export const DEMO_ACCOUNTS = [
   { id: 'user-sahara', label: 'Company Champion', detail: 'Sahara Industrial Solutions · 12/40 answers' },
   { id: 'user-namaa', label: 'Second Company', detail: 'Namaa Logistics · submitted assessment' },
   { id: 'user-analyst', label: 'Taleed Analyst', detail: 'Portfolio and submitted results · no export access' },
-  { id: 'user-manager', label: 'Program Manager', detail: 'Cycles, corrections, publication and access' },
   { id: 'user-admin', label: 'Super Admin', detail: 'All staff features, audit and demo data controls' },
 ];
 export function seedDatabase(instanceId = 'taleed-demo-initial'): Database {
@@ -33,8 +32,8 @@ export function seedDatabase(instanceId = 'taleed-demo-initial'): Database {
     users[`user-${slug}`] = { id: `user-${slug}`, name: person, email: `${slug}@example.com`,
       jobTitle: 'Head of Procurement', role: 'champion', orgId: `org-${slug}`, verified: true, active: true, canExport: false };
   });
-  (['analyst','manager','admin'] as const).forEach((role) => {
-    users[`user-${role}`] = { id: `user-${role}`, name: { analyst: 'Dana Analyst', manager: 'Kareem Program Manager', admin: 'Amina Administrator' }[role],
+  (['analyst','admin'] as const).forEach((role) => {
+    users[`user-${role}`] = { id: `user-${role}`, name: { analyst: 'Dana Analyst', admin: 'Amina Administrator' }[role],
       email: `${role}@example.com`, jobTitle: 'Taleed program team', role, orgId: null, verified: true, active: true, canExport: false };
   });
   const db: Database = {
