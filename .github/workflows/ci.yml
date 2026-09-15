@@ -15,7 +15,7 @@ jobs:
           node-version: '22'
       - name: Install dependencies
         run: |
-          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+          npm install
       - name: Type check, lint, domain tests and build
         run: npm run check
       - name: Install browser
@@ -32,4 +32,4 @@ jobs:
             test-results/
           if-no-files-found: ignore
 # Deliberately no deployment. After the first successful local install,
-# commit package-lock.json and replace the install conditional with npm ci.
+# Uses npm install because npm generates an inconsistent nested ajv lockfile entry.
