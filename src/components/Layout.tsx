@@ -7,7 +7,7 @@ import { canManage, isStaff } from '../domain/policies';
 import { Alert, Badge, Button, Dialog, Icon } from './ui';
 
 export function Brand({ light = false }: { light?: boolean }) {
-  return <Link className={`brand ${light ? 'brand-light' : ''}`} to="/"><span className="brand-mark"><span/><span/><span/><span/></span><span><strong>TALEED</strong><small>PROCUREMENT SELF-ASSESSMENT</small></span></Link>;
+  return <Link className={`brand ${light ? 'brand-light' : ''}`} to="/"><img className="brand-logo" src={`${import.meta.env.BASE_URL}taleed-logo.svg`} alt="aramco Taleed" width={118} height={39}/><small className="brand-tagline">Procurement Self-Assessment</small></Link>;
 }
 export function PublicHeader() {
   return <header className="public-header"><Brand/><nav aria-label="Public navigation"><Link to="/methodology">How it works</Link><Link to="/login" className="button button-secondary">Sign in</Link></nav></header>;
