@@ -22,7 +22,7 @@ export interface User {
   orgId: string | null; verified: boolean; active: boolean; canExport: boolean;
 }
 export interface Organization {
-  id: string; name: string; country: string; sector: string; size: string;
+  id: string; name: string; country: string; size: string;
   registrationId: string; authorityConfirmed: boolean; active: boolean;
 }
 export interface Cycle {

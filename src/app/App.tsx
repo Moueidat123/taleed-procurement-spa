@@ -6,7 +6,6 @@ import { selectUser, useAppSelector } from './store';
 import type { Role } from '../domain/types';
 import DataControls from '../features/staff/DataControls';
 const Landing=lazy(()=>import('../features/public/Landing'));
-const Guidance=lazy(()=>import('../features/public/Guidance'));
 const Login=lazy(()=>import('../features/public/Auth').then((m)=>({default:m.Login})));
 const Register=lazy(()=>import('../features/public/Auth').then((m)=>({default:m.Register})));
 const Verify=lazy(()=>import('../features/public/Auth').then((m)=>({default:m.Verify})));
@@ -40,7 +39,7 @@ export class AppErrorBoundary extends Component<{children:ReactNode},{failed:boo
 export default function App() {
   const bootError=useAppSelector((s)=>s.ui.bootError);
   return <HashRouter><AppErrorBoundary><Suspense fallback={<div className="loading-state" role="status"><span className="loader"/>Loading your workspace…</div>}>{bootError?<DataControls recovery/>:<Routes>
-    <Route path="/" element={<Landing/>}/><Route path="/login" element={<Login/>}/><Route path="/register" element={<Register/>}/><Route path="/verify" element={<Verify/>}/><Route path="/forgot-password" element={<Forgot/>}/><Route path="/reset-password" element={<Reset/>}/><Route path="/methodology" element={<Guidance/>}/><Route path="/privacy" element={<Guidance privacy/>}/>
+    <Route path="/" element={<Landing/>}/><Route path="/login" element={<Login/>}/><Route path="/register" element={<Register/>}/><Route path="/verify" element={<Verify/>}/><Route path="/forgot-password" element={<Forgot/>}/><Route path="/reset-password" element={<Reset/>}/>
     <Route element={<Guard/>}><Route path="/app" element={<Layout/>}><Route index element={<WorkspaceRedirect/>}/>
       <Route element={<Guard roles={['champion']}/>}><Route path="dashboard" element={<Dashboard/>}/><Route path="profile" element={<Profile/>}/><Route path="history" element={<History/>}/><Route path="assessment/:id/review" element={<Review/>}/><Route path="assessment/:id/:section" element={<Assessment/>}/></Route>
       <Route path="results/:id" element={<Results/>}/><Route path="recommendations/:id" element={<Results mode="recommendations"/>}/><Route path="responses/:id" element={<Results mode="responses"/>}/><Route path="report/:id" element={<Results mode="report"/>}/>

@@ -31,7 +31,7 @@ export function isCycleOpen(cycle: Cycle, now: string): boolean {
   return cycle.status === 'open' && date >= cycle.opensAt && date <= cycle.closesAt;
 }
 export function validProfile(org: Organization | undefined): boolean {
-  return !!org && org.name.trim().length >= 2 && !!org.country && !!org.sector && !!org.size && org.authorityConfirmed;
+  return !!org && org.name.trim().length >= 2 && !!org.country && !!org.size && org.authorityConfirmed;
 }
 /** One effective result per org/cycle. A correction draft never replaces a final result. */
 export function effectiveSubmissions(db: Database, cycleId?: string): Assessment[] {

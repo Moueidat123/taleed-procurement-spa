@@ -38,7 +38,6 @@ test('registration validates, verifies, and creates a company before assessment'
   await page.getByRole('button', { name: 'Verify and continue' }).click();
   await page.getByLabel('Legal company name *', { exact: true }).fill('Demonstration Company Six');
   await page.getByLabel('Country *', { exact: true }).selectOption('Saudi Arabia');
-  await page.getByLabel('Sector *', { exact: true }).selectOption('Technology');
   await page.getByLabel('Company size *', { exact: true }).selectOption('11–50');
   await page.locator('input[type="checkbox"]').check();
   await page.getByRole('button', { name: 'Save and continue' }).click();
@@ -114,7 +113,7 @@ test('admin creates a correction draft without replacing the effective submissio
 
 test('admin CSV export contains only current filtered effective submissions', async ({ page }) => {
   await login(page, 'admin@example.com');
-  await page.locator('#portfolio-sector').selectOption('Logistics');
+  await page.locator('#portfolio-search').fill('Namaa');
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'CSV', exact: true }).click();
   const file = await download;

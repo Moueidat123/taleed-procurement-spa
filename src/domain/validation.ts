@@ -27,10 +27,10 @@ function iso(value: unknown): void {
 }
 export function assertProfile(value: unknown): asserts value is Organization {
   object(value);
-  keys(value, ['id','name','country','sector','size','registrationId','authorityConfirmed','active']);
-  for (const field of ['id','name','country','sector','size','registrationId']) string(value[field], 160);
+  keys(value, ['id','name','country','size','registrationId','authorityConfirmed','active']);
+  for (const field of ['id','name','country','size','registrationId']) string(value[field], 160);
   bool(value.authorityConfirmed); bool(value.active);
-  if ((value.name as string).trim().length < 2 || !value.country || !value.sector || !value.size || !value.authorityConfirmed) fail('Complete the company profile and authority declaration.');
+  if ((value.name as string).trim().length < 2 || !value.country || !value.size || !value.authorityConfirmed) fail('Complete the company profile and authority declaration.');
 }
 export function assertFramework(value: unknown): asserts value is Framework {
   object(value);

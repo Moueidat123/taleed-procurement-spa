@@ -21,14 +21,14 @@ export async function preparePortfolioExport(db: Database, user: User, rows: Ass
   const effective=new Set(effectiveSubmissions(db).map((a)=>a.id));
   if(rows.some((a)=>!effective.has(a.id)||!canReadAssessment(user,a)||!a.snapshot))throw new Error('Export only authorized, effective submitted revisions.');
   if(new Set(rows.map((a)=>`${a.cycleId}/${a.frameworkVersion}`)).size!==1)throw new Error('Choose a single cycle and framework before exporting.');
-  const values: (string|number)[][]=[['Company','Country','Sector','Company size','Cycle','Framework','Revision','Respondent','Respondent role','Submitted at','Overall (%)','Maturity','Category (%)','Spend (%)','Sourcing (%)','SRM (%)']];
-  rows.forEach((a)=>{const s=a.snapshot;if(!s)return;values.push([s.organization.name,s.organization.country,s.organization.sector,s.organization.size,db.cycles[a.cycleId]?.label??a.cycleId,a.frameworkVersion,a.revision,s.respondent.name,s.respondent.jobTitle,s.submittedAt,s.result.overall,BAND_LABELS[s.result.band],...s.result.domains.map((d)=>d.score)]);});
+  const values: (string|number)[][]=[['Company','Country','Company size','Framework','Revision','Respondent','Respondent role','Submitted at','Overall (%)','Maturity','Category (%)','Spend (%)','Sourcing (%)','SRM (%)']];
+  rows.forEach((a)=>{const s=a.snapshot;if(!s)return;values.push([s.organization.name,s.organization.country,s.organization.size,a.frameworkVersion,a.revision,s.respondent.name,s.respondent.jobTitle,s.submittedAt,s.result.overall,BAND_LABELS[s.result.band],...s.result.domains.map((d)=>d.score)]);});
   if(format==='csv')return new Blob([toCsv(values)],{type:'text/csv;charset=utf-8'});
   const {default:ExcelJS}=await import('exceljs');
   const workbook=new ExcelJS.Workbook(); workbook.creator='Taleed Procurement Prototype';
   const sheet=workbook.addWorksheet('Effective submissions');
   values.forEach((row)=>sheet.addRow(row.map((v)=>typeof v==='number'?v:safeSpreadsheetText(v))));
-  sheet.views=[{state:'frozen',ySplit:1}];sheet.autoFilter={from:{row:1,column:1},to:{row:values.length,column:16}};
+  sheet.views=[{state:'frozen',ySplit:1}];sheet.autoFilter={from:{row:1,column:1},to:{row:values.length,column:14}};
   sheet.getRow(1).font={bold:true,color:{argb:'FFFFFFFF'}};sheet.getRow(1).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF0A1D5C'}};
   sheet.columns.forEach((column,i)=>{column.width=i===0?34:i===9?28:22;});
   const notice=workbook.addWorksheet('Read me');

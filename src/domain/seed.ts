@@ -18,16 +18,16 @@ export const DEMO_ACCOUNTS = [
 export function seedDatabase(instanceId = 'taleed-demo-initial'): Database {
   const now = '2026-09-15T08:00:00.000Z';
   const orgEntries = [
-    ['sahara','Sahara Industrial Solutions','Manufacturing','51–200','Layla Hassan'],
-    ['namaa','Namaa Logistics','Logistics','11–50','Noor Khalid'],
-    ['desert','Desert Packaging','Manufacturing','11–50','Sami Ahmed'],
-    ['atlas','Atlas Energy Services','Energy','51–200','Reem Saad'],
-    ['horizon','Horizon Technology','Technology','1–10','Omar Saleh'],
+    ['sahara','Sahara Industrial Solutions','51–200','Layla Hassan'],
+    ['namaa','Namaa Logistics','11–50','Noor Khalid'],
+    ['desert','Desert Packaging','11–50','Sami Ahmed'],
+    ['atlas','Atlas Energy Services','51–200','Reem Saad'],
+    ['horizon','Horizon Technology','1–10','Omar Saleh'],
   ];
   const organizations: Record<string, Organization> = {};
   const users: Record<string, User> = {};
-  orgEntries.forEach(([slug = '', name = '', sector = '', size = '', person = '']) => {
-    organizations[`org-${slug}`] = { id: `org-${slug}`, name, country: 'Saudi Arabia', sector, size,
+  orgEntries.forEach(([slug = '', name = '', size = '', person = '']) => {
+    organizations[`org-${slug}`] = { id: `org-${slug}`, name, country: 'Saudi Arabia', size,
       registrationId: `DEMO-${slug.toUpperCase()}`, authorityConfirmed: true, active: true };
     users[`user-${slug}`] = { id: `user-${slug}`, name: person, email: `${slug}@example.com`,
       jobTitle: 'Head of Procurement', role: 'champion', orgId: `org-${slug}`, verified: true, active: true, canExport: false };
@@ -41,8 +41,7 @@ export function seedDatabase(instanceId = 'taleed-demo-initial'): Database {
     frameworks: { '1.0.0': { version: '1.0.0', status: 'published', content: structuredClone(SOURCE_FRAMEWORK),
       approvalReference: 'DEMO-ONLY: simulated publication, not formal approval', publishedAt: now } },
     cycles: {
-      '2026': { id: '2026', label: '2026 Procurement Assessment', opensAt: '2026-01-01', closesAt: '2026-12-31', frameworkVersion: '1.0.0', status: 'open' },
-      '2025': { id: '2025', label: '2025 Demonstration Archive', opensAt: '2025-01-01', closesAt: '2025-12-31', frameworkVersion: '1.0.0', status: 'closed' },
+      '2026': { id: '2026', label: 'Procurement Assessment', opensAt: '2026-01-01', closesAt: '2026-12-31', frameworkVersion: '1.0.0', status: 'open' },
     }, assessments: {}, audit: [],
   };
   const add = (slug: string, cycleId: string, counts: number[], draft = false): void => {
@@ -62,7 +61,7 @@ export function seedDatabase(instanceId = 'taleed-demo-initial'): Database {
     };
     db.assessments[id] = assessment;
   };
-  add('sahara','2026',[0,0,0,0],true); add('sahara','2025',[5,4,6,5]);
+  add('sahara','2026',[0,0,0,0],true);
   add('namaa','2026',[6,4,8,6]); add('desert','2026',[2,3,4,3]);
   add('atlas','2026',[8,8,8,9]); add('horizon','2026',[6,7,8,7]);
   db.audit.push({ id: 'demo-seed', at: now, actorId: 'user-admin', action: 'seed', targetId: 'dataset', orgId: null,

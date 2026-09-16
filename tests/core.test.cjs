@@ -24,7 +24,7 @@ test('source catalogue: 40 distinct string IDs, 64 recommendations and 4 interpr
 });
 test('seed is valid, deterministic, synthetic and contains a 12-answer draft',()=>{
   const first=seedDatabase();const second=seedDatabase();assert.deepEqual(first,second);
-  assert.equal(Object.keys(first.organizations).length,5);assert.equal(Object.keys(first.assessments).length,6);
+  assert.equal(Object.keys(first.organizations).length,5);assert.equal(Object.keys(first.assessments).length,5);
   assert.equal(completion(first.assessments['assessment-sahara-2026'].answers),12);
 });
 test('all No and all Yes produce exactly 0% and 100%',()=>{
@@ -129,7 +129,7 @@ test('unverified account cannot start; verification and complete profile enable 
   assert.throws(()=>applyCommand(db,{type:'startAssessment',cycleId:'2026'},context('new-user')));
   assert.throws(()=>applyCommand(db,{type:'verify',code:'111111'},context('new-user')));
   const verified=change(db,{type:'verify',code:'123456'},'new-user');
-  const profile={name:'Brand New Demonstration',country:'Saudi Arabia',sector:'Technology',size:'1–10',registrationId:'NEW-DEMO',authorityConfirmed:true};
+  const profile={name:'Brand New Demonstration',country:'Saudi Arabia',size:'1–10',registrationId:'NEW-DEMO',authorityConfirmed:true};
   const company=change(verified,{type:'saveProfile',profile},'new-user','new-org');
   const started=change(company,{type:'startAssessment',cycleId:'2026'},'new-user','new-draft');
   assert.equal(completion(started.assessments['new-draft'].answers),0);assert.equal(started.assessments['new-draft'].orgId,'new-org');
