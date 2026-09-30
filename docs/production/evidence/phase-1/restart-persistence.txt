@@ -1,0 +1,13 @@
+## before restart
+1	e2e-analyst@example.test
+3
+cms-admin@example.test.yaml
+## down (volumes kept)
+ Network taleed-procurement-dev_default  Removed
+error: down never removes volumes. Use 'ops/local/dev reset' deliberately.
+## up --built
+==> Up: https://procurement.taleed.test (SPA mode: built). Mailpit: http://127.0.0.1:8025
+## after restart
+1	e2e-analyst@example.test
+3
+cms-admin@example.test.yaml

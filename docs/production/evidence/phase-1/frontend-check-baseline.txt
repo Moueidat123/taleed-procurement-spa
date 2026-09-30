@@ -1,0 +1,230 @@
+
+> taleed-procurement-spa@1.0.0-prototype check
+> npm run typecheck && npm run lint && npm test && npm run build
+
+
+> taleed-procurement-spa@1.0.0-prototype typecheck
+> tsc --noEmit
+
+
+> taleed-procurement-spa@1.0.0-prototype lint
+> eslint src tests/e2e
+
+
+> taleed-procurement-spa@1.0.0-prototype test
+> npm run test:core
+
+
+> taleed-procurement-spa@1.0.0-prototype test:core
+> node scripts/test-core.mjs
+
+TAP version 13
+# Subtest: source catalogue: 40 distinct string IDs, 64 recommendations and 4 interpretations
+ok 1 - source catalogue: 40 distinct string IDs, 64 recommendations and 4 interpretations
+  ---
+  duration_ms: 0.702042
+  type: 'test'
+  ...
+# Subtest: seed is valid, deterministic, synthetic and contains a 12-answer draft
+ok 2 - seed is valid, deterministic, synthetic and contains a 12-answer draft
+  ---
+  duration_ms: 8.684041
+  type: 'test'
+  ...
+# Subtest: all No and all Yes produce exactly 0% and 100%
+ok 3 - all No and all Yes produce exactly 0% and 100%
+  ---
+  duration_ms: 0.218458
+  type: 'test'
+  ...
+# Subtest: unrounded maturity boundaries are inclusive on the upper bound
+ok 4 - unrounded maturity boundaries are inclusive on the upper bound
+  ---
+  duration_ms: 0.147209
+  type: 'test'
+  ...
+# Subtest: 40-question total boundaries: 16/17, 26/27 and 32/33 Yes answers
+ok 5 - 40-question total boundaries: 16/17, 26/27 and 32/33 Yes answers
+  ---
+  duration_ms: 0.269625
+  type: 'test'
+  ...
+# Subtest: known 6/4/8/6 fixture: 60% Developing; Spend, Category, SRM priorities
+ok 6 - known 6/4/8/6 fixture: 60% Developing; Spend, Category, SRM priorities
+  ---
+  duration_ms: 0.132417
+  type: 'test'
+  ...
+# Subtest: all 14,641 domain-count combinations preserve score, exact band, unique stable priorities and correct recommendation groups
+ok 7 - all 14,641 domain-count combinations preserve score, exact band, unique stable priorities and correct recommendation groups
+  ---
+  duration_ms: 299.32225
+  type: 'test'
+  ...
+# Subtest: unanswered is not No; incomplete submissions cannot be scored
+ok 8 - unanswered is not No; incomplete submissions cannot be scored
+  ---
+  duration_ms: 0.315916
+  type: 'test'
+  ...
+# Subtest: unknown/missing IDs, invalid values and duplicate framework IDs are rejected
+ok 9 - unknown/missing IDs, invalid values and duplicate framework IDs are rejected
+  ---
+  duration_ms: 0.524458
+  type: 'test'
+  ...
+# Subtest: partial save and clear update only the draft, with no final snapshot
+ok 10 - partial save and clear update only the draft, with no final snapshot
+  ---
+  duration_ms: 6.5035
+  type: 'test'
+  ...
+# Subtest: submission requires all answers and declaration, then snapshots immediately
+ok 11 - submission requires all answers and declaration, then snapshots immediately
+  ---
+  duration_ms: 5.061709
+  type: 'test'
+  ...
+# Subtest: submitted answers cannot be edited; old profile snapshots do not change
+ok 12 - submitted answers cannot be edited; old profile snapshots do not change
+  ---
+  duration_ms: 4.106541
+  type: 'test'
+  ...
+# Subtest: correction remains a draft while original stays effective; resubmission advances effective revision
+ok 13 - correction remains a draft while original stays effective; resubmission advances effective revision
+  ---
+  duration_ms: 8.05175
+  type: 'test'
+  ...
+# Subtest: duplicate drafts/correction requests are blocked
+ok 14 - duplicate drafts/correction requests are blocked
+  ---
+  duration_ms: 4.495833
+  type: 'test'
+  ...
+# Subtest: company scoping blocks another company; staff cannot edit or see draft answers in read policy
+ok 15 - company scoping blocks another company; staff cannot edit or see draft answers in read policy
+  ---
+  duration_ms: 2.758833
+  type: 'test'
+  ...
+# Subtest: closed cycles and paused organizations block editing and submission
+ok 16 - closed cycles and paused organizations block editing and submission
+  ---
+  duration_ms: 6.281583
+  type: 'test'
+  ...
+# Subtest: registration normalizes email, requires consent, never accepts role escalation or password storage
+ok 17 - registration normalizes email, requires consent, never accepts role escalation or password storage
+  ---
+  duration_ms: 3.672458
+  type: 'test'
+  ...
+# Subtest: unverified account cannot start; verification and complete profile enable a new cycle draft
+ok 18 - unverified account cannot start; verification and complete profile enable a new cycle draft
+  ---
+  duration_ms: 8.308375
+  type: 'test'
+  ...
+# Subtest: duplicate company names and registration references are rejected
+ok 19 - duplicate company names and registration references are rejected
+  ---
+  duration_ms: 2.465792
+  type: 'test'
+  ...
+# Subtest: framework clone/publication preserves content and historical snapshots
+ok 20 - framework clone/publication preserves content and historical snapshots
+  ---
+  duration_ms: 5.954291
+  type: 'test'
+  ...
+# Subtest: analyst export grants are explicit; only management can grant them
+ok 21 - analyst export grants are explicit; only management can grant them
+  ---
+  duration_ms: 5.442584
+  type: 'test'
+  ...
+# Subtest: administrator/self-access protection is enforced
+ok 22 - administrator/self-access protection is enforced
+  ---
+  duration_ms: 2.651292
+  type: 'test'
+  ...
+# Subtest: persistence hydrates unchanged data, checks revisions and never silently resets corruption
+ok 23 - persistence hydrates unchanged data, checks revisions and never silently resets corruption
+  ---
+  duration_ms: 14.180625
+  type: 'test'
+  ...
+# Subtest: quota failures do not claim success or overwrite the saved revision
+ok 24 - quota failures do not claim success or overwrite the saved revision
+  ---
+  duration_ms: 5.250167
+  type: 'test'
+  ...
+# Subtest: corrupt/unknown-schema/tampered/unsafe backups are rejected before restoration
+ok 25 - corrupt/unknown-schema/tampered/unsafe backups are rejected before restoration
+  ---
+  duration_ms: 5.132416
+  type: 'test'
+  ...
+# Subtest: CSV formulas, quotes, newlines and non-ASCII values are handled safely
+ok 26 - CSV formulas, quotes, newlines and non-ASCII values are handled safely
+  ---
+  duration_ms: 0.195959
+  type: 'test'
+  ...
+# Subtest: audit caps at 500 events and never includes answer values in answer details
+ok 27 - audit caps at 500 events and never includes answer values in answer details
+  ---
+  duration_ms: 320.248542
+  type: 'test'
+  ...
+# Subtest: draft content editing is validated and cannot mutate published content or source IDs
+ok 28 - draft content editing is validated and cannot mutate published content or source IDs
+  ---
+  duration_ms: 7.473667
+  type: 'test'
+  ...
+1..28
+# tests 28
+# suites 0
+# pass 28
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 783.10775
+
+> taleed-procurement-spa@1.0.0-prototype build
+> npm run typecheck && vite build
+
+
+> taleed-procurement-spa@1.0.0-prototype typecheck
+> tsc --noEmit
+
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 155 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                             0.91 kB │ gzip:   0.46 kB
+dist/assets/index-7ij9dBXH.css             46.40 kB │ gzip:  10.00 kB
+dist/assets/rolldown-runtime-W7wSyTde.js    0.97 kB │ gzip:   0.56 kB
+dist/assets/Compare-CSuayvy1.js             2.80 kB │ gzip:   1.17 kB
+dist/assets/selectors-Chn_JtaB.js           3.06 kB │ gzip:   1.37 kB
+dist/assets/Landing-BCh15FVq.js             5.15 kB │ gzip:   1.82 kB
+dist/assets/Administration-CYca2_zH.js      5.16 kB │ gzip:   2.12 kB
+dist/assets/Portfolio-CjRVW9rS.js           6.60 kB │ gzip:   2.42 kB
+dist/assets/Results-Ip9DKaYR.js            10.20 kB │ gzip:   3.32 kB
+dist/assets/Auth-CfVcZm0i.js               10.29 kB │ gzip:   3.39 kB
+dist/assets/Organizations-BFFM2HNk.js      11.30 kB │ gzip:   3.47 kB
+dist/assets/Assessment-BigwEiiQ.js         11.46 kB │ gzip:   3.70 kB
+dist/assets/Company-BmsAeoTY.js            11.89 kB │ gzip:   4.19 kB
+dist/assets/schemas-F4PDruGk.js           112.78 kB │ gzip:  34.27 kB
+dist/assets/ui-DoEWhmn3.js                130.63 kB │ gzip:  44.36 kB
+dist/assets/index-DyfqhVgt.js             232.33 kB │ gzip:  72.96 kB
+dist/assets/exceljs.min-oOmTiXfY.js       929.56 kB │ gzip: 256.44 kB
+
+✓ built in 678ms

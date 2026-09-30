@@ -1,0 +1,11 @@
+
+Running 5 tests using 1 worker
+
+
+  ✓  1 [local-https-chromium] › tests/e2e-local/foundation.spec.ts:24:1 › trusted HTTPS origin serves the approved SPA without console errors (849ms)
+  ✓  2 [local-https-chromium] › tests/e2e-local/foundation.spec.ts:39:1 › same-origin API: session login, secure host-only cookie, logout (1.1s)
+  ✓  3 [local-https-chromium] › tests/e2e-local/foundation.spec.ts:65:1 › Statamic page is server-rendered with the approved design tokens (144ms)
+  ✓  4 [local-https-chromium] › tests/e2e-local/foundation.spec.ts:73:1 › Statamic control panel login is available on /cp (337ms)
+  ✓  5 [local-https-chromium] › tests/e2e-local/foundation.spec.ts:78:1 › CMS administrator signs in to /cp, and that session is rejected by the business API (1.9s)
+
+  5 passed (5.0s)

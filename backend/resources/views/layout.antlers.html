@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noindex, nofollow">
+        <meta name="theme-color" content="#0a1d5c">
+        <title>{{ title | sanitize }} | Taleed Procurement Self-Assessment</title>
+        {{# Shares the approved SPA design tokens (src/styles/tokens.css) via the root Vite build. #}}
+        {{ vite src="src/styles/cms-page.css" directory="spa" }}
+    </head>
+    <body class="cms-page">
+        <header class="cms-header"><a href="/#/">Taleed · Procurement Self-Assessment</a></header>
+        <main class="cms-main" id="main">
+            {{ template_content }}
+        </main>
+    </body>
+</html>

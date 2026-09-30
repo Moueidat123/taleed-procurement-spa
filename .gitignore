@@ -7,4 +7,8 @@ test-results/
 !.env.example
 .DS_Store
 *.log
-package-lock.json
+
+# Local Docker state (ops/local/dev) — never commit secrets, CA keys or builds
+infra/local/certs/
+infra/local/ca/
+backend/public/spa/

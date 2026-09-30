@@ -1,0 +1,33 @@
+## TLS verified with project CA (no -k)
+200 ssl_verify_result=0
+## HTTP -> HTTPS
+301 -> https://procurement.taleed.test/
+## health
+{"status":"ok","checks":{"database":"ok"},"release":"local"}
+## unknown API routes are JSON 404
+/api/procurement/v1/nope 404 application/json
+/api/other 404 application/json
+## /auth/me without session
+{"error":{"code":"unauthenticated","message":"Sign in to continue."},"requestId":"55502b2b-d5d8-4fa5-959e-8bc340151c5b"}
+## SPA shell at /
+200
+/spa/assets/index-oapAB72k.js
+<div id="root"></div>
+## Statamic CMS page
+200
+/spa/assets/cms-D3C7dJGe.css
+Placeholder content — pending approval
+## CP login
+200
+## security headers on /
+x-content-type-options: nosniff
+x-frame-options: DENY
+strict-transport-security: max-age=300
+x-content-type-options: nosniff
+## request forgery: POST without XSRF token (with a live session cookie)
+Sec-Fetch-Site=cross-site -> 419
+Sec-Fetch-Site=same-site -> 419
+Sec-Fetch-Site=none -> 419
+Sec-Fetch-Site=same-origin -> 202
+## MySQL not published on host
+3306 closed

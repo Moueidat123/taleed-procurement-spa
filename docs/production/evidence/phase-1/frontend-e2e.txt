@@ -1,0 +1,36 @@
+
+> taleed-procurement-spa@1.0.0-prototype test:e2e
+> playwright test
+
+
+Running 26 tests using 4 workers
+
+  ✓   3 [desktop-chromium] › tests/e2e/prototype.spec.ts:60:1 › incomplete review blocks submission and focuses the missing question (2.7s)
+  ✓   1 [desktop-chromium] › tests/e2e/prototype.spec.ts:25:1 › registration validates, verifies, and creates a company before assessment (2.8s)
+  ✓   4 [desktop-chromium] › tests/e2e/prototype.spec.ts:50:1 › mixed answers survive reload and clearing restores unanswered state (3.5s)
+  ✓   5 [desktop-chromium] › tests/e2e/prototype.spec.ts:87:1 › company cannot open another company result or staff controls (1.4s)
+  ✓   6 [desktop-chromium] › tests/e2e/prototype.spec.ts:95:1 › analyst sees portfolio but not draft answers or exports (1.6s)
+  ✓   7 [desktop-chromium] › tests/e2e/prototype.spec.ts:103:1 › admin creates a correction draft without replacing the effective submission (1.9s)
+  ✓   8 [desktop-chromium] › tests/e2e/prototype.spec.ts:114:1 › admin CSV export contains only current filtered effective submissions (1.3s)
+  ✓   9 [desktop-chromium] › tests/e2e/prototype.spec.ts:130:1 › storage quota failure never reports a changed answer as saved (1.7s)
+  ✓  11 [desktop-chromium] › tests/e2e/prototype.spec.ts:159:1 › corrupt persistence preserves original bytes and enters explicit recovery (1.8s)
+  ✓  12 [desktop-chromium] › tests/e2e/prototype.spec.ts:180:1 › desktop and mobile layout has no document-level horizontal overflow (1.2s)
+  ✓  13 [desktop-chromium] › tests/e2e/prototype.spec.ts:186:1 › skip-to-content focuses the main landmark without changing hash route (1.6s)
+  ✓  10 [desktop-chromium] › tests/e2e/prototype.spec.ts:146:1 › cross-tab writes pause a stale editor until it reloads (3.5s)
+  ✓   2 [desktop-chromium] › tests/e2e/prototype.spec.ts:69:1 › complete four-section journey submits once and shows 16 recommendations (10.9s)
+  ✓  14 [mobile-chromium] › tests/e2e/prototype.spec.ts:25:1 › registration validates, verifies, and creates a company before assessment (2.3s)
+  ✓  16 [mobile-chromium] › tests/e2e/prototype.spec.ts:60:1 › incomplete review blocks submission and focuses the missing question (2.0s)
+  ✓  15 [mobile-chromium] › tests/e2e/prototype.spec.ts:50:1 › mixed answers survive reload and clearing restores unanswered state (2.7s)
+  ✓  17 [mobile-chromium] › tests/e2e/prototype.spec.ts:87:1 › company cannot open another company result or staff controls (1.9s)
+  ✓  18 [mobile-chromium] › tests/e2e/prototype.spec.ts:95:1 › analyst sees portfolio but not draft answers or exports (1.8s)
+  ✓  21 [mobile-chromium] › tests/e2e/prototype.spec.ts:114:1 › admin CSV export contains only current filtered effective submissions (1.2s)
+  ✓  20 [mobile-chromium] › tests/e2e/prototype.spec.ts:103:1 › admin creates a correction draft without replacing the effective submission (2.0s)
+  ✓  22 [mobile-chromium] › tests/e2e/prototype.spec.ts:130:1 › storage quota failure never reports a changed answer as saved (1.8s)
+  ✓  24 [mobile-chromium] › tests/e2e/prototype.spec.ts:159:1 › corrupt persistence preserves original bytes and enters explicit recovery (2.0s)
+  -  26 [mobile-chromium] › tests/e2e/prototype.spec.ts:186:1 › skip-to-content focuses the main landmark without changing hash route
+  ✓  25 [mobile-chromium] › tests/e2e/prototype.spec.ts:180:1 › desktop and mobile layout has no document-level horizontal overflow (1.4s)
+  ✓  23 [mobile-chromium] › tests/e2e/prototype.spec.ts:146:1 › cross-tab writes pause a stale editor until it reloads (3.3s)
+  ✓  19 [mobile-chromium] › tests/e2e/prototype.spec.ts:69:1 › complete four-section journey submits once and shows 16 recommendations (9.4s)
+
+  1 skipped
+  25 passed (24.8s)

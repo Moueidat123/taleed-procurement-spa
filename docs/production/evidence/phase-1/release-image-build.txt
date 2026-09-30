@@ -1,0 +1,155 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.80kB done
+#1 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1.7
+#2 DONE 0.4s
+
+#3 docker-image://docker.io/docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e
+#3 resolve docker.io/docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e 0.0s done
+#3 CACHED
+
+#4 [internal] load metadata for docker.io/library/php:8.4-fpm-alpine@sha256:78cd8de9970a9cd6ff4d98860a94eb5bf37dd2d5776b4785562dbfad01c29d5a
+#4 DONE 0.0s
+
+#5 [internal] load metadata for docker.io/library/composer:2.8@sha256:5248900ab8b5f7f880c2d62180e40960cd87f60149ec9a1abfd62ac72a02577c
+#5 DONE 0.0s
+
+#6 [internal] load metadata for docker.io/library/node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402
+#6 DONE 0.0s
+
+#7 [internal] load .dockerignore
+#7 transferring context: 509B done
+#7 DONE 0.0s
+
+#8 [php-base 1/7] FROM docker.io/library/php:8.4-fpm-alpine@sha256:78cd8de9970a9cd6ff4d98860a94eb5bf37dd2d5776b4785562dbfad01c29d5a
+#8 resolve docker.io/library/php:8.4-fpm-alpine@sha256:78cd8de9970a9cd6ff4d98860a94eb5bf37dd2d5776b4785562dbfad01c29d5a 0.0s done
+#8 DONE 0.0s
+
+#9 [composer 1/1] FROM docker.io/library/composer:2.8@sha256:5248900ab8b5f7f880c2d62180e40960cd87f60149ec9a1abfd62ac72a02577c
+#9 resolve docker.io/library/composer:2.8@sha256:5248900ab8b5f7f880c2d62180e40960cd87f60149ec9a1abfd62ac72a02577c 0.0s done
+#9 DONE 0.0s
+
+#10 [spa 1/8] FROM docker.io/library/node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402
+#10 resolve docker.io/library/node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 0.0s done
+#10 DONE 0.0s
+
+#11 [internal] load build context
+#11 transferring context: 19.32kB 0.2s done
+#11 DONE 0.2s
+
+#12 [vendor 2/5] COPY backend/composer.json backend/composer.lock ./
+#12 CACHED
+
+#13 [vendor 1/5] WORKDIR /app
+#13 CACHED
+
+#14 [vendor 3/5] RUN composer install --no-dev --no-interaction --no-scripts --no-autoloader --prefer-dist
+#14 CACHED
+
+#15 [vendor 4/5] COPY backend/ ./
+#15 DONE 0.0s
+
+#16 [vendor 5/5] RUN composer dump-autoload --no-dev --optimize --classmap-authoritative --no-scripts
+#16 0.435 Generating optimized autoload files (authoritative)
+#16 1.993 Generated optimized autoload files (authoritative) containing 9552 classes
+#16 DONE 2.0s
+
+#17 [php-base 4/7] COPY infra/docker/php/fpm-pool.conf /usr/local/etc/php-fpm.d/zz-procurement.conf
+#17 CACHED
+
+#18 [php-base 5/7] COPY infra/docker/php/healthcheck.sh /usr/local/bin/php-fpm-healthcheck
+#18 CACHED
+
+#19 [php-base 6/7] RUN chmod 0755 /usr/local/bin/php-fpm-healthcheck
+#19 CACHED
+
+#20 [php-base 2/7] RUN set -eux;     apk add --no-cache fcgi icu-libs libzip libpng libjpeg-turbo libwebp freetype;     apk add --no-cache --virtual .build-deps autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c icu-dev libzip-dev libpng-dev libjpeg-turbo-dev libwebp-dev freetype-dev linux-headers;     docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp;     docker-php-ext-install -j"$(nproc)" pdo_mysql bcmath exif gd intl opcache pcntl zip;     apk del .build-deps;     php -m | grep -qi pdo_mysql
+#20 CACHED
+
+#21 [php-base 3/7] COPY infra/docker/php/conf.d/procurement.ini /usr/local/etc/php/conf.d/zz-procurement.ini
+#21 CACHED
+
+#22 [spa 4/8] RUN npm ci --ignore-scripts
+#22 CACHED
+
+#23 [spa 5/8] COPY index.html vite.config.ts tsconfig.json tsconfig.core.json ./
+#23 CACHED
+
+#24 [spa 6/8] COPY public ./public
+#24 CACHED
+
+#25 [spa 7/8] COPY src ./src
+#25 CACHED
+
+#26 [spa 2/8] WORKDIR /repo
+#26 CACHED
+
+#27 [spa 3/8] COPY package.json package-lock.json .npmrc ./
+#27 CACHED
+
+#28 [spa 8/8] RUN mkdir -p backend/public && npm run build:backend
+#28 CACHED
+
+#29 [php-base 7/7] WORKDIR /var/www/html
+#29 CACHED
+
+#30 [release 1/3] COPY --from=vendor --chown=www-data:www-data /app /var/www/html
+#30 DONE 1.3s
+
+#31 [release 2/3] COPY --from=spa --chown=www-data:www-data /repo/backend/public/spa /var/www/html/public/spa
+#31 DONE 0.1s
+
+#32 [release 3/3] RUN mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache     && APP_KEY="base64:$(head -c 32 /dev/urandom | base64)" CACHE_STORE=array DB_CONNECTION=sqlite DB_DATABASE=:memory:        sh -c "php artisan package:discover --no-interaction && php artisan vendor:publish --tag=statamic-cp --force --no-interaction"     && rm -f .env public/hot     && chown -R www-data:www-data storage bootstrap/cache
+#32 0.358 
+#32 0.358    INFO  Discovering packages.  
+#32 0.358 
+#32 0.361   ajthinking/archetype .................................................. DONE
+#32 0.361   inertiajs/inertia-laravel ............................................. DONE
+#32 0.361   laravel/fortify ....................................................... DONE
+#32 0.362   laravel/passkeys ...................................................... DONE
+#32 0.362   laravel/sanctum ....................................................... DONE
+#32 0.362   laravel/tinker ........................................................ DONE
+#32 0.363   nesbot/carbon ......................................................... DONE
+#32 0.363   nunomaduro/termwind ................................................... DONE
+#32 0.363   rebing/graphql-laravel ................................................ DONE
+#32 0.363   statamic/cms .......................................................... DONE
+#32 0.363   stillat/blade-parser .................................................. DONE
+#32 0.364   wilderborn/partyline .................................................. DONE
+#32 0.364 
+#32 0.981 
+#32 0.981    INFO  Publishing [statamic-cp] assets.  
+#32 0.981 
+#32 1.047   Copying directory [vendor/statamic/cms/resources/dist] to [public/vendor/statamic/cp]  DONE
+#32 1.047 
+#32 DONE 1.5s
+
+#33 exporting to image
+#33 exporting layers
+#33 exporting layers 2.5s done
+#33 exporting manifest sha256:7d38140cb3ab8900655628904eb6c8b377b4d61c0fcfca976f19818f5000044e done
+#33 exporting config sha256:a3699d22e0256c3613b1c34dad00bedd6f5cb205001ea2f416ef9f798a29b736 done
+#33 exporting attestation manifest sha256:33eccfad1c4532563ff8afdd27a44c39bf912b4e875e3e79b1f059645ad75df6 0.0s done
+#33 exporting manifest list sha256:a08a196a934feff8696fb87ca911b3bd9d94334fb4b26694c3fa871fc4ecf2af done
+#33 naming to docker.io/library/taleed-procurement:release-check done
+#33 unpacking to docker.io/library/taleed-procurement:release-check
+#33 unpacking to docker.io/library/taleed-procurement:release-check 1.6s done
+#33 DONE 4.2s
+user: www-data
+PHP 8.4.26 (cli) (built: Sep 24 2026 19:15:03) (NTS)
+artisan: Laravel Framework 13.34.0
+absent: vendor/phpunit
+absent: vendor/larastan
+absent: vendor/laravel/pail
+PRESENT (unexpected): tests
+absent: .env
+absent: users/cms-admin@example.test.yaml
+absent: public/hot
+absent: storage/framework/testing
+present: public/spa/index.html
+present: public/spa/manifest.json
+present: public/vendor/statamic/cp
+present: vendor/statamic/cms
+present: content/collections/pages/privacy.md
