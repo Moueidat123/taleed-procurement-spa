@@ -1,0 +1,164 @@
+==> Building images
+#1 [internal] load local bake definitions
+#1 reading from stdin 455B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 3.52kB done
+#2 DONE 0.0s
+
+#3 resolve image config for docker-image://docker.io/docker/dockerfile:1.7
+#3 DONE 0.4s
+
+#4 docker-image://docker.io/docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e
+#4 resolve docker.io/docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e 0.0s done
+#4 CACHED
+
+#5 [internal] load metadata for docker.io/library/php:8.4-fpm-alpine@sha256:78cd8de9970a9cd6ff4d98860a94eb5bf37dd2d5776b4785562dbfad01c29d5a
+#5 DONE 0.0s
+
+#6 [internal] load metadata for docker.io/library/composer:2.8@sha256:5248900ab8b5f7f880c2d62180e40960cd87f60149ec9a1abfd62ac72a02577c
+#6 DONE 0.0s
+
+#7 [internal] load .dockerignore
+#7 transferring context: 479B done
+#7 DONE 0.0s
+
+#8 [composer 1/1] FROM docker.io/library/composer:2.8@sha256:5248900ab8b5f7f880c2d62180e40960cd87f60149ec9a1abfd62ac72a02577c
+#8 resolve docker.io/library/composer:2.8@sha256:5248900ab8b5f7f880c2d62180e40960cd87f60149ec9a1abfd62ac72a02577c 0.0s done
+#8 DONE 0.0s
+
+#9 [php-base 1/7] FROM docker.io/library/php:8.4-fpm-alpine@sha256:78cd8de9970a9cd6ff4d98860a94eb5bf37dd2d5776b4785562dbfad01c29d5a
+#9 resolve docker.io/library/php:8.4-fpm-alpine@sha256:78cd8de9970a9cd6ff4d98860a94eb5bf37dd2d5776b4785562dbfad01c29d5a 0.0s done
+#9 DONE 0.0s
+
+#10 [internal] load build context
+#10 transferring context: 298B done
+#10 DONE 0.0s
+
+#11 [php-base 6/7] RUN chmod 0755 /usr/local/bin/php-fpm-healthcheck
+#11 CACHED
+
+#12 [php-base 4/7] COPY infra/docker/php/fpm-pool.conf /usr/local/etc/php-fpm.d/zz-procurement.conf
+#12 CACHED
+
+#13 [php-base 2/7] RUN set -eux;     apk add --no-cache fcgi icu-libs libzip libpng libjpeg-turbo libwebp freetype;     apk add --no-cache --virtual .build-deps autoconf 		dpkg-dev dpkg 		file 		g++ 		gcc 		libc-dev 		make 		pkgconf 		re2c icu-dev libzip-dev libpng-dev libjpeg-turbo-dev libwebp-dev freetype-dev linux-headers;     docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp;     docker-php-ext-install -j"$(nproc)" pdo_mysql bcmath exif gd intl opcache pcntl zip;     apk del .build-deps;     php -m | grep -qi pdo_mysql
+#13 CACHED
+
+#14 [dev 1/3] RUN apk add --no-cache git unzip
+#14 CACHED
+
+#15 [dev 2/3] COPY --from=composer /usr/bin/composer /usr/bin/composer
+#15 CACHED
+
+#16 [php-base 7/7] WORKDIR /var/www/html
+#16 CACHED
+
+#17 [php-base 3/7] COPY infra/docker/php/conf.d/procurement.ini /usr/local/etc/php/conf.d/zz-procurement.ini
+#17 CACHED
+
+#18 [php-base 5/7] COPY infra/docker/php/healthcheck.sh /usr/local/bin/php-fpm-healthcheck
+#18 CACHED
+
+#19 [dev 3/3] RUN echo "opcache.validate_timestamps=1" > /usr/local/etc/php/conf.d/zzz-dev.ini
+#19 CACHED
+
+#20 exporting to image
+#20 exporting layers done
+#20 exporting manifest sha256:7e2fdba42e3fe33399337d09c01cb2d731cc75848649bed01f187d6ac63ad9f3 done
+#20 exporting config sha256:e2460ce515d7521f1bc39d684b57d99d9e77a8ed366e5c19ac25075ab5f258be done
+#20 exporting attestation manifest sha256:ecd7a96e379a6ab403519b7b6e97431ce798891bb84c9f9cdaf556a10292f55f done
+#20 exporting manifest list sha256:67285c0148149ab51e35b2031b93e69c0eaed0f8b54c3641918795f30e07581f done
+#20 naming to docker.io/library/taleed-procurement-dev-php:dev done
+#20 unpacking to docker.io/library/taleed-procurement-dev-php:dev 0.0s done
+#20 DONE 0.1s
+
+#21 resolving provenance for metadata file
+#21 DONE 0.0s
+ app  Built
+==> Starting MySQL
+ Container taleed-procurement-dev-mysql-1  Running
+==> Installing PHP dependencies from composer.lock (inside the container)
+Installing dependencies from lock file (including require-dev)
+Verifying lock file contents can be installed on current platform.
+Nothing to install, update or remove
+Generating optimized autoload files
+> Illuminate\Foundation\ComposerScripts::postAutoloadDump
+> @php artisan package:discover --ansi
+
+  [37;44m INFO [39;49m Discovering packages.  
+
+  ajthinking/archetype [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  inertiajs/inertia-laravel [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  laravel/fortify [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  laravel/pail [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  laravel/passkeys [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  laravel/sanctum [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  laravel/tinker [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  nesbot/carbon [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  nunomaduro/collision [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  nunomaduro/termwind [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  rebing/graphql-laravel [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  spatie/laravel-error-solutions [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  statamic/cms [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  stillat/blade-parser [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+  wilderborn/partyline [90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m[90m.[39m [32;1mDONE[39;22m
+
+> @php artisan statamic:install --ansi
+
+  [37;44m INFO [39;49m Discovering addons.  
+
+  [37;44m INFO [39;49m Publishing [1m[statamic][22m assets.  
+
+  File [1m[config/statamic/antlers.php][22m already exists [90m..................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/api.php][22m already exists [90m......................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/assets.php][22m already exists [90m...................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/autosave.php][22m already exists [90m.................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/cp.php][22m already exists [90m.......................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/editions.php][22m already exists [90m.................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/forms.php][22m already exists [90m....................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/git.php][22m already exists [90m......................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/graphql.php][22m already exists [90m..................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/live_preview.php][22m already exists [90m.............[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/markdown.php][22m already exists [90m.................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/oauth.php][22m already exists [90m....................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/protect.php][22m already exists [90m..................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/revisions.php][22m already exists [90m................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/routes.php][22m already exists [90m...................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/search.php][22m already exists [90m...................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/static_caching.php][22m already exists [90m...........[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/stache.php][22m already exists [90m...................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/system.php][22m already exists [90m...................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/templates.php][22m already exists [90m................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/users.php][22m already exists [90m....................[39m [33;1mSKIPPED[39;22m  
+  File [1m[config/statamic/webauthn.php][22m already exists [90m.................[39m [33;1mSKIPPED[39;22m  
+  Copying directory [1m[vendor/statamic/cms/resources/users][22m to [1m[resources/users][22m  [32;1mDONE[39;22m
+  File [1m[please][22m already exists [90m.......................................[39m [33;1mSKIPPED[39;22m  
+
+  [37;44m INFO [39;49m Publishing [1m[statamic-cp][22m assets.  
+
+  Copying directory [1m[vendor/statamic/cms/resources/dist][22m to [1m[public/vendor/statamic/cp][22m  [32;1mDONE[39;22m
+
+  [37;44m INFO [39;49m Publishing [1m[statamic-frontend][22m assets.  
+
+  Copying directory [1m[vendor/statamic/cms/resources/dist-frontend][22m to [1m[public/vendor/statamic/frontend][22m  [32;1mDONE[39;22m
+
+  [37;44m INFO [39;49m Compiled views cleared successfully.  
+
+  [37;44m INFO [39;49m Application cache cleared successfully.  
+
+111 packages you are using are looking for funding.
+Use the `composer fund` command to find out more!
+ Container taleed-procurement-dev-mysql-1  Running
+
+   INFO  Preparing database.  
+
+  Creating migration table ...................................... 13.31ms DONE
+
+   INFO  Running migrations.  
+
+  0001_01_01_000000_create_identity_tables ...................... 61.29ms DONE
+  0001_01_01_000001_create_cache_table .......................... 21.83ms DONE
+  0001_01_01_000002_create_jobs_table ........................... 38.71ms DONE
+
+==> Init complete. Next: ops/local/dev up   (then ops/local/dev trust-help)

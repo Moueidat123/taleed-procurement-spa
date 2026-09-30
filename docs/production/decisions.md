@@ -186,3 +186,46 @@ No methodology page is restored. Phase 1 needs only a placeholder entry to prove
 - **For Phase 1:** none. Everything Phase 1 needs is resolvable locally.
 - **For Phase 3:** D-12.
 - **For Phase 5:** D-15 and D-19, plus the production inputs listed in `04-OPERATIONS.md §External values`.
+
+---
+
+## Phase 1 additions (30 September 2026)
+
+| ID | Decision | Status |
+|---|---|---|
+| D-20 | CSRF: keep Laravel 13 `PreventRequestForgery` defaults | Implemented |
+| D-21 | npm toolchain and `@hookform/resolvers` pin | Implemented |
+| D-22 | Statamic outpost contact | Noted; owner awareness |
+| D-23 | CMS routes under `/pages/*`; `/api/*` reserved | Implemented |
+| D-24 | Local certificate from a project-local CA; no host changes | Implemented |
+| D-25 | Separate CMS password-token tables | Implemented |
+
+### D-20 CSRF
+- A browser-set `Sec-Fetch-Site: same-origin` is accepted as proof of origin. Otherwise the XSRF token is required.
+- `same-site` (other Taleed subdomains) is **not** trusted; `allowSameSite` stays false.
+- Verified by `ops/local/checks/https-smoke.sh`: cross-site → 419, same-site → 419, header-less → 419, same-origin → accepted.
+
+### D-21 npm toolchain
+- `package-lock.json` is generated with npm 10.9.9 (Node 22 image, CI).
+- `@hookform/resolvers` is pinned to `5.2.2`, inside the declared `^5.2.1` range. Versions 5.5 and later declare an optional `ajv@8` peer, and that made npm write a lock its own `npm ci` rejected. This was the root cause of the prototype's earlier "lockfile sync bug".
+- The SPA only uses the Zod resolver. `npm run check` (28/28) and e2e (25 passed, 1 skipped) are unchanged.
+
+### D-22 Statamic outpost
+Statamic Core contacts statamic.com (the "outpost" licence/version check) and caches the result. It needs no licence key. Production egress policy should allow it or accept its failure. The owner should be aware of it.
+
+### D-23 Route ownership
+- `/` is the SPA shell (HashRouter).
+- `/api/procurement/v1/*` is the business API. Every other `/api/*` path is reserved as a JSON 404.
+- `/pages/{slug}` holds Statamic entries (placeholder privacy page, D-12); `/cp` is the CMS.
+- `/sanctum/csrf-cookie` and `/up` are infrastructure routes.
+
+### D-24 Local certificates
+- `mkcert` issues the certificate from `infra/local/ca`, and the system trust store is not modified.
+- Verification uses `curl --cacert` and a Chromium SPKI pin.
+- Trusting it in a daily browser, and the `/etc/hosts` entry, remain owner-approved manual steps (`ops/local/dev trust-help`).
+
+### D-25 CMS password tokens
+- Because the default guard is the Eloquent `web` guard, Statamic keeps Laravel's standard password broker manager.
+- The CMS admin's reset and activation brokers (`statamic_resets`, `statamic_activations`) therefore use their own DB tables: `cms_password_reset_tokens` and `cms_password_activation_tokens`.
+- The app broker uses `app_password_reset_tokens`.
+- Cross-provider resolution is tested and returns `INVALID_USER`.

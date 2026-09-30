@@ -1,0 +1,5 @@
+title: Pages
+# CMS-managed editorial pages live under /pages/* so they never claim routes
+# owned by the React SPA (/), the business API (/api/*) or the CP (/cp).
+route: '/pages/{slug}'
+propagate: false

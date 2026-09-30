@@ -1,0 +1,31 @@
+## TLS verified with project CA (no -k)
+200 ssl_verify_result=0
+## HTTP -> HTTPS
+301 -> https://procurement.taleed.test/
+## health
+{"status":"ok","checks":{"database":"ok"},"release":"local"}
+## unknown API routes are JSON 404
+/api/procurement/v1/nope 404 application/json
+/api/other 404 application/json
+## /auth/me without session
+{"error":{"code":"unauthenticated","message":"Sign in to continue."},"requestId":"5943efa5-c860-471b-bc75-fa54e5f4c469"}
+## SPA shell at /
+200
+/@vite/client
+<div id="root"></div>
+## Statamic CMS page
+200
+Placeholder content — pending approval
+src/styles/cms-page.css
+## CP login
+200
+## security headers on /
+strict-transport-security: max-age=300
+x-content-type-options: nosniff
+## request forgery: POST without XSRF token (with a live session cookie)
+Sec-Fetch-Site=cross-site -> 419
+Sec-Fetch-Site=same-site -> 419
+Sec-Fetch-Site=none -> 419
+Sec-Fetch-Site=same-origin -> 202
+## MySQL not published on host
+3306 closed

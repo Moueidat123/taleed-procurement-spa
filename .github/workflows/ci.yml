@@ -1,26 +1,36 @@
-name: Validate procurement prototype
+name: CI
+
+# Validation only — this workflow never deploys (decisions.md D-18).
 on:
   push:
   pull_request:
   workflow_dispatch:
+
 permissions:
   contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  check:
+  frontend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install dependencies
-        run: |
-          npm install
+          cache: npm
+      - name: Install from lockfile
+        run: npm ci --ignore-scripts
       - name: Type check, lint, domain tests and build
         run: npm run check
+      - name: Backend-mode SPA build (same-origin /spa)
+        run: npm run build:backend
       - name: Install browser
         run: npx playwright install --with-deps chromium
-      - name: Browser acceptance checks
+      - name: Browser acceptance checks (approved prototype journeys)
         run: npm run test:e2e
       - name: Upload browser evidence
         if: always()
@@ -31,5 +41,66 @@ jobs:
             playwright-report/
             test-results/
           if-no-files-found: ignore
-# Deliberately no deployment. After the first successful local install,
-# Uses npm install because npm generates an inconsistent nested ajv lockfile entry.
+
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      mysql:
+        image: mysql:8.4@sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242
+        env:
+          MYSQL_ROOT_PASSWORD: ci-only-root
+          MYSQL_DATABASE: procurement_test
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci-only-root --silent"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+    env:
+      DB_HOST: 127.0.0.1
+      DB_USERNAME: root
+      DB_PASSWORD: ci-only-root
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql, bcmath, exif, gd, intl, zip, pcntl
+          coverage: none
+      - name: Validate composer.json / lock
+        run: composer validate --strict
+      - name: Install from lockfile
+        run: composer install --no-interaction --prefer-dist --no-progress
+        env:
+          APP_KEY: base64:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+          CACHE_STORE: array
+      - name: Security advisories
+        run: composer audit
+      - name: Code style (Pint)
+        run: vendor/bin/pint --test
+      - name: Static analysis (Larastan)
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+      - name: PHPUnit on MySQL 8.4
+        run: php artisan test
+        env:
+          APP_KEY: base64:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+
+  infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No runtime state or secrets committed
+        run: |
+          set -e
+          ! git ls-files 'backend/users/*.yaml' | grep .
+          ! git ls-files | grep -E '(^|/)\.env$|infra/local/(ca|certs)/|backend/public/spa/|\.pem$'
+      - name: Shell scripts
+        run: shellcheck -S warning ops/local/dev ops/local/checks/*.sh infra/local/mysql-init/*.sh infra/docker/php/healthcheck.sh
+      - name: Local compose resolves (placeholder values only)
+        run: |
+          cp infra/local/.env.example /tmp/compose.env
+          sed -i 's/__GENERATED__/ci-placeholder/' /tmp/compose.env
+          docker compose --env-file /tmp/compose.env --profile spa-dev config --quiet
+      - name: Release image builds (not pushed)
+        run: docker build -f infra/docker/php/Dockerfile --target release -t taleed-procurement:ci .

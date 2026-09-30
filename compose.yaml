@@ -1,0 +1,121 @@
+# Taleed Procurement — LOCAL DEVELOPMENT ONLY (decisions.md D-07, D-09).
+# Use via `ops/local/dev` (reads infra/local/.env). Production has its own
+# compose file (Phase 4) with no source mounts, Vite or Mailpit.
+#
+# Published ports: the HTTPS edge (127.0.0.1) and Mailpit UI (127.0.0.1).
+# MySQL is never published. Stopping never deletes volumes (`dev down`).
+
+name: ${COMPOSE_PROJECT_NAME:-taleed-procurement-dev}
+
+x-php: &php
+  build:
+    context: .
+    dockerfile: infra/docker/php/Dockerfile
+    target: dev
+  image: ${COMPOSE_PROJECT_NAME:-taleed-procurement-dev}-php:dev
+  volumes:
+    - ./backend:/var/www/html
+  depends_on:
+    mysql:
+      condition: service_healthy
+  restart: unless-stopped
+
+services:
+  mysql:
+    image: mysql:8.4@sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?run ops/local/dev init}
+      PROCUREMENT_DB: ${PROCUREMENT_DB:-procurement}
+      PROCUREMENT_APP_PASSWORD: ${PROCUREMENT_APP_PASSWORD:?run ops/local/dev init}
+      PROCUREMENT_MIGRATOR_PASSWORD: ${PROCUREMENT_MIGRATOR_PASSWORD:?run ops/local/dev init}
+      PROCUREMENT_TEST_PASSWORD: ${PROCUREMENT_TEST_PASSWORD:?run ops/local/dev init}
+    command: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"]
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./infra/local/mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_ROOT_PASSWORD\" mysqladmin ping -h 127.0.0.1 -uroot --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    restart: unless-stopped
+
+  app:
+    <<: *php
+
+  queue:
+    <<: *php
+    command: ["php", "artisan", "queue:work", "database", "--tries=3", "--backoff=10", "--max-time=3600"]
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'artisan queue:work' >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # Exactly one scheduler.
+  scheduler:
+    <<: *php
+    command: ["php", "artisan", "schedule:work"]
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'artisan schedule:work' >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  vite:
+    image: node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402
+    working_dir: /repo
+    environment:
+      VITE_PUBLIC_ORIGIN: https://${PROCUREMENT_HOSTNAME:-procurement.taleed.test}${PROCUREMENT_HTTPS_PORT_SUFFIX:-}
+    # Linux node_modules live in a volume (host node_modules are platform-specific).
+    # backend/public/hot tells Laravel's Vite helper to load CMS CSS via the dev server.
+    command: >
+      sh -c "npm ci --ignore-scripts --no-audit --no-fund &&
+             printf '%s' \"$$VITE_PUBLIC_ORIGIN\" > backend/public/hot &&
+             trap 'rm -f backend/public/hot' EXIT INT TERM &&
+             npx vite --host 0.0.0.0"
+    volumes:
+      - ./:/repo
+      - node-modules:/repo/node_modules
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:5173/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    profiles: ["spa-dev"]
+    restart: unless-stopped
+
+  web:
+    image: nginx:1.29-alpine@sha256:5616878291a2eed594aee8db4dade5878cf7edcb475e59193904b198d9b830de
+    environment:
+      PROCUREMENT_HOSTNAME: ${PROCUREMENT_HOSTNAME:-procurement.taleed.test}
+      PROCUREMENT_SPA_MODE: ${PROCUREMENT_SPA_MODE:-dev}
+    ports:
+      - "127.0.0.1:${PROCUREMENT_HTTPS_PORT:-443}:443"
+      - "127.0.0.1:${PROCUREMENT_HTTP_PORT:-80}:80"
+    volumes:
+      - ./infra/docker/nginx/templates:/etc/nginx/templates:ro
+      - ./infra/docker/nginx/snippets:/etc/nginx/snippets:ro
+      - ./infra/local/certs:/etc/nginx/certs:ro
+      - ./backend/public:/var/www/html/public:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --no-check-certificate -O /dev/null https://127.0.0.1/up || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit:v1.27@sha256:e22dce5b36f93c77082e204a3942fb6b283b7896e057458400a4c88344c3df68
+    ports:
+      - "127.0.0.1:${PROCUREMENT_MAILPIT_PORT:-8025}:8025"
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+  node-modules:

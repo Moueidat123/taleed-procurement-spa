@@ -1,0 +1,36 @@
+# Local development HTTPS edge (decisions.md D-07). NOT the production edge.
+# ${PROCUREMENT_HOSTNAME} and ${PROCUREMENT_SPA_MODE} are substituted at start.
+
+server {
+    listen 80;
+    server_name ${PROCUREMENT_HOSTNAME};
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name ${PROCUREMENT_HOSTNAME};
+
+    ssl_certificate     /etc/nginx/certs/local.pem;
+    ssl_certificate_key /etc/nginx/certs/local-key.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    client_max_body_size 20m;
+    server_tokens off;
+    root /var/www/html/public;
+
+    add_header Strict-Transport-Security "max-age=300" always; # short: local only
+    add_header X-Content-Type-Options "nosniff" always;
+
+    # Compiled SPA assets and Statamic CP/frontend assets: static files only.
+    location ^~ /spa/            { try_files $uri =404; expires 1h; }
+    location ^~ /vendor/statamic/ { try_files $uri =404; expires 1h; }
+    location = /favicon.ico       { try_files $uri =404; access_log off; }
+
+    # Laravel / Statamic owned routes (same origin as the SPA).
+    location ~ ^/(api|sanctum|cp|pages|up|!)(/|$) { include /etc/nginx/snippets/laravel.conf; }
+
+    # Everything else belongs to the SPA (dev: Vite HMR, built: Laravel shell).
+    include /etc/nginx/snippets/spa-${PROCUREMENT_SPA_MODE}.conf;
+}

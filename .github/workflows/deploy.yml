@@ -1,8 +1,9 @@
-name: Build and Deploy to GitHub Pages
+# Publishes the ORIGINAL static demo (browser-local synthetic data) to GitHub Pages.
+# Manual only (decisions.md D-16): the production application is the Laravel +
+# Statamic backend and is never deployed from this workflow.
+name: Publish demo to GitHub Pages
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -25,12 +26,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install from lockfile
+        run: npm ci --ignore-scripts
 
-      - name: Build
-        run: npm run build
+      - name: Check (typecheck, lint, domain tests, build)
+        run: npm run check
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

@@ -1,0 +1,14 @@
+/* Server-rendered Statamic pages (backend/resources/views/*.antlers.html).
+   Reuses the approved SPA tokens; adds no new brand values. */
+@import './tokens.css';
+
+*, *::before, *::after { box-sizing: border-box; }
+body.cms-page { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.6; }
+.cms-header { background: var(--surface); border-bottom: 1px solid var(--line); padding: 16px 24px; }
+.cms-header a { color: var(--navy); font-weight: 600; text-decoration: none; }
+.cms-header a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.cms-main { max-width: 760px; margin: 32px auto; padding: 0 16px; }
+.cms-article { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 32px; }
+.cms-article h1 { color: var(--navy); margin-top: 0; font-size: 1.75rem; }
+.cms-article a { color: var(--blue); }
+.cms-flag { display: inline-block; margin: 0 0 12px; padding: 4px 10px; border-radius: var(--radius-sm); background: var(--amber-tint); color: var(--amber-text); font-size: .85rem; font-weight: 600; }

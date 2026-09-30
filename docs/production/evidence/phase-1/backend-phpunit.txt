@@ -1,0 +1,27 @@
+ Container taleed-procurement-dev-mysql-1  Running
+
+   PASS  Tests\Feature\Foundation\CoreEditionTest
+  ✓ statamic runs as core with headless apis disabled                    0.39s  
+  ✓ cms admin command creates exactly one user and never enables pro     0.13s  
+
+   PASS  Tests\Feature\Foundation\PrincipalIsolationTest
+  ✓ application user logs in through the business api                    0.34s  
+  ✓ inactive and wrong password fail identically                         0.04s  
+  ✓ cms only session cannot call the business api                        0.04s  
+  ✓ cms administrator can reach the control panel                        0.49s  
+  ✓ application super admin has no control panel access                  0.03s  
+  ✓ password reset brokers never cross providers                         0.84s  
+  ✓ forgot password response does not reveal accounts                    0.70s  
+  ✓ application login does not write statamic user state                 0.06s  
+
+   PASS  Tests\Feature\Foundation\RoutingTest
+  ✓ health is json and reports database                                  0.03s  
+  ✓ unknown business routes return the json error envelope               0.03s  
+  ✓ protected business route requires application identity               0.03s  
+  ✓ root serves the built spa shell or a clear 503                       0.03s  
+  ✓ cms privacy placeholder is server rendered by statamic               0.09s  
+  ✓ csrf cookie endpoint is reserved                                     0.03s  
+
+  Tests:    16 passed (84 assertions)
+  Duration: 3.55s
+

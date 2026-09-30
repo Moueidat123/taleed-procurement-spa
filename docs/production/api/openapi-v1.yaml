@@ -1,0 +1,202 @@
+openapi: 3.1.0
+info:
+  title: Taleed Procurement business API
+  version: 1.0.0-phase1
+  description: |
+    Same-origin JSON API for the approved React SPA (docs/production/07-API-CONTRACT.md).
+    Authentication: Laravel session (`web` guard, Eloquent `app_users`) via Sanctum SPA
+    mode. Call `GET /sanctum/csrf-cookie` first; send the `XSRF-TOKEN` cookie value as
+    `X-XSRF-TOKEN` on state-changing requests (same-origin browsers are also accepted via
+    `Sec-Fetch-Site: same-origin`, Laravel 13). The Statamic CMS session is never accepted.
+
+    `x-status: implemented` = Phase 1, tested. `x-status: planned` = Phase 2 contract to
+    implement; shapes may be refined by the migration/contract owner before Phase 2 starts.
+    Field names follow src/domain/types.ts (camelCase). IDs are strings (ULIDs; source
+    question IDs such as "1.10" are strings). Bands: foundational | developing | advanced |
+    best_in_class. Answers: "yes" | "no" | null.
+servers:
+  - url: /api/procurement/v1
+
+components:
+  securitySchemes:
+    appSession:
+      type: apiKey
+      in: cookie
+      name: taleed_procurement_session
+  schemas:
+    Error:
+      type: object
+      required: [error, requestId]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum: [validation_failed, unauthenticated, forbidden, not_found, method_not_allowed, conflict, csrf_token_mismatch, rate_limited, unavailable, server_error, http_error]
+            message: { type: string }
+            fields:
+              type: object
+              additionalProperties: { type: array, items: { type: string } }
+        requestId: { type: string, format: uuid }
+    CurrentUser:
+      type: object
+      required: [id, name, email, role, orgId, verified, active, canExport]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string, format: email }
+        jobTitle: { type: [string, 'null'] }
+        role: { type: string, enum: [champion, analyst, admin] }
+        orgId: { type: [string, 'null'] }
+        verified: { type: boolean }
+        active: { type: boolean }
+        canExport: { type: boolean }
+  responses:
+    Unauthenticated:
+      description: No application session
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Validation:
+      description: Invalid input
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Conflict:
+      description: Stale expectedVersion / state conflict
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+
+paths:
+  /health:
+    get:
+      x-status: implemented
+      summary: Readiness (database reachable). No infrastructure details.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [ok, degraded] }
+                  checks: { type: object, properties: { database: { type: string, enum: [ok, unavailable] } } }
+                  release: { type: string }
+        '503': { description: Degraded }
+
+  /auth/login:
+    post:
+      x-status: implemented
+      summary: Application login (Laravel Fortify). Throttled 5/min per email+IP. Inactive accounts fail like wrong passwords.
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object, required: [email, password], properties: { email: { type: string }, password: { type: string } } }
+      responses:
+        '200': { description: 'Signed in; `{"two_factor": true}` when a TOTP challenge is required' }
+        '422': { $ref: '#/components/responses/Validation' }
+        '429': { description: Rate limited }
+  /auth/logout:
+    post:
+      x-status: implemented
+      security: [{ appSession: [] }]
+      responses: { '204': { description: Session invalidated (also ends any CMS session in the same browser) } }
+  /auth/me:
+    get:
+      x-status: implemented
+      security: [{ appSession: [] }]
+      responses:
+        '200':
+          description: Current application identity
+          content: { application/json: { schema: { type: object, properties: { data: { $ref: '#/components/schemas/CurrentUser' } } } } }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+  /auth/forgot-password:
+    post:
+      x-status: implemented
+      summary: Always the same acknowledgement (no account enumeration).
+      requestBody:
+        content: { application/json: { schema: { type: object, required: [email], properties: { email: { type: string } } } } }
+      responses: { '202': { description: 'Generic acknowledgement' } }
+  /auth/reset-password:
+    post:
+      x-status: implemented
+      summary: Fortify broker `app_users`; link opens the SPA at /#/reset-password?token=&email=
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object, required: [token, email, password, password_confirmation], properties: { token: { type: string }, email: { type: string }, password: { type: string, minLength: 12 }, password_confirmation: { type: string } } }
+      responses:
+        '200': { description: Password reset }
+        '422': { $ref: '#/components/responses/Validation' }
+  /auth/two-factor-challenge:
+    post:
+      x-status: implemented
+      summary: Fortify TOTP challenge (enforcement for privileged roles arrives in Phase 2, D-17).
+      responses: { '204': { description: Signed in }, '422': { $ref: '#/components/responses/Validation' } }
+
+  /auth/register:
+    post:
+      x-status: planned
+      summary: Create an unverified Champion from allowlisted fields only (name, email, jobTitle, password, consent).
+      responses: { '201': { description: Created; verification challenge sent }, '422': { $ref: '#/components/responses/Validation' }, '429': { description: Rate limited } }
+  /auth/verification/send:
+    post: { x-status: planned, summary: 'Send six-digit challenge (hashed, expiring, throttled)', responses: { '202': { description: Sent } } }
+  /auth/verification/confirm:
+    post: { x-status: planned, summary: 'Confirm six-digit challenge (attempt-limited, single use)', responses: { '204': { description: Verified }, '422': { $ref: '#/components/responses/Validation' } } }
+  /auth/invitations/accept:
+    post: { x-status: planned, summary: 'Accept single-use staff invitation (throttled)', responses: { '204': { description: Accepted } } }
+  /organization:
+    get: { x-status: planned, summary: "Current Champion's company (no sector field)", responses: { '200': { description: OK } } }
+    patch: { x-status: planned, summary: 'Update profile: name, country, size, registrationId, authorityConfirmed', responses: { '200': { description: OK }, '422': { $ref: '#/components/responses/Validation' } } }
+  /cycles/available:
+    get: { x-status: planned, summary: 'Open cycles pinned to a published framework (UI uses the first)', responses: { '200': { description: OK } } }
+  /frameworks/{version}:
+    get: { x-status: planned, summary: 'Published framework content (domains, questions, actions, interpretations)', responses: { '200': { description: OK } } }
+  /assessments:
+    post: { x-status: planned, summary: 'Create or resume the draft for own organization + cycle (locks aggregate)', responses: { '200': { description: Existing draft }, '201': { description: Created } } }
+  /assessments/history:
+    get: { x-status: planned, summary: "Own organization's revisions", responses: { '200': { description: OK } } }
+  /assessments/{revisionId}:
+    get: { x-status: planned, summary: 'Own draft/submitted revision; staff: submitted only', responses: { '200': { description: OK }, '404': { description: Not found or not accessible } } }
+  /assessments/{revisionId}/answers:
+    patch:
+      x-status: planned
+      summary: Save/clear answers with optimistic concurrency.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [expectedVersion, answers]
+              properties:
+                expectedVersion: { type: integer }
+                answers: { type: object, additionalProperties: { type: [string, 'null'], enum: ['yes', 'no', null] } }
+      responses: { '200': { description: 'Committed; returns new version' }, '409': { $ref: '#/components/responses/Conflict' }, '422': { $ref: '#/components/responses/Validation' } }
+  /assessments/{revisionId}/submit:
+    post:
+      x-status: planned
+      summary: Atomic, idempotent submission (Idempotency-Key header required).
+      parameters: [{ name: Idempotency-Key, in: header, required: true, schema: { type: string } }]
+      requestBody:
+        content: { application/json: { schema: { type: object, required: [expectedVersion, declaration], properties: { expectedVersion: { type: integer }, declaration: { const: true } } } } }
+      responses: { '200': { description: Submitted (or original receipt on retry) }, '409': { $ref: '#/components/responses/Conflict' }, '422': { $ref: '#/components/responses/Validation' } }
+  /assessments/{revisionId}/result:
+    get: { x-status: planned, summary: 'Immutable submitted result snapshot', responses: { '200': { description: OK } } }
+  /staff/portfolio:
+    get: { x-status: planned, summary: 'Analyst/Super Admin aggregate over effective submissions', responses: { '200': { description: OK } } }
+  /staff/organizations:
+    get: { x-status: planned, summary: 'Paginated directory with stage + answeredCount only (never answers)', responses: { '200': { description: OK } } }
+  /staff/organizations/{id}:
+    get: { x-status: planned, summary: 'Company details + permitted submissions', responses: { '200': { description: OK } } }
+  /staff/organizations/{id}/access:
+    patch: { x-status: planned, summary: 'Super Admin: pause/enable organization', responses: { '200': { description: OK } } }
+  /staff/assessments/{revisionId}/corrections:
+    post: { x-status: planned, summary: 'Super Admin: open correction draft with reason (>= 10 chars)', responses: { '201': { description: Created }, '409': { $ref: '#/components/responses/Conflict' } } }
+  /staff/comparisons:
+    post: { x-status: planned, summary: 'Compare 2–4 compatible effective submissions', responses: { '200': { description: OK } } }
+  /staff/users:
+    get: { x-status: planned, summary: 'Super Admin: people & access list', responses: { '200': { description: OK } } }
+  /staff/invitations:
+    post: { x-status: planned, summary: 'Super Admin: invite analyst/admin (behind the existing create-staff form, D-10)', responses: { '201': { description: Invited } } }
+  /staff/users/{id}/access:
+    patch: { x-status: planned, summary: 'Super Admin: active / canExport (self and last-admin protected)', responses: { '200': { description: OK }, '409': { $ref: '#/components/responses/Conflict' } } }
+  /staff/exports:
+    post: { x-status: planned, summary: 'Server CSV/XLSX export request (Phase 3)', responses: { '202': { description: Accepted } } }
