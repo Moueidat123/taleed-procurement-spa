@@ -1,0 +1,310 @@
+<?php
+
+namespace Statamic\View\Antlers\Language\Runtime;
+
+use Statamic\View\Antlers\Language\Nodes\AntlersNode;
+use Statamic\View\Antlers\Language\Utilities\StringUtilities;
+
+/**
+ * Class GlobalRuntimeState.
+ *
+ * The GlobalRuntimeState is responsible for communicating data state
+ * across key parts of the Antlers Runtime/Virtual Machine. Non-core
+ * developers are highly discouraged from interacting with any of
+ * these properties directly, as this can cause runtime issues.
+ */
+class GlobalRuntimeState
+{
+    const INDICATOR_NAMED_SLOTS_AVAILABLE = '_ns_a';
+
+    /**
+     * Indicates if the executing environment is in debug mode.
+     *
+     * @var bool
+     */
+    public static $isDebugMode = false;
+
+    /**
+     * A unique identifier for the active Antlers environment.
+     *
+     * @var string
+     */
+    public static $environmentId = '';
+
+    /**
+     * A reference of all observed interpolation regions.
+     *
+     * @var string[]
+     */
+    public static $interpolatedVariables = [];
+
+    /**
+     * A list of all Antlers template files processed.
+     *
+     * This list will be updated dynamically, and
+     * will reflect the template execution path.
+     *
+     * @var array
+     */
+    public static $templateFileStack = [];
+
+    /**
+     * The active section count.
+     *
+     * @var int
+     */
+    public static $yieldCount = 0;
+
+    /**
+     * A reference to all active yield stacks, and their corresponding counts.
+     *
+     * @var array
+     */
+    public static $yieldStacks = [];
+
+    /** @var AntlersNode|null */
+    public static $lastNode = null;
+
+    /**
+     * A trace of the Antlers template file being executed.
+     *
+     * @var string|null
+     */
+    public static $currentExecutionFile = null;
+
+    /**
+     * Indicates if the Antlers runtime is evaluating user-supplied data.
+     *
+     * @var bool
+     */
+    public static $isEvaluatingUserData = true;
+
+    public static $isEvaluatingData = false;
+
+    /**
+     * A counter of the active tracer count.
+     *
+     * @var int
+     */
+    public static $activeTracerCount = 0;
+
+    /**
+     * Controls whether the Antlers runtime should trace tag assignments.
+     *
+     * @var bool
+     */
+    public static $traceTagAssignments = false;
+
+    /**
+     * A list of all traced runtime assignments.
+     *
+     * @var array
+     */
+    public static $tracedRuntimeAssignments = [];
+
+    /**
+     * A list of IDs of all abandoned nodes.
+     *
+     * @var array
+     */
+    public static $abandonedNodes = [];
+
+    /**
+     * Updates the global state with the provided Antlers runtime tag assignments.
+     *
+     * @param  array  $assignments  The assignments.
+     */
+    public static function mergeTagRuntimeAssignments($assignments)
+    {
+        self::$tracedRuntimeAssignments = array_merge(self::$tracedRuntimeAssignments, $assignments);
+    }
+
+    /**
+     * Maintains a record of all tag nodes that have been entered.
+     *
+     * Utilized to offset start lines when re-parsing tag callbacks.
+     *
+     * @var AntlersNode[]
+     */
+    public static $globalTagEnterStack = [];
+
+    /**
+     * Controls runtime access violation error behavior.
+     *
+     * @var bool
+     */
+    public static $throwErrorOnAccessViolation = false;
+
+    /**
+     * A list of all globally invalid variable paths.
+     *
+     * @var string[]
+     */
+    public static $bannedVarPaths = [];
+
+    /**
+     * A list of globally invalid content variable paths.
+     *
+     * @var string[]
+     */
+    public static $bannedContentVarPaths = [];
+
+    /**
+     * A list of all invalid tag paths.
+     *
+     * @var string[]
+     */
+    public static $bannedTagPaths = [];
+
+    /**
+     * A list of all invalid content tag paths.
+     *
+     * @var string[]
+     */
+    public static $bannedContentTagPaths = [];
+
+    /**
+     * A list of all allowed content tag paths.
+     *
+     * @var string[]
+     */
+    public static $allowedContentTagPaths = [];
+
+    /**
+     * A list of all invalid modifier paths.
+     *
+     * @var string[]
+     */
+    public static $bannedModifierPaths = [];
+
+    /**
+     * A list of all invalid content modifier paths.
+     *
+     * @var string[]
+     */
+    public static $bannedContentModifierPaths = [];
+
+    /**
+     * A list of all allowed content modifier paths.
+     *
+     * @var string[]
+     */
+    public static $allowedContentModifierPaths = [];
+
+    /**
+     * Controls if PHP is evaluated in user content.
+     *
+     * @var bool
+     */
+    public static $allowPhpInContent = false;
+
+    /**
+     * Controls if method invocations are evaluated in user content.
+     *
+     * @var bool
+     */
+    public static $allowMethodsInContent = false;
+
+    /**
+     * Maintains a list of all field prefixes that have been encountered.
+     *
+     * @var array
+     */
+    public static $prefixState = [];
+
+    public static $containsLayout = false;
+    public static $renderingLayout = false;
+    public static $shareVariablesTemplateTrigger = '';
+    public static $layoutVariables = [];
+
+    public static $requiresRuntimeIsolation = false;
+
+    // Scopes the parseView() data restore to renders that request it (the include tag).
+    // Views leaving data behind on the processor is arguably the real bug, but other
+    // renders keep that behavior for BC. Remove once that is fixed for everyone.
+    public static $isolateViewData = false;
+
+    public static $evaulatingTagContents = false;
+
+    public static $userContentEvalState = null;
+
+    public static $isCascadeEnabled = true;
+
+    /**
+     * A list of callbacks that will be invoked when ___internal_debug:peek is called.
+     *
+     * The callback will receive the current NodeProcessor
+     * instance before it enters into tag callback state.
+     *
+     * @var array
+     */
+    public static $peekCallbacks = [];
+
+    public static $isCacheEnabled = false;
+
+    public static function isolate(): void
+    {
+        self::$traceTagAssignments = false;
+        self::$tracedRuntimeAssignments = [];
+        self::$requiresRuntimeIsolation = true;
+        self::$isCascadeEnabled = false;
+    }
+
+    public static function captureRuntimeState(): array
+    {
+        return [
+            self::$requiresRuntimeIsolation,
+            self::$traceTagAssignments,
+            self::$tracedRuntimeAssignments,
+            self::$isCascadeEnabled,
+        ];
+    }
+
+    public static function captureAndIsolate(): array
+    {
+        $captured = self::captureRuntimeState();
+
+        self::isolate();
+
+        return $captured;
+    }
+
+    public static function restoreState(array $capturedState): void
+    {
+        self::$requiresRuntimeIsolation = $capturedState[0];
+        self::$traceTagAssignments = $capturedState[1];
+        self::$tracedRuntimeAssignments = $capturedState[2];
+        // Forcing true when absent is technically incorrect: the caller may itself be
+        // isolated, and this re-enables its cascade access mid-render. Preserved
+        // for backwards compatibility and not causing too much chaos and pain
+        self::$isCascadeEnabled = $capturedState[3] ?? true;
+    }
+
+    public static function resetGlobalState()
+    {
+        self::$isCascadeEnabled = true;
+        self::$templateFileStack = [];
+        self::$shareVariablesTemplateTrigger = '';
+        self::$layoutVariables = [];
+        self::$containsLayout = false;
+        self::$tracedRuntimeAssignments = [];
+        self::$traceTagAssignments = false;
+        self::$environmentId = StringUtilities::uuidv4();
+        self::$yieldCount = 0;
+        self::$yieldStacks = [];
+        self::$abandonedNodes = [];
+        self::$isEvaluatingUserData = true;
+        self::$isEvaluatingData = false;
+        self::$userContentEvalState = null;
+
+        StackReplacementManager::clearStackState();
+        LiteralReplacementManager::resetLiteralState();
+        RecursiveNodeManager::resetRecursiveNodeState();
+        RuntimeParser::clearRenderNodeCache();
+    }
+
+    public static function createIndicatorVariable($indicator)
+    {
+        return '__'.self::$environmentId.$indicator;
+    }
+}
