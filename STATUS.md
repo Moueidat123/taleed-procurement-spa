@@ -1,24 +1,29 @@
 # Project status — read this first
 
 **Last updated:** 30 September 2026 · **Updated by:** Claude Code
-**Current phase:** Phase 1 (Foundation) is ✅ **complete, local only**. Phase 2 has **not started** and is waiting for owner approval.
+**Current phase:** Phase 1 (Foundation) is ✅ complete locally, **awaiting independent review and merge**. The plan is fixed by `docs/production/PLAN-CONTRACT.md`, approved by the director on 30 Sep 2026. **Next: Phase 2A**, after the Phase 1 review, the director's merge and the director's go-ahead.
 **Branch:** `implementation/phase-1` (local commits, **not pushed**) · **Base:** `main` @ `c8c9a9d`
 
 This file is the short entry point for any agent or colleague (Claude Code, Codex or others).
+
+**Binding plan and decisions: `docs/production/PLAN-CONTRACT.md`.** Developers execute it and do not make product decisions. Anything it does not cover is escalated to the director with options and a recommendation.
 - Detailed log: `docs/production/HANDOFF.md`
 - Rules: `AGENTS.md` → `prompts/production/MASTER.md`
 - Decisions: `docs/production/decisions.md`
 - Local how-to: `docs/production/LOCAL-DEVELOPMENT.md`
 
-## Phase tracker
+## Phase tracker (7 phases in total, 5 remaining; D-26)
 | Phase | Prompt | State |
 |---|---|---|
-| 0 Discovery | `prompts/production/00-DISCOVERY.md` | ✅ Done (commit `43640c4`). Output: `docs/production/{discovery,decisions,reuse-matrix}.md` |
-| 1 Foundation | `prompts/production/01-FOUNDATION.md` | ✅ Done locally (commit `ef9cc3d`). Evidence: `docs/production/evidence/phase-1/` |
-| 2 Identity & assessments | `02-IDENTITY-AND-ASSESSMENTS.md` | ⏳ **Next.** Needs owner approval. An independent review of Phase 1 is recommended first |
-| 3 UI & reports | `03-UI-AND-REPORTS.md` | ⏳ Needs owner decision D-12 (privacy notice / CMS content) |
-| 4 Release readiness | `04-RELEASE-READINESS.md` | ⏳ |
-| 5 Production release | `05-PRODUCTION-RELEASE.md` | ⛔ Needs explicit release authorisation plus D-15 and D-19 inputs |
+| 0 Discovery | `prompts/production/00-DISCOVERY.md` | ✅ Done (commit `43640c4`) |
+| 1 Foundation | `prompts/production/01-FOUNDATION.md` | ✅ Done locally (commit `ef9cc3d`). ⏳ Independent review, PR and director merge pending |
+| 2A Accounts, login and security | `02A-ACCOUNTS.md` | ⏳ **Next**, after the Phase 1 merge and the director's go-ahead |
+| 2B Assessment engine and scoring | `02B-ASSESSMENTS.md` | ⏳ |
+| 3 Connect the React app, staff views and reports | `03-UI-AND-REPORTS.md` | ⏳ Needs the privacy text by the end of Phase 3 (contract §5 #2) |
+| 4 Release readiness | `04-RELEASE-READINESS.md` | ⏳ Needs the retention policy by the end of Phase 4 (§5 #3) |
+| 5 Production launch | `05-PRODUCTION-RELEASE.md` | ⛔ Needs the director's written go-ahead and §5 inputs #4–#10 |
+
+Every phase: branch `implementation/<phase>`, then evidence, then `STATUS.md` and `HANDOFF.md` updates, then a PR, then an independent review, then the director merges and approves the next phase (D-27, D-28).
 
 ## What works now (verified 30 Sep 2026)
 - **Stack:** Laravel 13.34 + Statamic 6.34.1 **Core** (no Pro, no licence key) in `backend/`; MySQL 8.4.11; PHP 8.4.26.
@@ -51,12 +56,12 @@ This file is the short entry point for any agent or colleague (Claude Code, Code
 5. At the end of a phase, update **this file** and `HANDOFF.md`, then commit locally. Push only on explicit instruction.
 
 ## Open decisions and blockers
-| ID | Needed by | Question |
-|---|---|---|
-| D-12 | Phase 3 | Is a client-approved privacy notice linked from registration consent? Which landing copy is CMS-editable? (`/pages/privacy` is a marked placeholder.) |
-| D-15 | Phase 5 | Production VM placement (dedicated is proposed), DNS, certificate, data disk, mail, backups |
-| D-19 | Phase 5 | Formal content-approval reference for framework v1.0.0 |
-| Host changes | Any time | Owner approval to add the `/etc/hosts` entry and trust the local CA (`ops/local/dev trust-help`). Until then, use curl or the Playwright config |
+All product decisions are made (PLAN-CONTRACT §3). What remains are **director inputs** with deadlines (§5):
+- privacy notice text (end of Phase 3);
+- retention policy (end of Phase 4);
+- programme-owner content sign-off, GCP access, static IP and VM cost, SendGrid key and sender address on `myprototype.cloud`, `/cp` allow-list IPs, alert emails, first real admin identities, written release go-ahead (all before Phase 5).
+
+Host changes for local development (the hosts entry and trusting the local CA) are optional. `ops/local/dev trust-help` explains them.
 
 ## Known limits
 - The SPA still uses its browser-local demo repository. Switching it to the API is Phase 2/3.

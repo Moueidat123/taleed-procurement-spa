@@ -16,6 +16,8 @@ Required local commands, names finalized by the implementation:
 `dev up`, `dev down` (without deleting volumes), `dev logs`, `dev test`, `dev seed-demo` (explicit local-only), and `dev reset` guarded by local environment and project/database identity. Provide Windows/macOS/Linux HTTPS setup and troubleshooting. Never make `up` a destructive reset.
 
 ## Production: one GCE VM with a retained data disk
+
+> **Director decisions (30 Sep 2026):** a new dedicated VM (D-15), served on a reserved static IP over HTTPS with an IP certificate and automated renewal, with no domain (D-41). Where this section mentions a DNS hostname or a shared edge, `PLAN-CONTRACT.md` and D-15/D-41 take precedence.
 Use the owner's confirmed single Google Compute Engine VM and reserved static IP. Use an approved DNS hostname pointing to that IP with a publicly trusted HTTPS certificate. The hostname in a prompt is not an issued certificate or a working link.
 
 If Survey and Sustainability share this VM, retain its existing validated Nginx/Certbot or other TLS edge. Do not launch a second service binding the same public ports 80/443. Add a separately reviewed hostname/upstream. Use distinct container names, application networks, MySQL database/users, runtime secrets and durable directories for Procurement. Prefer a dedicated Procurement MySQL service on the same VM for lifecycle isolation if capacity permits; otherwise a separate database/user on an explicitly approved existing MySQL service is a recorded trade-off. Do not upgrade another application's database or share its schema during this project.

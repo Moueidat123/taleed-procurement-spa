@@ -13,7 +13,10 @@ The SPA is still wired to its browser-local demo repository, since API integrati
 ## Active assignment
 Writer: Claude Code (Phases 0–1). Reviewer: unassigned; recommended: an independent reviewer (e.g. Codex) on the Phase 1 commit, per `prompts/production/REVIEW.md`. Branch `implementation/phase-1` (local, not pushed). Next action: owner review and approval of Phase 2.
 
-## Decisions proposed
+## Decisions
+All director decisions are recorded on 30 Sep 2026 in `decisions.md` (D-26 to D-41) and summarised in the binding `PLAN-CONTRACT.md`. The earlier proposal below is kept for history.
+
+### Original proposal
 Preserve React; Laravel + Statamic 6 Core under backend; separate Eloquent/Statamic guards; MySQL 8.4 LTS; same-origin HTTPS; local + production only; retained production data independent of code; explicit release authorization.
 
 ## Known evidence gaps
@@ -176,7 +179,9 @@ Self-found and fixed during the phase:
 - README and older docs remain stale (C2/C3); update them when behaviour changes.
 
 ### Exact next phase and approval required
-Phase 2, `prompts/production/02-IDENTITY-AND-ASSESSMENTS.md`, local only. Needs explicit owner approval. Recommended: an independent review of the Phase 1 commit first.
+1. Independent review of `ef9cc3d` (mandatory, D-27).
+2. A PR and the director's merge (D-28).
+3. Phase **2A**, `prompts/production/02A-ACCOUNTS.md`, local only, after the director's written go-ahead.
 
 ## After each phase replace this section
 Scope and acceptance IDs:

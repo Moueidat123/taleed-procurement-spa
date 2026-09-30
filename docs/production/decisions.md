@@ -229,3 +229,60 @@ Statamic Core contacts statamic.com (the "outpost" licence/version check) and ca
 - The CMS admin's reset and activation brokers (`statamic_resets`, `statamic_activations`) therefore use their own DB tables: `cms_password_reset_tokens` and `cms_password_activation_tokens`.
 - The app broker uses `app_password_reset_tokens`.
 - Cross-provider resolution is tested and returns `INVALID_USER`.
+
+---
+
+## Director decisions (30 September 2026) — binding
+Asked as options with recommendations and answered by the director. These replace every "Proposed", "Owner decision" and "Production blocker" status above. `docs/production/PLAN-CONTRACT.md` is the binding summary for developers.
+
+### Plan and process
+| ID | Question | Director's choice |
+|---|---|---|
+| D-26 | Phase structure | Split Phase 2 → **7 phases in total (0, 1, 2A, 2B, 3, 4, 5); 5 remaining** (recommended option) |
+| D-27 | Independent review | **Mandatory for every phase** before the next starts (recommended) |
+| D-28 | Git | **A branch and PR per phase; only the director merges to main**; CI on every PR (recommended) |
+| D-29 | Production releases | **The director approves each release in writing**; the developer executes; no auto-deploy (recommended) |
+
+### Identity
+| ID | Question | Director's choice |
+|---|---|---|
+| D-30 | Email verification | **Six-digit code** (approved screen) (recommended) |
+| D-17 | MFA | **Mandatory for Super Admin and Analyst** (recommended) |
+| D-10 | Adding staff | **Email invitation** (recommended) |
+| D-31 | Registration | **Public sign-up, one Champion per company** (recommended) |
+
+### Content
+| ID | Question | Director's choice |
+|---|---|---|
+| D-12 | Privacy notice | **Client-supplied notice in Statamic at `/pages/privacy`, linked from consent**; launch is blocked without the text (recommended) |
+| D-12b | CMS scope | **Legal pages, landing text and email wording**; framework content is not editable in the CMS (recommended) |
+| D-19 | Content sign-off | **Written sign-off by the Taleed programme owner**, recorded as `approval_reference` (recommended) |
+| D-32 | Language | **English only** (recommended) |
+
+### Assessment and data
+| ID | Question | Director's choice |
+|---|---|---|
+| D-33 | Cycles | **One annual cycle** (recommended) |
+| D-34 | Correction after close | **Allowed, with reason, audited** (recommended) |
+| D-14 | PDF | **Browser print / Save as PDF** (recommended) |
+| D-35 | Retention | **Client legal provides the policy by the end of Phase 4**; anonymise command built; launch gate (recommended) |
+
+### Production
+| ID | Question | Director's choice |
+|---|---|---|
+| D-15 | Hosting | **New dedicated VM** in the existing Taleed GCP project (recommended) |
+| D-41 | Address | **Reserved GCP static IP served over HTTPS only**, no domain (the director's own answer) |
+| D-36 | Mail | **SendGrid** with the **`myprototype.cloud`** sender domain used by all Taleed apps; a new dedicated API key |
+| D-37 | Backups | **Daily and before each release; encrypted off-VM; 30 days; RPO 24 hours; RTO 4 hours** (recommended) |
+| D-38 | CMS access | **Allow-listed IPs plus two-factor** (recommended) |
+| D-39 | Landing demo copy | **"Explore the live demo" → "Sign in"; disclaimer removed** (recommended) |
+| D-40 | Alerts | **Director and developer by email** (recommended) |
+
+### Consequences of D-41 (IP address instead of a domain)
+- **Certificate:** the Let's Encrypt IP certificate is short-lived (about 6 days), so automated renewal plus an expiry alert are mandatory Phase 4 and 5 gates.
+- **Cookies and CSRF:** `SANCTUM_STATEFUL_DOMAINS`, `APP_URL` and host-only cookies are set to the IP.
+- **Email links:** links point to `https://<ip>`, while the sender is on `myprototype.cloud`.
+- **Later domain move:** moving to a domain changes the URL. Users would need the new link; data is unaffected.
+- **Superseded guidance:** this replaces the "approved DNS hostname" wording in `04-OPERATIONS.md` and the "reject IP certificate" row in `reuse-matrix.md`.
+
+The local development hostname `procurement.taleed.test` is unchanged.

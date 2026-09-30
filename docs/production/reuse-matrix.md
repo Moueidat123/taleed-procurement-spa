@@ -76,7 +76,7 @@ No code was copied in Phase 0. **Reuse** means adopt the pattern (re-implemented
 | No scheduler service in production | SV, SD | **Reject** | Procurement runs exactly one scheduler |
 | Named volumes on the boot disk, no mount or marker check | SV, SD | **Reject** | Dedicated data disk plus fail-closed preflight (`04-OPERATIONS.md`) |
 | `render-prod-conf.sh` refusing HTTPS without certificates | SV | **Reuse** | Fail closed |
-| Let's Encrypt **IP** certificate | SV, SD | **Reject** | Use an approved DNS hostname with a publicly trusted certificate |
+| Let's Encrypt **IP** certificate + certbot renewal | SV, SD | **Adopt (director decision D-41)** | Production is served on a reserved static IP over HTTPS; renewal automation and an expiry alert are mandatory gates |
 | Same DB user for migrate and runtime | SD | **Reject** | Separate migration credentials injected only into the one-shot `migrate` role |
 | `deploy-local` → `deploy-remote`: CI-green gate, `git archive` + sha256, `flock` release lock, preflight, backup before migrate, migrate once, switch, `/health` reports the release, auto-rollback only without migrations, no tag reuse | SD `scripts/prod/*` | **Reuse (pattern)** | Re-implemented for Procurement names and paths; no identifiers copied |
 | SD `--dry-run` that uploads the bundle and writes settings remotely | SD `deploy-local.sh:224-227` | **Reject** | The offline plan must be non-mutating |

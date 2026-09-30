@@ -1,3 +1,5 @@
+> **Superseded (30 September 2026, director decision D-26):** this phase is split into `02A-ACCOUNTS.md` and `02B-ASSESSMENTS.md`. Kept for reference only; do not execute this file.
+
 # Phase 2 — real identity, schema and assessment engine
 
 Prerequisite: reviewed working local foundation. Read master and database design. Work locally only.
