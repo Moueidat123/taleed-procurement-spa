@@ -1,0 +1,26 @@
+{
+  "status": "verified",
+  "date": "2026-09-30",
+  "original_file_count": 85,
+  "existing_files_intentionally_changed": [
+    "AGENTS.md"
+  ],
+  "original_AGENTS_preserved_at": "docs/production/reference/AGENTS.prototype.md",
+  "application_source_changed": false,
+  "backend_implemented": false,
+  "production_deployed": false,
+  "validation": [
+    "JSON documents parse",
+    "Markdown fences balanced",
+    "original AGENTS archived byte-for-byte",
+    "28 existing core tests passed",
+    "14641 oracle cases match TypeScript",
+    "40 source questions and 64 actions match workbook"
+  ],
+  "not_run": [
+    "full frontend dependency install/build/Playwright",
+    "PHP/MySQL tests",
+    "Docker runtime",
+    "real cloud/backup/restore/deploy"
+  ]
+}

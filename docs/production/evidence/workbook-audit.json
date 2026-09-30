@@ -1,0 +1,11 @@
+{
+  "date": "2026-09-30",
+  "workbook": "Procurement_Self Assessment Tool_v01.xlsx",
+  "sha256": "e86755a94db9bb4c2d14c3bf1f60eb237189d4a5bc1fd04efbb8d4faf197eecd",
+  "domains": 4,
+  "question_count": 40,
+  "recommendation_count": 64,
+  "question_mismatches": [],
+  "recommendation_mismatches": [],
+  "method": "artifact_tool read source cell values and compare JSON text; strip leading bullet and whitespace from recommendation lines. Not a recalculation of Excel."
+}
