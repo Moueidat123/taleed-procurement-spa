@@ -3,7 +3,7 @@
 ## Current scope, 30 September 2026
 The owner approved moving the existing client-approved SPA into a working Laravel + Statamic 6 Core application in **this repository**. The older prototype-only instruction is superseded for this implementation. Its complete original text is retained as historical evidence in `docs/production/reference/AGENTS.prototype.md`, not as active instructions. All unrelated security, source-fidelity and validation safeguards remain applicable.
 
-Read `START-HERE-PRODUCTION.md`, `prompts/production/MASTER.md`, the current phase prompt and `docs/production/HANDOFF.md`. More specific active instructions elsewhere must be inspected before edits. Report conflicts; do not silently overwrite human work.
+Start with `STATUS.md` (current phase, branch and exact next step; update it at every phase boundary). Read `START-HERE-PRODUCTION.md`, `prompts/production/MASTER.md`, the current phase prompt and `docs/production/HANDOFF.md`. More specific active instructions elsewhere must be inspected before edits. Report conflicts; do not silently overwrite human work.
 
 ## Non-negotiable decisions
 - Preserve React, the approved UI tokens, components, workflows and the three implemented application roles: Champion, Analyst and Super Admin. No Vue/Inertia rewrite or generic admin dashboard replacement.
