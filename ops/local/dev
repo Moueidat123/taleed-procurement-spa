@@ -1,0 +1,185 @@
+#!/usr/bin/env bash
+# Taleed Procurement — local Docker helper (LOCAL ONLY; never production).
+# Usage: ops/local/dev <command> [args]
+#   init          one-time local setup: secrets, certificates, images, deps, key, migrations
+#   up            start (SPA via Vite HMR); `up --built` serves the compiled SPA through Laravel
+#   down          stop containers (volumes and data are always kept)
+#   ps | logs [service]
+#   migrate       run migrations with the separate migrator account
+#   test          backend PHPUnit against the dedicated *_test database
+#   build-spa     compile the SPA into backend/public/spa (inside the node container)
+#   artisan ...   run php artisan in the app container
+#   cms-admin <email>              create THE single Statamic CMS administrator
+#   seed-demo                      create synthetic local users (explicit, local only)
+#   reset         DESTROY this project's local volumes (typed confirmation)
+#   trust-help    print the manual steps to trust the local certificate (no changes made)
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+LOCAL_ENV="$ROOT/infra/local/.env"
+CERT_DIR="$ROOT/infra/local/certs"
+CA_DIR="$ROOT/infra/local/ca"
+cd "$ROOT"
+
+die() { echo "error: $*" >&2; exit 1; }
+info() { echo "==> $*"; }
+
+load_env() {
+  [ -f "$LOCAL_ENV" ] || die "infra/local/.env missing. Run: ops/local/dev init"
+  set -a; # shellcheck disable=SC1090
+  . "$LOCAL_ENV"; set +a
+  case "${COMPOSE_PROJECT_NAME:-}" in
+    *procurement*) ;;
+    *) die "COMPOSE_PROJECT_NAME must contain 'procurement' (got '${COMPOSE_PROJECT_NAME:-}')" ;;
+  esac
+  if [ "${PROCUREMENT_HTTPS_PORT:-443}" = "443" ]; then export PROCUREMENT_HTTPS_PORT_SUFFIX=""; else export PROCUREMENT_HTTPS_PORT_SUFFIX=":${PROCUREMENT_HTTPS_PORT}"; fi
+  export PROCUREMENT_ORIGIN="https://${PROCUREMENT_HOSTNAME}${PROCUREMENT_HTTPS_PORT_SUFFIX}"
+}
+
+dc() {
+  local profiles=()
+  [ "${PROCUREMENT_SPA_MODE:-dev}" = "dev" ] && profiles=(--profile spa-dev)
+  docker compose --env-file "$LOCAL_ENV" ${profiles[@]+"${profiles[@]}"} "$@"
+}
+
+random_secret() { LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32; }
+
+set_env_value() { # file key value (value must not contain '|')
+  local file="$1" key="$2" value="$3"
+  if grep -q "^${key}=" "$file"; then sed -i.bak "s|^${key}=.*|${key}=${value}|" "$file" && rm -f "$file.bak"
+  else printf '%s=%s\n' "$key" "$value" >> "$file"; fi
+}
+
+cmd_init() {
+  if [ ! -f "$LOCAL_ENV" ]; then
+    info "Creating infra/local/.env with random local-only secrets"
+    cp infra/local/.env.example "$LOCAL_ENV"
+    for key in MYSQL_ROOT_PASSWORD PROCUREMENT_APP_PASSWORD PROCUREMENT_MIGRATOR_PASSWORD PROCUREMENT_TEST_PASSWORD; do
+      set_env_value "$LOCAL_ENV" "$key" "$(random_secret)"
+    done
+    chmod 600 "$LOCAL_ENV"
+  fi
+  load_env
+
+  if [ ! -f backend/.env ]; then
+    info "Creating backend/.env for local Docker"
+    cp backend/.env.example backend/.env
+    set_env_value backend/.env DB_PASSWORD "$PROCUREMENT_APP_PASSWORD"
+    set_env_value backend/.env DB_MIGRATOR_PASSWORD "$PROCUREMENT_MIGRATOR_PASSWORD"
+    set_env_value backend/.env APP_URL "$PROCUREMENT_ORIGIN"
+    set_env_value backend/.env SANCTUM_STATEFUL_DOMAINS "${PROCUREMENT_HOSTNAME}${PROCUREMENT_HTTPS_PORT_SUFFIX}"
+    # LOCAL key only (same format as key:generate). Production keys are provisioned, never generated here.
+    set_env_value backend/.env APP_KEY "base64:$(openssl rand -base64 32)"
+    chmod 600 backend/.env
+  fi
+
+  cmd_certs
+
+  info "Building images"
+  dc build app
+  info "Starting MySQL"
+  dc up -d mysql
+  info "Installing PHP dependencies from composer.lock (inside the container)"
+  # Array cache: the database cache table does not exist until migrations have run.
+  dc run --rm --no-deps -e CACHE_STORE=array app composer install --no-interaction --prefer-dist
+  grep -q '^APP_KEY=base64:' backend/.env || die "backend/.env has no APP_KEY; delete backend/.env and re-run init."
+  cmd_migrate
+  info "Init complete. Next: ops/local/dev up   (then ops/local/dev trust-help)"
+}
+
+cmd_certs() {
+  mkdir -p "$CERT_DIR" "$CA_DIR"
+  if [ -f "$CERT_DIR/local.pem" ] && [ -f "$CERT_DIR/local-key.pem" ]; then return; fi
+  command -v mkcert >/dev/null || die "mkcert is required to issue the local certificate (brew install mkcert)."
+  info "Issuing a local certificate for ${PROCUREMENT_HOSTNAME} with a PROJECT-LOCAL CA (system trust store untouched)"
+  CAROOT="$CA_DIR" mkcert -cert-file "$CERT_DIR/local.pem" -key-file "$CERT_DIR/local-key.pem" "$PROCUREMENT_HOSTNAME" >/dev/null
+  chmod 600 "$CERT_DIR/local-key.pem" "$CA_DIR/rootCA-key.pem"
+}
+
+cmd_up() {
+  load_env
+  if [ "${1:-}" = "--built" ]; then
+    export PROCUREMENT_SPA_MODE=built
+    rm -f backend/public/hot
+    [ -f backend/public/spa/index.html ] || cmd_build_spa
+  fi
+  dc up -d --wait --remove-orphans
+  info "Up: ${PROCUREMENT_ORIGIN} (SPA mode: ${PROCUREMENT_SPA_MODE}). Mailpit: http://127.0.0.1:${PROCUREMENT_MAILPIT_PORT}"
+}
+
+cmd_down() {
+  load_env
+  for a in "$@"; do case "$a" in -v|--volumes) die "down never removes volumes. Use 'ops/local/dev reset' deliberately." ;; esac; done
+  dc --profile spa-dev down --remove-orphans
+}
+
+cmd_migrate() {
+  load_env
+  dc run --rm -e CACHE_STORE=array app php artisan migrate --database=mysql_migrator --force --no-interaction
+}
+
+cmd_test() {
+  load_env
+  dc run --rm \
+    -e DB_USERNAME=procurement_test -e DB_PASSWORD="$PROCUREMENT_TEST_PASSWORD" \
+    app php artisan test "$@"
+}
+
+cmd_build_spa() {
+  load_env
+  docker run --rm -v "$ROOT":/repo -v "${COMPOSE_PROJECT_NAME}_node-modules":/repo/node_modules -w /repo \
+    node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 \
+    sh -c "npm ci --ignore-scripts --no-audit --no-fund && npm run build:backend"
+}
+
+cmd_seed_demo() {
+  load_env
+  info "Creating synthetic local users (example.test addresses, random passwords printed once)"
+  for spec in "champion@example.test champion" "analyst@example.test analyst" "admin@example.test admin"; do
+    set -- $spec
+    dc exec -T app php artisan procurement:dev:create-app-user "$1" --role="$2" --name="Synthetic $2" || true
+  done
+}
+
+cmd_reset() {
+  load_env
+  echo "This deletes ALL local data volumes for project '${COMPOSE_PROJECT_NAME}' (MySQL, node_modules)."
+  read -r -p "Type the project name to confirm: " answer
+  [ "$answer" = "$COMPOSE_PROJECT_NAME" ] || die "Confirmation did not match; nothing deleted."
+  dc --profile spa-dev down --volumes --remove-orphans
+}
+
+cmd_trust_help() {
+  load_env
+  cat <<EOF
+The certificate is issued by a project-local CA: $CA_DIR/rootCA.pem
+Nothing has been added to your system trust store or hosts file.
+
+Command-line checks work without any host change:
+  curl --cacert infra/local/ca/rootCA.pem --resolve ${PROCUREMENT_HOSTNAME}:${PROCUREMENT_HTTPS_PORT}:127.0.0.1 ${PROCUREMENT_ORIGIN}/api/procurement/v1/health
+
+To browse ${PROCUREMENT_ORIGIN} in a normal browser (owner approval required; host changes):
+  1. Hosts entry:   echo "127.0.0.1 ${PROCUREMENT_HOSTNAME}" | sudo tee -a /etc/hosts
+  2. Trust the CA:  CAROOT="$CA_DIR" mkcert -install
+     (Windows/Linux: import $CA_DIR/rootCA.pem into the OS/browser trust store.)
+  Undo: remove the hosts line; CAROOT="$CA_DIR" mkcert -uninstall
+EOF
+}
+
+case "${1:-}" in
+  init) shift; cmd_init "$@" ;;
+  certs) shift; load_env; cmd_certs ;;
+  up) shift; cmd_up "$@" ;;
+  down) shift; cmd_down "$@" ;;
+  ps) shift; load_env; dc ps "$@" ;;
+  logs) shift; load_env; dc logs -f --tail=200 "$@" ;;
+  migrate) shift; cmd_migrate ;;
+  test) shift; cmd_test "$@" ;;
+  build-spa) shift; cmd_build_spa ;;
+  artisan) shift; load_env; dc exec app php artisan "$@" ;;
+  cms-admin) shift; load_env; [ -n "${1:-}" ] || die "usage: cms-admin <email>"; dc exec app php artisan procurement:cms:create-admin "$1" ;;
+  seed-demo) shift; cmd_seed_demo ;;
+  reset) shift; cmd_reset ;;
+  trust-help) shift; cmd_trust_help ;;
+  *) sed -n '2,19p' "$0"; exit 1 ;;
+esac

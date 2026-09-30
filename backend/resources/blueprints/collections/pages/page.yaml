@@ -1,0 +1,24 @@
+title: Page
+tabs:
+  main:
+    display: Main
+    sections:
+      -
+        fields:
+          -
+            handle: title
+            field:
+              type: text
+              required: true
+              display: Title
+          -
+            handle: content
+            field:
+              type: markdown
+              display: Content
+              escape_markup: true
+          -
+            handle: placeholder
+            field:
+              type: toggle
+              display: 'Placeholder (not approved content)'

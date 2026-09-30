@@ -1,0 +1,11 @@
+## grants: runtime account
+GRANT USAGE ON *.* TO `procurement_app`@`%`
+GRANT SELECT, INSERT, UPDATE, DELETE ON `procurement`.* TO `procurement_app`@`%`
+## runtime account DROP TABLE attempt
+ERROR 1142 (42000) at line 1: DROP command denied to user 'procurement_app'@'localhost' for table 'sessions'
+## runtime account CREATE TABLE attempt
+ERROR 1142 (42000) at line 1: CREATE command denied to user 'procurement_app'@'localhost' for table 'x'
+## test account on dev schema
+ERROR 1044 (42000): Access denied for user 'procurement_test'@'%' to database 'procurement'
+## sessions table intact
+1
