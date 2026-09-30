@@ -14,7 +14,7 @@ This file is the short entry point for any agent or colleague (Claude Code, Code
 | Phase | Prompt | State |
 |---|---|---|
 | 0 Discovery | `prompts/production/00-DISCOVERY.md` | ✅ Done (commit `43640c4`). Output: `docs/production/{discovery,decisions,reuse-matrix}.md` |
-| 1 Foundation | `prompts/production/01-FOUNDATION.md` | ✅ Done locally. Evidence: `docs/production/evidence/phase-1/` |
+| 1 Foundation | `prompts/production/01-FOUNDATION.md` | ✅ Done locally (commit `ef9cc3d`). Evidence: `docs/production/evidence/phase-1/` |
 | 2 Identity & assessments | `02-IDENTITY-AND-ASSESSMENTS.md` | ⏳ **Next.** Needs owner approval. An independent review of Phase 1 is recommended first |
 | 3 UI & reports | `03-UI-AND-REPORTS.md` | ⏳ Needs owner decision D-12 (privacy notice / CMS content) |
 | 4 Release readiness | `04-RELEASE-READINESS.md` | ⏳ |

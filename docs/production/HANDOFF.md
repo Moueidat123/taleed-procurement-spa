@@ -70,7 +70,7 @@ Local foundation only. The 05-ACCEPTANCE "Foundation and free-Core boundary" gat
 ### Branch and commit
 `implementation/phase-1`:
 - Phase 0 docs: `43640c4`.
-- Phase 1 foundation: the commit that records this entry (see `git log`).
+- Phase 1 foundation: `ef9cc3d` (the review target).
 
 ### Changed files
 **New:**
