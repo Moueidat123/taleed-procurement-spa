@@ -14,8 +14,15 @@ use Illuminate\Support\Carbon;
  * are set explicitly by admin-authorized code, never mass assigned.
  *
  * @property string $id
+ * @property string $email
+ * @property string $normalized_email
  * @property string $role
+ * @property bool $can_export
+ * @property string $token_hash
  * @property Carbon $expires_at
+ * @property Carbon|null $accepted_at
+ * @property string|null $accepted_user_id
+ * @property Carbon|null $revoked_at
  */
 class StaffInvitation extends Model
 {

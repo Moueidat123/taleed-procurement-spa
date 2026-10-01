@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Procurement\AcceptInvitationController;
 use App\Http\Controllers\Procurement\ConfirmVerificationController;
 use App\Http\Controllers\Procurement\HealthController;
+use App\Http\Controllers\Procurement\IssueInvitationController;
 use App\Http\Controllers\Procurement\MeController;
 use App\Http\Controllers\Procurement\OrganizationController;
 use App\Http\Controllers\Procurement\RegisterController;
@@ -22,6 +24,10 @@ Route::get('/health', HealthController::class)->name('procurement.health');
 Route::post('/auth/register', RegisterController::class)
     ->middleware('throttle:register')->name('procurement.auth.register');
 
+// Accept a staff invitation (D-10): public, throttled, single-use token.
+Route::post('/auth/invitations/accept', AcceptInvitationController::class)
+    ->middleware('throttle:invitation')->name('procurement.invitations.accept');
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', MeController::class)->name('procurement.auth.me');
 
@@ -36,6 +42,10 @@ Route::middleware('auth:sanctum')->group(function () {
         ->name('procurement.organization.show');
     Route::patch('/organization', [OrganizationController::class, 'update'])
         ->name('procurement.organization.update');
+
+    // Staff invitations (D-10): Super Admin issues; token emailed, never returned.
+    Route::post('/staff/invitations', IssueInvitationController::class)
+        ->name('procurement.staff.invitations.issue');
 });
 
 // Unknown business routes are JSON 404s, never the SPA shell or a CMS page.
