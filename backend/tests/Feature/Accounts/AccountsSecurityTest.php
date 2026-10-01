@@ -6,6 +6,7 @@ use App\Models\AppUser;
 use App\Models\Organization;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Statamic\Facades\User as CmsUser;
 use Tests\TestCase;
 
@@ -38,7 +39,7 @@ class AccountsSecurityTest extends TestCase
         return ['analyst' => ['analyst'], 'super admin' => ['admin']];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('staffRoles')]
+    #[DataProvider('staffRoles')]
     public function test_every_staff_route_requires_confirmed_two_factor(string $role): void
     {
         $user = AppUser::factory()->role($role)->create();

@@ -3,7 +3,9 @@
 namespace Tests\Feature\Accounts;
 
 use App\Models\AppUser;
+use App\Services\StaffAccessService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 /**
@@ -114,9 +116,9 @@ class StaffAdministrationTest extends TestCase
         $actor = AppUser::factory()->role('admin')->create(['active' => false]);
 
         try {
-            app(\App\Services\StaffAccessService::class)->update($actor, $lastAdmin, ['active' => false]);
+            app(StaffAccessService::class)->update($actor, $lastAdmin, ['active' => false]);
             $this->fail('Expected the last-admin guard to throw.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             $this->assertSame(409, $e->status);
             $this->assertTrue($lastAdmin->fresh()->active);
         }

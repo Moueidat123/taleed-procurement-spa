@@ -4,6 +4,7 @@ namespace Tests\Feature\Concurrency;
 
 use App\Models\AppUser;
 use App\Services\StaffAccessService;
+use Illuminate\Database\Connection;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +23,7 @@ class LastAdminLockTest extends TestCase
 {
     use DatabaseTruncation;
 
-    private function second(): \Illuminate\Database\Connection
+    private function second(): Connection
     {
         $default = (string) config('database.default');
         config(['database.connections.race' => config("database.connections.{$default}")]);

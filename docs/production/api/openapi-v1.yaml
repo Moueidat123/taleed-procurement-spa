@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Taleed Procurement business API
-  version: 1.0.0-phase1
+  version: 1.0.0-phase2a
   description: |
     Same-origin JSON API for the approved React SPA (docs/production/07-API-CONTRACT.md).
     Authentication: Laravel session (`web` guard, Eloquent `app_users`) via Sanctum SPA
@@ -9,7 +9,7 @@ info:
     `X-XSRF-TOKEN` on state-changing requests (same-origin browsers are also accepted via
     `Sec-Fetch-Site: same-origin`, Laravel 13). The Statamic CMS session is never accepted.
 
-    `x-status: implemented` = Phase 1, tested. `x-status: planned` = Phase 2 contract to
+    `x-status: implemented` = Phase 1/2A, tested. `x-status: planned` = Phase 2 contract to
     implement; shapes may be refined by the migration/contract owner before Phase 2 starts.
     Field names follow src/domain/types.ts (camelCase). IDs are strings (ULIDs; source
     question IDs such as "1.10" are strings). Bands: foundational | developing | advanced |
@@ -34,7 +34,7 @@ components:
           properties:
             code:
               type: string
-              enum: [validation_failed, unauthenticated, forbidden, not_found, method_not_allowed, conflict, csrf_token_mismatch, rate_limited, unavailable, server_error, http_error]
+              enum: [validation_failed, unauthenticated, forbidden, two_factor_required, not_found, method_not_allowed, conflict, csrf_token_mismatch, rate_limited, unavailable, server_error, http_error]
             message: { type: string }
             fields:
               type: object
@@ -60,8 +60,11 @@ components:
     Validation:
       description: Invalid input
       content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Forbidden:
+      description: 'Role not permitted, or `two_factor_required` for staff without confirmed TOTP'
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
     Conflict:
-      description: Stale expectedVersion / state conflict
+      description: Stale expectedVersion / state conflict / last active Super Admin
       content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
 
 paths:
@@ -129,23 +132,23 @@ paths:
   /auth/two-factor-challenge:
     post:
       x-status: implemented
-      summary: Fortify TOTP challenge (enforcement for privileged roles arrives in Phase 2, D-17).
+      summary: Fortify TOTP challenge. Analysts and Super Admins must confirm TOTP before any /staff route (D-17); Champions may opt in.
       responses: { '204': { description: Signed in }, '422': { $ref: '#/components/responses/Validation' } }
 
   /auth/register:
     post:
-      x-status: planned
-      summary: Create an unverified Champion from allowlisted fields only (name, email, jobTitle, password, consent).
+      x-status: implemented
+      summary: Create an unverified Champion from allowlisted fields only (name, email, jobTitle, password, consent). Throttled 3/min and 20/day per IP. Role, organization and export are never taken from input.
       responses: { '201': { description: Created; verification challenge sent }, '422': { $ref: '#/components/responses/Validation' }, '429': { description: Rate limited } }
-  /auth/verification/send:
-    post: { x-status: planned, summary: 'Send six-digit challenge (hashed, expiring, throttled)', responses: { '202': { description: Sent } } }
-  /auth/verification/confirm:
-    post: { x-status: planned, summary: 'Confirm six-digit challenge (attempt-limited, single use)', responses: { '204': { description: Verified }, '422': { $ref: '#/components/responses/Validation' } } }
+  /auth/email/verify/send:
+    post: { x-status: implemented, security: [{ appSession: [] }], summary: 'Send six-digit code (hashed, 15-minute expiry, throttled 5/min per account and 10/min per IP)', responses: { '202': { description: Sent }, '401': { $ref: '#/components/responses/Unauthenticated' }, '429': { description: Rate limited } } }
+  /auth/email/verify/confirm:
+    post: { x-status: implemented, security: [{ appSession: [] }], summary: 'Confirm six-digit code (5 attempts, single use); returns the CurrentUser', responses: { '200': { description: Verified }, '401': { $ref: '#/components/responses/Unauthenticated' }, '422': { $ref: '#/components/responses/Validation' }, '429': { description: Rate limited } } }
   /auth/invitations/accept:
-    post: { x-status: planned, summary: 'Accept single-use staff invitation (throttled)', responses: { '204': { description: Accepted } } }
+    post: { x-status: implemented, summary: 'Accept a single-use, 72-hour staff invitation. Role and email come from the invitation, never input. Throttled 5/min per IP; unknown, used and expired tokens fail identically.', responses: { '201': { description: 'Staff user created and signed in; returns the CurrentUser' }, '422': { $ref: '#/components/responses/Validation' }, '429': { description: Rate limited } } }
   /organization:
-    get: { x-status: planned, summary: "Current Champion's company (no sector field)", responses: { '200': { description: OK } } }
-    patch: { x-status: planned, summary: 'Update profile: name, country, size, registrationId, authorityConfirmed', responses: { '200': { description: OK }, '422': { $ref: '#/components/responses/Validation' } } }
+    get: { x-status: implemented, security: [{ appSession: [] }], summary: "Current Champion's company (no sector field)", responses: { '200': { description: OK }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: No company profile yet } } }
+    patch: { x-status: implemented, security: [{ appSession: [] }], summary: 'Create or update the profile (verified Champion only): name, country, size, registrationId, authorityConfirmed. Duplicate name+country or registrationId is refused.', responses: { '200': { description: Updated }, '201': { description: Created and linked }, '403': { $ref: '#/components/responses/Forbidden' }, '422': { $ref: '#/components/responses/Validation' } } }
   /cycles/available:
     get: { x-status: planned, summary: 'Open cycles pinned to a published framework (UI uses the first)', responses: { '200': { description: OK } } }
   /frameworks/{version}:
@@ -187,16 +190,16 @@ paths:
   /staff/organizations/{id}:
     get: { x-status: planned, summary: 'Company details + permitted submissions', responses: { '200': { description: OK } } }
   /staff/organizations/{id}/access:
-    patch: { x-status: planned, summary: 'Super Admin: pause/enable organization', responses: { '200': { description: OK } } }
+    patch: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin with confirmed TOTP: pause/enable organization (body `{active: boolean}`); audited', responses: { '200': { description: OK }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Not found }, '422': { $ref: '#/components/responses/Validation' } } }
   /staff/assessments/{revisionId}/corrections:
     post: { x-status: planned, summary: 'Super Admin: open correction draft with reason (>= 10 chars)', responses: { '201': { description: Created }, '409': { $ref: '#/components/responses/Conflict' } } }
   /staff/comparisons:
     post: { x-status: planned, summary: 'Compare 2–4 compatible effective submissions', responses: { '200': { description: OK } } }
   /staff/users:
-    get: { x-status: planned, summary: 'Super Admin: people & access list', responses: { '200': { description: OK } } }
+    get: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin with confirmed TOTP: staff people & access list (Champions excluded)', responses: { '200': { description: OK }, '401': { $ref: '#/components/responses/Unauthenticated' }, '403': { $ref: '#/components/responses/Forbidden' } } }
   /staff/invitations:
-    post: { x-status: planned, summary: 'Super Admin: invite analyst/admin (behind the existing create-staff form, D-10)', responses: { '201': { description: Invited } } }
+    post: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin with confirmed TOTP: invite analyst/admin (D-10). Token is emailed, never returned. Duplicate pending invitation is refused.', responses: { '201': { description: 'Invited: id, email, role, expiresAt' }, '403': { $ref: '#/components/responses/Forbidden' }, '422': { $ref: '#/components/responses/Validation' } } }
   /staff/users/{id}/access:
-    patch: { x-status: planned, summary: 'Super Admin: active / canExport (self and last-admin protected)', responses: { '200': { description: OK }, '409': { $ref: '#/components/responses/Conflict' } } }
+    patch: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin with confirmed TOTP: active / canExport only (other fields ignored). Self-change refused (422); last active Super Admin protected under row locks (409); audited.', responses: { '200': { description: OK }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Not found }, '409': { $ref: '#/components/responses/Conflict' }, '422': { $ref: '#/components/responses/Validation' } } }
   /staff/exports:
     post: { x-status: planned, summary: 'Server CSV/XLSX export request (Phase 3)', responses: { '202': { description: Accepted } } }

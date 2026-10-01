@@ -1,7 +1,7 @@
 # Project status — read this first
 
 **Last updated:** 1 October 2026 · **Updated by:** GitHub Copilot
-**Current phase:** Phase 1 (Foundation) is ✅ complete and **merged into `main`** (PR #1, merge `1dc49c9`). **Next: Phase 2A (Accounts, login and security) — local logic only.**
+**Current phase:** Phase 1 (Foundation) is ✅ complete and **merged into `main`** (PR #1, merge `1dc49c9`). **Phase 2A (Accounts, login and security) is implemented on `implementation/phase-2a` and awaiting independent review and the director's merge.** Phase 2B does not start until then.
 **Branch:** `main` (Phase 1 merged) · new phase work happens on `implementation/<phase>` branches.
 
 > **Working mode (director instruction, 1 Oct 2026):** continue all **local logic and application** work (Phases 2A, 2B, 3). **Deployment phases (4 Release readiness, 5 Production launch) stay frozen** until the director provides the §5 inputs and a written go-ahead. Nothing in this repo touches production, pushes credentials, or provisions paid resources.
@@ -21,7 +21,7 @@ This file is the short entry point for any agent or colleague (Claude Code, Code
 |---|---|---|
 | 0 Discovery | `prompts/production/00-DISCOVERY.md` | ✅ Done (commit `43640c4`) |
 | 1 Foundation | `prompts/production/01-FOUNDATION.md` | ✅ Done and **merged to `main`** (`ef9cc3d`, PR #1 `1dc49c9`) |
-| 2A Accounts, login and security | `02A-ACCOUNTS.md` | 🛠️ **In progress / next** — local logic only |
+| 2A Accounts, login and security | `02A-ACCOUNTS.md` | 🔍 **Implemented; PR open, awaiting review** — local logic only |
 | 2B Assessment engine and scoring | `02B-ASSESSMENTS.md` | ⏳ Local logic, after 2A |
 | 3 Connect the React app, staff views and reports | `03-UI-AND-REPORTS.md` | ⏳ Local app; privacy text is a launch gate, not a local blocker |
 
