@@ -1,8 +1,10 @@
 # Project status — read this first
 
-**Last updated:** 30 September 2026 · **Updated by:** Claude Code
-**Current phase:** Phase 1 (Foundation) is ✅ complete locally, **awaiting independent review and merge**. The plan is fixed by `docs/production/PLAN-CONTRACT.md`, approved by the director on 30 Sep 2026. **Next: Phase 2A**, after the Phase 1 review, the director's merge and the director's go-ahead.
-**Branch:** `implementation/phase-1` (local commits, **not pushed**) · **Base:** `main` @ `c8c9a9d`
+**Last updated:** 1 October 2026 · **Updated by:** GitHub Copilot
+**Current phase:** Phase 1 (Foundation) is ✅ complete and **merged into `main`** (PR #1, merge `1dc49c9`). **Phase 2A (Accounts, login and security) is implemented on `implementation/phase-2a` and awaiting independent review and the director's merge.** Phase 2B does not start until then.
+**Branch:** `main` (Phase 1 merged) · new phase work happens on `implementation/<phase>` branches.
+
+> **Working mode (director instruction, 1 Oct 2026):** continue all **local logic and application** work (Phases 2A, 2B, 3). **Deployment phases (4 Release readiness, 5 Production launch) stay frozen** until the director provides the §5 inputs and a written go-ahead. Nothing in this repo touches production, pushes credentials, or provisions paid resources.
 
 This file is the short entry point for any agent or colleague (Claude Code, Codex or others).
 
@@ -12,18 +14,24 @@ This file is the short entry point for any agent or colleague (Claude Code, Code
 - Decisions: `docs/production/decisions.md`
 - Local how-to: `docs/production/LOCAL-DEVELOPMENT.md`
 
-## Phase tracker (7 phases in total, 5 remaining; D-26)
+## Phase tracker (7 phases in total; D-26)
+
+### Local track — buildable now on this machine
 | Phase | Prompt | State |
 |---|---|---|
 | 0 Discovery | `prompts/production/00-DISCOVERY.md` | ✅ Done (commit `43640c4`) |
-| 1 Foundation | `prompts/production/01-FOUNDATION.md` | ✅ Done locally (commit `ef9cc3d`). ⏳ Independent review, PR and director merge pending |
-| 2A Accounts, login and security | `02A-ACCOUNTS.md` | ⏳ **Next**, after the Phase 1 merge and the director's go-ahead |
-| 2B Assessment engine and scoring | `02B-ASSESSMENTS.md` | ⏳ |
-| 3 Connect the React app, staff views and reports | `03-UI-AND-REPORTS.md` | ⏳ Needs the privacy text by the end of Phase 3 (contract §5 #2) |
-| 4 Release readiness | `04-RELEASE-READINESS.md` | ⏳ Needs the retention policy by the end of Phase 4 (§5 #3) |
-| 5 Production launch | `05-PRODUCTION-RELEASE.md` | ⛔ Needs the director's written go-ahead and §5 inputs #4–#10 |
+| 1 Foundation | `prompts/production/01-FOUNDATION.md` | ✅ Done and **merged to `main`** (`ef9cc3d`, PR #1 `1dc49c9`) |
+| 2A Accounts, login and security | `02A-ACCOUNTS.md` | 🔍 **Implemented; PR open, awaiting review** — local logic only |
+| 2B Assessment engine and scoring | `02B-ASSESSMENTS.md` | ⏳ Local logic, after 2A |
+| 3 Connect the React app, staff views and reports | `03-UI-AND-REPORTS.md` | ⏳ Local app; privacy text is a launch gate, not a local blocker |
 
-Every phase: branch `implementation/<phase>`, then evidence, then `STATUS.md` and `HANDOFF.md` updates, then a PR, then an independent review, then the director merges and approves the next phase (D-27, D-28).
+### Deployment track — FROZEN (kept as-is; director inputs required)
+| Phase | Prompt | State |
+|---|---|---|
+| 4 Release readiness | `04-RELEASE-READINESS.md` | 🔒 Frozen — prod tooling/backups/CI/HTTPS/VM; needs §5 inputs |
+| 5 Production launch | `05-PRODUCTION-RELEASE.md` | 🔒 Frozen — needs the director's written go-ahead and §5 inputs #4–#10 |
+
+Every phase: branch `implementation/<phase>`, then evidence, then `STATUS.md` and `HANDOFF.md` updates, then a PR, then an independent review, then the director merges and approves the next phase (D-27, D-28). The deployment track does not start until it is explicitly unfrozen.
 
 ## What works now (verified 30 Sep 2026)
 - **Stack:** Laravel 13.34 + Statamic 6.34.1 **Core** (no Pro, no licence key) in `backend/`; MySQL 8.4.11; PHP 8.4.26.
@@ -50,10 +58,10 @@ Every phase: branch `implementation/<phase>`, then evidence, then `STATUS.md` an
 
 ## How to resume (any agent)
 1. Read `AGENTS.md`, this file, `docs/production/HANDOFF.md` and `docs/production/decisions.md`.
-2. Run `git status` and `git switch implementation/phase-1` (or continue from its HEAD). Never discard uncommitted work.
+2. Run `git status`. Phase 1 is on `main`. For new work, create `git switch -c implementation/phase-2a`. Never discard uncommitted work.
 3. Local environment: `ops/local/dev init` (once), then `ops/local/dev up`, `ops/local/dev test` and `ops/local/checks/https-smoke.sh`. See `docs/production/LOCAL-DEVELOPMENT.md`.
 4. Start the phase marked **Next** only when the owner has approved it. Use that phase's prompt.
-5. At the end of a phase, update **this file** and `HANDOFF.md`, then commit locally. Push only on explicit instruction.
+5. At the end of a phase, update **this file** and `HANDOFF.md`, open a PR, and let the director merge. Do not start the frozen deployment track (Phases 4–5) without an explicit unfreeze.
 
 ## Open decisions and blockers
 All product decisions are made (PLAN-CONTRACT §3). What remains are **director inputs** with deadlines (§5):
@@ -65,7 +73,7 @@ Host changes for local development (the hosts entry and trusting the local CA) a
 
 ## Known limits
 - The SPA still uses its browser-local demo repository. Switching it to the API is Phase 2/3.
-- CI workflows have been rewritten but not yet run on GitHub, because nothing has been pushed.
+- CI workflows run on GitHub (Phase 1 was pushed and merged via PR #1). Deployment workflows remain manual-only (D-16).
 - Only macOS/arm64 has been verified.
 
 ## Standing constraints (summary)

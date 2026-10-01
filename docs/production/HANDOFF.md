@@ -1,6 +1,6 @@
 # Implementation handoff
 
-Updated: 30 September 2026. Phase: **01-FOUNDATION complete (local only)** on branch `implementation/phase-1`; awaiting owner review before Phase 2.
+Updated: 1 October 2026. Phase: **01-FOUNDATION complete and merged to `main`** (commit `ef9cc3d`, PR #1 merge `1dc49c9`). **Next: Phase 2A on the local track.** Deployment track (Phases 4–5) is frozen per the director instruction of 1 Oct 2026 (see `PLAN-CONTRACT.md` → "Working mode").
 
 ## Current state
 A working local foundation exists:
@@ -9,6 +9,8 @@ A working local foundation exists:
 - Independent app and CMS guards, verified by tests.
 
 The SPA is still wired to its browser-local demo repository, since API integration is Phase 2/3. No production resource has been touched.
+
+**Working mode (1 Oct 2026):** local-track phases (2A accounts/security, 2B assessment engine/scoring, 3 React wiring + staff views + reports) are actively buildable on this machine. The deployment track (4 Release readiness, 5 Production launch) is frozen and unchanged until the director unfreezes it with the section 5 inputs.
 
 ## Active assignment
 Writer: Claude Code (Phases 0–1). Reviewer: unassigned; recommended: an independent reviewer (e.g. Codex) on the Phase 1 commit, per `prompts/production/REVIEW.md`. Branch `implementation/phase-1` (local, not pushed). Next action: owner review and approval of Phase 2.
@@ -182,6 +184,46 @@ Self-found and fixed during the phase:
 1. Independent review of `ef9cc3d` (mandatory, D-27).
 2. A PR and the director's merge (D-28).
 3. Phase **2A**, `prompts/production/02A-ACCOUNTS.md`, local only, after the director's written go-ahead.
+
+## Phase 2A — 02A-ACCOUNTS
+### Scope and acceptance
+Implemented per PLAN-CONTRACT §2 "Phase 2A", local only:
+- Schema and models: organisations (no sector), app-user → organisation link, staff invitations (72 h, single use, hashed token), email verification challenges (six digits, 15 min, 5 attempts, hashed), append-only audit events.
+- Endpoints: Champion registration (allow-listed, 3/min and 20/day per IP); verification send/confirm (throttled); organisation GET/PATCH (duplicates blocked); staff invitation issue/accept (accept 5/min per IP); staff list and access changes; organisation pause/enable.
+- Self-change refused (422). Last active Super Admin protected under row locks (409).
+- Staff MFA (D-17): Analysts and Super Admins without confirmed TOTP get 403 `two_factor_required` on every `/staff` route. Champions may opt in.
+- `procurement:admin:bootstrap`: creates or promotes one audited Super Admin; idempotent; MFA still enrolled by the person.
+
+### Branch and commits
+`implementation/phase-2a` from `main` (`ba62b655`): f2c8b06c, f262f42d, 07aed7f1, 9d13b516, e3ed5c42, 157e30a9, d5ba1819, 27b3859a and the final evidence/docs commit.
+
+### Database, schema and contract changes
+- New migrations for organisations, invitations, verification challenges and audit events; `app_users` gains `organization_id`.
+- `docs/production/api/openapi-v1.yaml` 1.0.0-phase2a: Phase 2A paths marked implemented with real paths and codes. Verification paths are `/auth/email/verify/send|confirm`. New `Forbidden` response and `two_factor_required` error code.
+
+### Commands, exit statuses and evidence (`docs/production/evidence/phase-2a/`)
+- `ops/local/dev test` on MySQL 8.4: 62 passed, 263 assertions, exit 0 (`test-run.txt`).
+- Larastan: no errors, exit 0 (`larastan.txt`).
+- Pint `--test`: pass after auto-fixing 3 test files, exit 0 (`pint.txt`).
+- OpenAPI YAML parses: 30 paths (`openapi-parse.txt`).
+
+Tests cover: enumeration resistance, mass-assignment refusal, forged IDs, expired/used/invalid invitations and codes, invitation-accept throttling, identical emails across app and CMS, MFA enforcement per staff role, organisation pause/enable with audit, the bootstrap command, and the last-admin race on MySQL with real row locks on a second connection.
+
+### Reviewer findings and resolutions
+None yet; independent review not assigned.
+
+### Known gaps (skipped at the director's request to save time)
+1. No dedicated CSRF test. Framework Sanctum CSRF is relied on.
+2. Registration and verification rate limits are configured but not tested; only invitation accept is tested.
+3. Self-deactivation is tested for the single-admin case only, not as a parallel race.
+4. A Super Admin deactivated while their own request is in flight can still complete that request. The last-admin rule still holds. Recommended fix: re-check the actor under the row lock.
+5. Mailpit visual check of the verification and invitation emails not done; emails are asserted with notification fakes.
+6. composer audit not run for this phase.
+
+### Exact next phase and approval required
+1. Independent review of this PR (D-27).
+2. Director merge (D-28).
+3. Phase 2B, `prompts/production/02B-ASSESSMENTS.md`, local only, after written go-ahead.
 
 ## After each phase replace this section
 Scope and acceptance IDs:

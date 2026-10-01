@@ -44,4 +44,19 @@ class AppUserFactory extends Factory
     {
         return $this->afterMaking(fn (AppUser $user) => $user->active = false);
     }
+
+    public function unverified(): static
+    {
+        // Runs after the configure() default, so it wins over the ??= now().
+        return $this->afterMaking(fn (AppUser $user) => $user->email_verified_at = null);
+    }
+
+    /**
+     * Staff member who has completed TOTP enrolment, satisfying the
+     * privileged MFA gate (decisions.md D-17).
+     */
+    public function twoFactorConfirmed(): static
+    {
+        return $this->afterMaking(fn (AppUser $user) => $user->two_factor_confirmed_at = now());
+    }
 }

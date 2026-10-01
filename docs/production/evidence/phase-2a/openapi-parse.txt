@@ -1,0 +1,2 @@
+openapi yaml: ok (30 paths, version 1.0.0-phase2a)
+exit=0

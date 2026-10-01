@@ -51,5 +51,20 @@ class FortifyServiceProvider extends ServiceProvider
 
         RateLimiter::for('two-factor', fn (Request $request) => Limit::perMinute(5)
             ->by((string) $request->session()->get('login.id')));
+
+        // Champion registration (PLAN-CONTRACT §4 defaults): 3/min and 20/day per IP.
+        RateLimiter::for('register', fn (Request $request) => [
+            Limit::perMinute(3)->by((string) $request->ip()),
+            Limit::perDay(20)->by((string) $request->ip()),
+        ]);
+
+        // Verification code send/confirm: throttle per account and per IP.
+        RateLimiter::for('verify', fn (Request $request) => [
+            Limit::perMinute(5)->by('verify|'.($request->user()?->getAuthIdentifier() ?? $request->ip())),
+            Limit::perMinute(10)->by((string) $request->ip()),
+        ]);
+
+        // Invitation acceptance is throttled by IP.
+        RateLimiter::for('invitation', fn (Request $request) => Limit::perMinute(5)->by('invite|'.$request->ip()));
     }
 }

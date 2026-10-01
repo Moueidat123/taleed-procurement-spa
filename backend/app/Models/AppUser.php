@@ -5,6 +5,8 @@ namespace App\Models;
 use Database\Factories\AppUserFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -53,5 +55,17 @@ class AppUser extends Authenticatable
     public function isStaff(): bool
     {
         return $this->role !== 'champion';
+    }
+
+    /** @return BelongsTo<Organization, $this> */
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'organization_id');
+    }
+
+    /** @return HasMany<EmailVerificationChallenge, $this> */
+    public function emailVerificationChallenges(): HasMany
+    {
+        return $this->hasMany(EmailVerificationChallenge::class, 'app_user_id');
     }
 }
