@@ -14,8 +14,12 @@ use Illuminate\Support\Carbon;
  * challenge invalidates earlier unconsumed ones for the same user.
  *
  * @property string $id
+ * @property string $app_user_id
  * @property int $attempts
- * @property \Illuminate\Support\Carbon $expires_at
+ * @property int $sent_count
+ * @property Carbon $expires_at
+ * @property Carbon|null $consumed_at
+ * @property Carbon|null $last_sent_at
  */
 class EmailVerificationChallenge extends Model
 {
@@ -23,7 +27,7 @@ class EmailVerificationChallenge extends Model
 
     public const MAX_ATTEMPTS = 5;
 
-    /** @var array<string, mixed> */
+    /** @var list<string> */
     protected $guarded = [];
 
     protected function casts(): array

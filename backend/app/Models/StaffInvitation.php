@@ -15,13 +15,13 @@ use Illuminate\Support\Carbon;
  *
  * @property string $id
  * @property string $role
- * @property \Illuminate\Support\Carbon $expires_at
+ * @property Carbon $expires_at
  */
 class StaffInvitation extends Model
 {
     use HasUlids;
 
-    /** @var array<string, mixed> */
+    /** @var list<string> */
     protected $guarded = [];
 
     protected function casts(): array

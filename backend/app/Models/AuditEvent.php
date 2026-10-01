@@ -21,7 +21,7 @@ class AuditEvent extends Model
 
     public const UPDATED_AT = null;
 
-    /** @var array<string, mixed> */
+    /** @var list<string> */
     protected $guarded = [];
 
     protected function casts(): array

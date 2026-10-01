@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\Procurement\ConfirmVerificationController;
 use App\Http\Controllers\Procurement\HealthController;
 use App\Http\Controllers\Procurement\MeController;
+use App\Http\Controllers\Procurement\RegisterController;
+use App\Http\Controllers\Procurement\SendVerificationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,8 +17,18 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/health', HealthController::class)->name('procurement.health');
 
+// Champion self-registration (D-31): public, throttled, allow-listed fields.
+Route::post('/auth/register', RegisterController::class)
+    ->middleware('throttle:register')->name('procurement.auth.register');
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', MeController::class)->name('procurement.auth.me');
+
+    // Six-digit email verification (D-30): throttled send and confirm.
+    Route::post('/auth/email/verify/send', SendVerificationController::class)
+        ->middleware('throttle:verify')->name('procurement.auth.verify.send');
+    Route::post('/auth/email/verify/confirm', ConfirmVerificationController::class)
+        ->middleware('throttle:verify')->name('procurement.auth.verify.confirm');
 });
 
 // Unknown business routes are JSON 404s, never the SPA shell or a CMS page.
