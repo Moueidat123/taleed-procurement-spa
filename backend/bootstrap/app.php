@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AssignRequestId;
+use App\Http\Middleware\EnsureStaffTwoFactor;
 use App\Support\ApiErrorRenderer;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,6 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // First-party SPA on the same origin: session + CSRF for /api (Sanctum).
         $middleware->statefulApi();
         $middleware->prepend(AssignRequestId::class);
+
+        // Privileged MFA gate for staff actions (decisions.md D-17).
+        $middleware->alias(['staff.2fa' => EnsureStaffTwoFactor::class]);
 
         // API guests get a JSON 401 (never a redirect); the SPA owns its login screen.
         $middleware->redirectGuestsTo(fn (Request $request) => $request->is('api/*') ? null : '/#/login');

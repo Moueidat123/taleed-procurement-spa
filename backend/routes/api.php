@@ -4,10 +4,13 @@ use App\Http\Controllers\Procurement\AcceptInvitationController;
 use App\Http\Controllers\Procurement\ConfirmVerificationController;
 use App\Http\Controllers\Procurement\HealthController;
 use App\Http\Controllers\Procurement\IssueInvitationController;
+use App\Http\Controllers\Procurement\ListStaffUsersController;
 use App\Http\Controllers\Procurement\MeController;
 use App\Http\Controllers\Procurement\OrganizationController;
 use App\Http\Controllers\Procurement\RegisterController;
 use App\Http\Controllers\Procurement\SendVerificationController;
+use App\Http\Controllers\Procurement\UpdateOrganizationAccessController;
+use App\Http\Controllers\Procurement\UpdateStaffAccessController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -46,6 +49,17 @@ Route::middleware('auth:sanctum')->group(function () {
     // Staff invitations (D-10): Super Admin issues; token emailed, never returned.
     Route::post('/staff/invitations', IssueInvitationController::class)
         ->name('procurement.staff.invitations.issue');
+
+    // Staff people & access and organization pause/enable (D-10, D-17): Super
+    // Admin only, gated behind confirmed TOTP two-factor for staff.
+    Route::middleware('staff.2fa')->group(function () {
+        Route::get('/staff/users', ListStaffUsersController::class)
+            ->name('procurement.staff.users.index');
+        Route::patch('/staff/users/{user}/access', UpdateStaffAccessController::class)
+            ->name('procurement.staff.users.access');
+        Route::patch('/staff/organizations/{organization}/access', UpdateOrganizationAccessController::class)
+            ->name('procurement.staff.organizations.access');
+    });
 });
 
 // Unknown business routes are JSON 404s, never the SPA shell or a CMS page.
