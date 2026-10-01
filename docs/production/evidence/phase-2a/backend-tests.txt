@@ -1,0 +1,86 @@
+ Container taleed-procurement-dev-mysql-1 Running 
+ Container taleed-procurement-dev-mysql-1 Waiting 
+ Container taleed-procurement-dev-mysql-1 Healthy 
+ Container taleed-procurement-dev-app-run-8c7dcb34dc7f Creating 
+ Container taleed-procurement-dev-app-run-8c7dcb34dc7f Created 
+
+   PASS  Tests\Feature\Accounts\AccountsSecurityTest
+  ✓ every staff route requires confirmed two factor with data set "anal… 0.76s  
+  ✓ every staff route requires confirmed two factor with data set "supe… 0.05s  
+  ✓ champions are not subject to the mfa gate but are still forbidden    0.02s  
+  ✓ super admin pauses and enables an organization with audit            0.03s  
+  ✓ an analyst with two factor cannot pause an organization              0.02s  
+  ✓ forged user and organization ids return 404                          0.02s  
+  ✓ access change ignores role email and password in input               0.03s  
+  ✓ invitation acceptance is rate limited                                0.04s  
+  ✓ identical email in app and cms are independent principals            0.12s  
+  ✓ bootstrap command creates one audited super admin and is idempotent  0.03s  
+  ✓ bootstrap command rejects an invalid email                           0.02s  
+
+   PASS  Tests\Feature\Accounts\OrganizationProfileTest
+  ✓ verified champion creates a profile and is linked                    0.03s  
+  ✓ get returns profile or 404 before creation                           0.03s  
+  ✓ update edits in place without creating a second company              0.02s  
+  ✓ duplicate company name in same country is blocked                    0.03s  
+  ✓ duplicate registration id is blocked                                 0.02s  
+  ✓ unverified champion cannot set a profile                             0.02s  
+  ✓ staff cannot use the champion profile endpoint                       0.02s  
+  ✓ sector and privileged fields are never persisted                     0.02s  
+
+   PASS  Tests\Feature\Accounts\RegistrationTest
+  ✓ champion can register and receives a code                            0.04s  
+  ✓ registration never sets privileged fields from input                 0.03s  
+  ✓ duplicate email is rejected without enumeration                      0.03s  
+  ✓ weak password and missing consent are rejected                       0.03s  
+  ✓ confirming the correct code verifies the user                        0.06s  
+  ✓ wrong code counts an attempt and locks after five                    0.10s  
+
+   PASS  Tests\Feature\Accounts\StaffAdministrationTest
+  ✓ super admin lists staff and excludes champions                       0.07s  
+  ✓ staff without confirmed two factor are blocked by the gate           0.06s  
+  ✓ a champion cannot list staff                                         0.06s  
+  ✓ a guest cannot list staff                                            0.05s  
+  ✓ super admin toggles analyst export                                   0.07s  
+  ✓ super admin deactivates an analyst                                   0.06s  
+  ✓ super admin cannot change their own access                           0.05s  
+  ✓ the last active super admin cannot be deactivated                    0.06s  
+  ✓ a champion cannot change staff access                                0.05s  
+
+   PASS  Tests\Feature\Accounts\StaffInvitationTest
+  ✓ super admin issues an invitation and token is emailed not stored     0.06s  
+  ✓ a champion cannot issue                                              0.05s  
+  ✓ an analyst cannot issue                                              0.02s  
+  ✓ a guest cannot issue                                                 0.02s  
+  ✓ accepting a valid token creates a signed in staff user               0.03s  
+  ✓ role and email come from the invitation not from input               0.03s  
+  ✓ a token cannot be used twice                                         0.04s  
+  ✓ an expired token is rejected                                         0.03s  
+  ✓ a random token is rejected without enumeration                       0.02s  
+  ✓ duplicate pending invitation is refused                              0.03s  
+
+   PASS  Tests\Feature\Foundation\CoreEditionTest
+  ✓ statamic runs as core with headless apis disabled                    0.03s  
+  ✓ cms admin command creates exactly one user and never enables pro     0.04s  
+
+   PASS  Tests\Feature\Foundation\PrincipalIsolationTest
+  ✓ application user logs in through the business api                    0.03s  
+  ✓ inactive and wrong password fail identically                         0.03s  
+  ✓ cms only session cannot call the business api                        0.05s  
+  ✓ cms administrator can reach the control panel                        1.05s  
+  ✓ application super admin has no control panel access                  0.07s  
+  ✓ password reset brokers never cross providers                         0.87s  
+  ✓ forgot password response does not reveal accounts                    0.78s  
+  ✓ application login does not write statamic user state                 0.05s  
+
+   PASS  Tests\Feature\Foundation\RoutingTest
+  ✓ health is json and reports database                                  0.02s  
+  ✓ unknown business routes return the json error envelope               0.02s  
+  ✓ protected business route requires application identity               0.02s  
+  ✓ root serves the built spa shell or a clear 503                       0.02s  
+  ✓ cms privacy placeholder is server rendered by statamic               0.10s  
+  ✓ csrf cookie endpoint is reserved                                     0.02s  
+
+  Tests:    60 passed (259 assertions)
+  Duration: 6.00s
+
+exit=0
