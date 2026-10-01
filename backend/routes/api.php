@@ -3,6 +3,7 @@
 use App\Http\Controllers\Procurement\ConfirmVerificationController;
 use App\Http\Controllers\Procurement\HealthController;
 use App\Http\Controllers\Procurement\MeController;
+use App\Http\Controllers\Procurement\OrganizationController;
 use App\Http\Controllers\Procurement\RegisterController;
 use App\Http\Controllers\Procurement\SendVerificationController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,12 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('throttle:verify')->name('procurement.auth.verify.send');
     Route::post('/auth/email/verify/confirm', ConfirmVerificationController::class)
         ->middleware('throttle:verify')->name('procurement.auth.verify.confirm');
+
+    // Company profile (D-31): one Champion per company; duplicates blocked.
+    Route::get('/organization', [OrganizationController::class, 'show'])
+        ->name('procurement.organization.show');
+    Route::patch('/organization', [OrganizationController::class, 'update'])
+        ->name('procurement.organization.update');
 });
 
 // Unknown business routes are JSON 404s, never the SPA shell or a CMS page.
