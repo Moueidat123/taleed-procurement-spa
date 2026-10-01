@@ -32,7 +32,7 @@ class StaffInvitationTest extends TestCase
     public function test_super_admin_issues_an_invitation_and_token_is_emailed_not_stored(): void
     {
         Notification::fake();
-        $admin = AppUser::factory()->role('admin')->create();
+        $admin = AppUser::factory()->role('admin')->twoFactorConfirmed()->create();
 
         $this->actingAs($admin)->postJson(self::ISSUE, [
             'email' => 'new.analyst@taleed.test', 'role' => 'analyst', 'canExport' => true,
@@ -78,7 +78,7 @@ class StaffInvitationTest extends TestCase
 
     public function test_accepting_a_valid_token_creates_a_signed_in_staff_user(): void
     {
-        $admin = AppUser::factory()->role('admin')->create();
+        $admin = AppUser::factory()->role('admin')->twoFactorConfirmed()->create();
         $token = $this->issueToken($admin, 'analyst@taleed.test', 'analyst', true);
 
         $this->postJson(self::ACCEPT, [
@@ -99,7 +99,7 @@ class StaffInvitationTest extends TestCase
 
     public function test_role_and_email_come_from_the_invitation_not_from_input(): void
     {
-        $admin = AppUser::factory()->role('admin')->create();
+        $admin = AppUser::factory()->role('admin')->twoFactorConfirmed()->create();
         $token = $this->issueToken($admin, 'analyst@taleed.test', 'analyst', false);
 
         $this->postJson(self::ACCEPT, [
@@ -120,7 +120,7 @@ class StaffInvitationTest extends TestCase
 
     public function test_a_token_cannot_be_used_twice(): void
     {
-        $admin = AppUser::factory()->role('admin')->create();
+        $admin = AppUser::factory()->role('admin')->twoFactorConfirmed()->create();
         $token = $this->issueToken($admin, 'analyst@taleed.test', 'analyst', false);
 
         $accept = fn () => $this->postJson(self::ACCEPT, [
@@ -135,7 +135,7 @@ class StaffInvitationTest extends TestCase
 
     public function test_an_expired_token_is_rejected(): void
     {
-        $admin = AppUser::factory()->role('admin')->create();
+        $admin = AppUser::factory()->role('admin')->twoFactorConfirmed()->create();
         $token = $this->issueToken($admin, 'analyst@taleed.test', 'analyst', false);
 
         // Age the invitation past its 72h lifetime.
@@ -160,7 +160,7 @@ class StaffInvitationTest extends TestCase
     public function test_duplicate_pending_invitation_is_refused(): void
     {
         Notification::fake();
-        $admin = AppUser::factory()->role('admin')->create();
+        $admin = AppUser::factory()->role('admin')->twoFactorConfirmed()->create();
 
         $this->actingAs($admin)->postJson(self::ISSUE, [
             'email' => 'dup@taleed.test', 'role' => 'analyst',

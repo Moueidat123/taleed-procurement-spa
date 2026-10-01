@@ -38,8 +38,17 @@ class StaffAccessService
         }
 
         return DB::transaction(function () use ($actor, $target, $changes) {
+            // Lock all active Super Admins plus the target in a stable order so
+            // concurrent deactivations serialize and the last-admin check is safe.
+            AppUser::query()
+                ->where(fn ($q) => $q->where('role', 'admin')->where('active', true))
+                ->orWhereKey($target->id)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->pluck('id');
+
             /** @var AppUser $target */
-            $target = AppUser::query()->whereKey($target->id)->lockForUpdate()->firstOrFail();
+            $target = AppUser::query()->whereKey($target->id)->firstOrFail();
 
             $deactivating = array_key_exists('active', $changes) && $changes['active'] === false && $target->active;
             if ($deactivating && $target->role === 'admin' && $this->isLastActiveAdmin($target)) {

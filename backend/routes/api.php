@@ -46,13 +46,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/organization', [OrganizationController::class, 'update'])
         ->name('procurement.organization.update');
 
-    // Staff invitations (D-10): Super Admin issues; token emailed, never returned.
-    Route::post('/staff/invitations', IssueInvitationController::class)
-        ->name('procurement.staff.invitations.issue');
-
     // Staff people & access and organization pause/enable (D-10, D-17): Super
     // Admin only, gated behind confirmed TOTP two-factor for staff.
     Route::middleware('staff.2fa')->group(function () {
+        // Staff invitations (D-10): token emailed, never returned.
+        Route::post('/staff/invitations', IssueInvitationController::class)
+            ->name('procurement.staff.invitations.issue');
         Route::get('/staff/users', ListStaffUsersController::class)
             ->name('procurement.staff.users.index');
         Route::patch('/staff/users/{user}/access', UpdateStaffAccessController::class)
