@@ -10,6 +10,9 @@
 
 If any of these conflict, stop and ask the director.
 
+## Working mode (director instruction, 1 October 2026)
+Development proceeds on the **local track only**: Phase 2A (accounts/security logic), Phase 2B (assessment engine and scoring) and Phase 3 (wiring the approved React app, staff views and reports) — all built and tested on the local machine. The **deployment track (Phase 4 Release readiness and Phase 5 Production launch) is frozen** and kept exactly as specified; it does not begin until the director supplies the section 5 inputs and a written go-ahead to unfreeze. No work on either track touches production, pushes secrets, or provisions paid resources. This note does not change any decision in section 3; it only sequences execution.
+
 ## 1. The rule for developers: execute, do not decide
 - Every product, scope, security, hosting and data decision is already made (section 3), or it is listed as a director input with a deadline (section 5).
 - If a situation arises that this contract does not cover, the developer **stops and asks the director**. They do not choose a default themselves. Each question must include options and a recommendation, and must be recorded in `docs/production/decisions.md` once answered.
@@ -21,12 +24,12 @@ If any of these conflict, stop and ask the director.
 | # | Phase | Prompt | State |
 |---|---|---|---|
 | 0 | Discovery | `00-DISCOVERY.md` | ✅ Done (`43640c4`) |
-| 1 | Local foundation | `01-FOUNDATION.md` | ✅ Done locally (`ef9cc3d`); **independent review pending** |
-| 2A | Accounts, login and security | `02A-ACCOUNTS.md` | ⏳ Next |
-| 2B | Assessment engine, scoring and data integrity | `02B-ASSESSMENTS.md` | ⏳ |
-| 3 | Connect the approved React app, staff views and reports | `03-UI-AND-REPORTS.md` | ⏳ |
-| 4 | Release readiness (production tooling, backups, CI), no live release | `04-RELEASE-READINESS.md` | ⏳ |
-| 5 | Production launch, explicitly authorised | `05-PRODUCTION-RELEASE.md` | ⛔ Needs written go-ahead plus section 5 inputs |
+| 1 | Local foundation | `01-FOUNDATION.md` | ✅ Done and **merged to `main`** (`ef9cc3d`, PR #1 `1dc49c9`) |
+| 2A | Accounts, login and security | `02A-ACCOUNTS.md` | 🛠️ In progress / next — **local track** |
+| 2B | Assessment engine, scoring and data integrity | `02B-ASSESSMENTS.md` | ⏳ **local track** |
+| 3 | Connect the approved React app, staff views and reports | `03-UI-AND-REPORTS.md` | ⏳ **local track** |
+| 4 | Release readiness (production tooling, backups, CI), no live release | `04-RELEASE-READINESS.md` | 🔒 **Frozen (deployment track)** |
+| 5 | Production launch, explicitly authorised | `05-PRODUCTION-RELEASE.md` | 🔒 **Frozen** — needs written go-ahead plus section 5 inputs |
 
 **Gate between phases:** these steps are mandatory for every phase.
 1. The developer finishes the phase and writes evidence under `docs/production/evidence/<phase>/`.

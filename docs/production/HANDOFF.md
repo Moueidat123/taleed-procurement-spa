@@ -1,6 +1,6 @@
 # Implementation handoff
 
-Updated: 30 September 2026. Phase: **01-FOUNDATION complete (local only)** on branch `implementation/phase-1`; awaiting owner review before Phase 2.
+Updated: 1 October 2026. Phase: **01-FOUNDATION complete and merged to `main`** (commit `ef9cc3d`, PR #1 merge `1dc49c9`). **Next: Phase 2A on the local track.** Deployment track (Phases 4–5) is frozen per the director instruction of 1 Oct 2026 (see `PLAN-CONTRACT.md` → "Working mode").
 
 ## Current state
 A working local foundation exists:
@@ -9,6 +9,8 @@ A working local foundation exists:
 - Independent app and CMS guards, verified by tests.
 
 The SPA is still wired to its browser-local demo repository, since API integration is Phase 2/3. No production resource has been touched.
+
+**Working mode (1 Oct 2026):** local-track phases (2A accounts/security, 2B assessment engine/scoring, 3 React wiring + staff views + reports) are actively buildable on this machine. The deployment track (4 Release readiness, 5 Production launch) is frozen and unchanged until the director unfreezes it with the section 5 inputs.
 
 ## Active assignment
 Writer: Claude Code (Phases 0–1). Reviewer: unassigned; recommended: an independent reviewer (e.g. Codex) on the Phase 1 commit, per `prompts/production/REVIEW.md`. Branch `implementation/phase-1` (local, not pushed). Next action: owner review and approval of Phase 2.
