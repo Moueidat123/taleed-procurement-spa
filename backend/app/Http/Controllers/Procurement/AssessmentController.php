@@ -85,8 +85,9 @@ class AssessmentController
     {
         /** @var AppUser $user */
         $user = $request->user();
-        $this->service->assertEligible($user);
+        // Read-only: a Champion without a company yet simply has no history.
+        abort_unless($user->role === 'champion' && $user->active, 403);
 
-        return new JsonResponse(['data' => $this->service->history($user)]);
+        return new JsonResponse(['data' => $user->organization_id === null ? [] : $this->service->history($user)]);
     }
 }

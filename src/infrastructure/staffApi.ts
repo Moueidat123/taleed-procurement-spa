@@ -61,7 +61,7 @@ export const staffApi = api.injectEndpoints({
     compare: build.mutation<Comparison, { organizationIds: string[]; cycleId?: string }>({
       query: (body) => ({ url: '/staff/comparisons', method: 'POST', body }), transformResponse: (r: Wrapped<Comparison>) => r.data,
     }),
-    exportRows: build.mutation<{ cycleId: string; frameworkVersion: string | null; rows: ExportRow[] }, { format: 'csv' | 'xlsx'; cycleId?: string; band?: string; search?: string }>({
+    exportRows: build.mutation<{ cycleId: string; frameworkVersion: string | null; rows: ExportRow[] }, { format: 'csv' | 'xlsx'; cycleId?: string; band?: string; search?: string; organizationId?: string }>({
       query: (body) => ({ url: '/staff/exports', method: 'POST', body: clean(body) }),
       transformResponse: (r: Wrapped<{ cycleId: string; frameworkVersion: string | null; rows: ExportRow[] }>) => r.data,
     }),

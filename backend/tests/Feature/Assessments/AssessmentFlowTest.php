@@ -15,6 +15,12 @@ use Tests\TestCase;
 /** Phase 2B — Champion endpoints: start/resume, save with version, idempotent submit, result, history. */
 class AssessmentFlowTest extends TestCase
 {
+    public function test_a_champion_without_a_company_has_an_empty_history(): void
+    {
+        $this->actingAs(AppUser::factory()->role('champion')->create())
+            ->getJson('/api/procurement/v1/assessments/history')->assertOk()->assertExactJson(['data' => []]);
+    }
+
     use RefreshDatabase;
 
     private const API = '/api/procurement/v1';

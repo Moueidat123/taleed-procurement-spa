@@ -31,7 +31,6 @@ export function Layout() {
     ['/app/portfolio','chart','Portfolio overview'], ['/app/organizations','company','Organizations'],
     ['/app/compare','grid','Compare results'], ['/app/frameworks','check','Framework & cycle'],
     ...(user.role === 'admin' ? [['/app/access','users','People & access']] : []),
-    ['/app/security','lock','Two-step verification'],
   ] : [['/app/dashboard','grid','My workspace'], ['/app/history','clock','Assessment history'], ['/app/profile','company','Company profile']];
   const roleLabel = user.role === 'admin' ? 'Super Admin' : user.role === 'analyst' ? 'Taleed Analyst' : 'Company Champion';
   return <div className="app-shell"><a className="skip-link" href="#main-content" onClick={(event) => { event.preventDefault(); document.getElementById('main-content')?.focus(); }}>Skip to content</a>

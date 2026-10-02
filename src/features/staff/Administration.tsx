@@ -61,7 +61,7 @@ export function Security() {
   const [qr, setQr] = useState(''); const [codes, setCodes] = useState<string[]>([]);
   const [password, setPassword] = useState(''); const [code, setCode] = useState(''); const [error, setError] = useState('');
   if (user.twoFactorEnabled && step !== 'codes') return <><PageHeading eyebrow="ACCOUNT SECURITY" title="Two-step verification" description="Your account is protected with an authenticator app."/><Alert kind="success" title="Two-step verification is on">You will be asked for a code from your authenticator app each time you sign in. Keep your recovery codes somewhere safe.</Alert></>;
-  return <><PageHeading eyebrow="ACCOUNT SECURITY" title="Set up two-step verification" description="Staff accounts must use an authenticator app before program data is available."/>
+  return <><PageHeading eyebrow="ACCOUNT SECURITY" title="Set up two-step verification" description="Optional: add an authenticator app for extra sign-in protection."/>
     {error && <Alert kind="error">{error}</Alert>}
     <Card>{step === 'password' && <form noValidate onSubmit={async (e) => {
       e.preventDefault(); setError('');

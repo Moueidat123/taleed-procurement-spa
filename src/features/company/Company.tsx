@@ -100,6 +100,7 @@ export function Dashboard() {
   const [start, { isLoading: starting }] = useStartAssessmentMutation(); const [startError, setStartError] = useState('');
 
   if (orgQ.isLoading || cyclesQ.isLoading || historyQ.isLoading) return <Loading label="Loading your workspace…" />;
+  if (!orgQ.error && !orgQ.data) return <Navigate to="/app/profile" replace />;
   const failed = orgQ.error ?? cyclesQ.error ?? historyQ.error;
   if (failed) return <LoadError error={failed} retry={() => { void orgQ.refetch(); void cyclesQ.refetch(); void historyQ.refetch(); }} />;
   const org = orgQ.data;
