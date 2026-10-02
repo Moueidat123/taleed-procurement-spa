@@ -31,7 +31,6 @@ export function Organizations() {
       <Field label="Maturity band" htmlFor="org-band"><select id="org-band" value={band} onChange={(e) => setFilter('band', e.target.value)}><option value="">All bands</option>{BANDS.map((b) => <option key={b} value={b}>{BAND_LABELS[b]}</option>)}</select></Field>
       <span className="filter-count" role="status">{total} result{total === 1 ? '' : 's'}</span></Card>
     {list.isLoading ? <Card><p className="muted">Loading organizations…</p></Card>
-      : error?.code === 'two_factor_required' ? <Alert kind="warning" title="Set up two-step verification first">Staff lists open only after two-step verification is confirmed for your account. <Link to="/app/security">Set up two-step verification</Link></Alert>
       : error ? <Alert kind="error" title="The directory could not be loaded">{error.message} <Button variant="secondary" onClick={() => void list.refetch()}>Try again</Button></Alert>
       : rows.length ? <Card className="table-card"><div className="table-wrap"><table><caption className="sr-only">Champion and company directory</caption><thead><tr><th>Company / champion</th><th>Size</th><th>Account</th><th>Assessment progress</th><th>Result</th><th>Details</th></tr></thead><tbody>{rows.map((r) => <tr key={`${r.organizationId ? 'o' : 'u'}-${r.id}`}>
         <td><strong>{r.name ?? 'Profile not set yet'}</strong>{r.champion && <small className="block">{r.champion.name} · {r.champion.email}</small>}</td>
