@@ -163,15 +163,20 @@ class StaffPortfolioTest extends TestCase
         $this->actingAs($granted)->postJson(self::API.'/staff/exports', ['format' => 'pdf'])->assertUnprocessable();
     }
 
-    public function test_registered_champions_without_a_company_are_listed_for_staff(): void
+    public function test_champions_appear_from_registration_before_they_create_a_company(): void
     {
-        $pending = AppUser::factory()->role('champion')->create(['name' => 'Pending Person', 'email' => 'pending@newco.test']);
-        $res = $this->actingAs($this->analyst())->getJson(self::API.'/staff/champions/pending')->assertOk()
-            ->assertJsonPath('meta.total', 1)
-            ->assertJsonPath('data.0.email', 'pending@newco.test');
-        $this->assertArrayHasKey('verified', $res->json('data.0'));
-        $this->getJson(self::API.'/staff/champions/pending?search=nobody')->assertOk()->assertJsonPath('meta.total', 0);
-        $this->assertNotNull($pending->id);
+        AppUser::factory()->role('champion')->create(['name' => 'Pending Person', 'email' => 'pending@newco.test']);
+        $res = $this->actingAs($this->analyst())->getJson(self::API.'/staff/organizations')->assertOk()
+            ->assertJsonPath('meta.total', 5);
+        $row = collect($res->json('data'))->firstWhere('stage', 'no_profile');
+        $this->assertNull($row['organizationId']);
+        $this->assertNull($row['name']);
+        $this->assertSame('pending@newco.test', $row['champion']['email']);
+
+        $this->getJson(self::API.'/staff/organizations?stage=no_profile')->assertOk()
+            ->assertJsonPath('meta.total', 1)->assertJsonPath('data.0.champion.name', 'Pending Person');
+        $this->getJson(self::API.'/staff/organizations?search=pending@newco')->assertOk()->assertJsonPath('meta.total', 1);
+        $this->getJson(self::API.'/staff/organizations?stage=submitted')->assertOk()->assertJsonPath('meta.total', 2);
     }
 
     public function test_champions_are_refused(): void

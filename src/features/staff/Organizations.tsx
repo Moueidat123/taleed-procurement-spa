@@ -4,15 +4,19 @@ import { useCurrentUser } from '../../app/hooks';
 import { BANDS, BAND_LABELS } from '../../domain/scoring';
 import type { Band } from '../../domain/types';
 import { toApiError } from '../../infrastructure/api';
-import { useOpenCorrectionMutation, useSetOrganizationActiveMutation, useStaffOrganizationQuery, useStaffOrganizationsQuery, usePendingChampionsQuery, type Stage } from '../../infrastructure/staffApi';
+import { useOpenCorrectionMutation, useSetOrganizationActiveMutation, useStaffOrganizationQuery, useStaffOrganizationsQuery, type Stage } from '../../infrastructure/staffApi';
 import { Alert, Badge, BandBadge, Button, Card, Dialog, EmptyState, Field, Icon, LinkButton, PageHeading, Progress, formatDate } from '../../components/ui';
 import { Pager } from './Pager';
 
 const STAGES: Record<Stage, { label: string; tone: string }> = {
-  not_started: { label: 'Not started', tone: 'amber' }, in_progress: { label: 'In progress', tone: 'blue' }, submitted: { label: 'Completed', tone: 'success' },
+  no_profile: { label: 'Awaiting profile setup', tone: 'neutral' }, not_started: { label: 'Not started', tone: 'amber' },
+  in_progress: { label: 'In progress', tone: 'blue' }, submitted: { label: 'Completed', tone: 'success' },
 };
 
-/** Company directory: search, stage and band filters and paging all run on the server. Drafts show answered count only. */
+/**
+ * Champion & company directory: every Champion appears from registration ("Awaiting profile setup"),
+ * then as an active company with progress. Search, filters and paging run on the server; no draft answers.
+ */
 export function Organizations() {
   const [params, setParams] = useSearchParams();
   const search = params.get('q') ?? ''; const stage = (params.get('stage') ?? '') as Stage | ''; const band = (params.get('band') ?? '') as Band | '';
@@ -20,26 +24,23 @@ export function Organizations() {
   const list = useStaffOrganizationsQuery({ search, stage, band, page, perPage: 25 });
   const setFilter = (key: string, value: string) => setParams((cur) => { const next = new URLSearchParams(cur); if (value) next.set(key, value); else next.delete(key); next.delete('page'); return next; });
   const rows = list.data?.data ?? []; const total = list.data?.meta.total ?? 0;
-  const pendingPage = Math.max(1, Number(params.get('ppage') ?? 1) || 1);
-  const pending = usePendingChampionsQuery({ search, page: pendingPage });
-  return <><PageHeading eyebrow="PARTICIPATION" title="Organizations & progress" description="Every registered company with its stage in the current cycle. Draft answers are never shown to staff." />
-    <Card className="filters compact"><Field label="Company name" htmlFor="org-search"><input id="org-search" type="search" value={search} onChange={(e) => setFilter('q', e.target.value)} placeholder="Search companies…" /></Field>
+  const error = list.isError ? toApiError(list.error as never) : null;
+  return <><PageHeading eyebrow="PARTICIPATION" title="Organizations & champion progress" description="Every registered Company Champion appears here from sign-up: profile setup, answering progress and submitted results. Draft answers are never shown to staff." />
+    <Card className="filters compact"><Field label="Company or champion" htmlFor="org-search"><input id="org-search" type="search" value={search} onChange={(e) => setFilter('q', e.target.value)} placeholder="Search companies, names or emails…" /></Field>
       <Field label="Assessment stage" htmlFor="org-stage"><select id="org-stage" value={stage} onChange={(e) => setFilter('stage', e.target.value)}><option value="">All stages</option>{(Object.keys(STAGES) as Stage[]).map((s) => <option key={s} value={s}>{STAGES[s].label}</option>)}</select></Field>
       <Field label="Maturity band" htmlFor="org-band"><select id="org-band" value={band} onChange={(e) => setFilter('band', e.target.value)}><option value="">All bands</option>{BANDS.map((b) => <option key={b} value={b}>{BAND_LABELS[b]}</option>)}</select></Field>
-      <span className="filter-count" role="status">{total} compan{total === 1 ? 'y' : 'ies'}</span></Card>
+      <span className="filter-count" role="status">{total} result{total === 1 ? '' : 's'}</span></Card>
     {list.isLoading ? <Card><p className="muted">Loading organizations…</p></Card>
-      : list.isError ? <Alert kind="error" title="The directory could not be loaded">{toApiError(list.error as never).message} <Button variant="secondary" onClick={() => void list.refetch()}>Try again</Button></Alert>
-      : rows.length ? <Card className="table-card"><div className="table-wrap"><table><caption className="sr-only">Company directory</caption><thead><tr><th>Company</th><th>Size</th><th>Account</th><th>Assessment progress</th><th>Result</th><th>Details</th></tr></thead><tbody>{rows.map((r) => <tr key={r.id}>
-        <td><strong>{r.name}</strong><small className="block">{r.country}</small></td><td>{r.size}</td><td><Badge tone={r.active ? 'success' : 'amber'}>{r.active ? 'Active' : 'Paused'}</Badge></td>
-        <td className="progress-cell"><div className="row-between"><Badge tone={STAGES[r.stage].tone}>{STAGES[r.stage].label}</Badge>{r.stage !== 'not_started' && <small>{r.answeredCount}/40</small>}</div>{r.stage !== 'not_started' && <Progress value={r.answeredCount} label={`${r.name} completion`} />}</td>
-        <td>{r.overall !== null ? <><strong>{r.overall.toFixed(1)}%</strong>{r.band && <><br /><BandBadge band={r.band} /></>}</> : '—'}</td><td><Link to={`/app/organizations/${r.id}`}>View company</Link></td></tr>)}</tbody></table></div>{list.data && <Pager meta={list.data.meta} onPage={(p) => setParams((cur) => { const n = new URLSearchParams(cur); n.set('page', String(p)); return n; })} />}</Card>
-      : <EmptyState title="No companies match these filters">Try a different search, stage or band.</EmptyState>}
-    <div className="section-title"><h2>Registered, no company yet</h2><span>{pending.data?.meta.total ?? 0} champion{pending.data?.meta.total === 1 ? '' : 's'}</span></div>
-    {pending.isLoading ? <Card><p className="muted">Loading registrations…</p></Card>
-      : pending.isError ? <Alert kind="error">Registrations could not be loaded. <Button variant="secondary" onClick={() => void pending.refetch()}>Try again</Button></Alert>
-      : pending.data?.data.length ? <Card className="table-card"><div className="table-wrap"><table><caption className="sr-only">Champions who have not set up a company profile</caption><thead><tr><th>Champion</th><th>Job title</th><th>Email</th><th>Registered</th></tr></thead><tbody>{pending.data.data.map((c) => <tr key={c.id}>
-        <td><strong>{c.name}</strong>{!c.active && <> <Badge tone="amber">Paused</Badge></>}</td><td>{c.jobTitle ?? '—'}</td><td><Badge tone={c.verified ? 'neutral' : 'amber'}>{c.verified ? 'Verified' : 'Not verified'}</Badge><small className="block">{c.email}</small></td><td>{formatDate(c.registeredAt)}</td></tr>)}</tbody></table></div><Pager meta={pending.data.meta} onPage={(p) => setParams((cur) => { const n = new URLSearchParams(cur); n.set('ppage', String(p)); return n; })} /></Card>
-      : <EmptyState title="No pending registrations">Every registered champion has set up a company profile.</EmptyState>}</>;
+      : error ? <Alert kind="error" title="The directory could not be loaded">{error.message} <Button variant="secondary" onClick={() => void list.refetch()}>Try again</Button></Alert>
+      : rows.length ? <Card className="table-card"><div className="table-wrap"><table><caption className="sr-only">Champion and company directory</caption><thead><tr><th>Company / champion</th><th>Size</th><th>Account</th><th>Assessment progress</th><th>Result</th><th>Details</th></tr></thead><tbody>{rows.map((r) => <tr key={`${r.organizationId ? 'o' : 'u'}-${r.id}`}>
+        <td><strong>{r.name ?? 'Profile not set yet'}</strong>{r.champion && <small className="block">{r.champion.name} · {r.champion.email}</small>}</td>
+        <td>{r.size ?? '—'}</td>
+        <td>{r.organizationId ? <Badge tone={r.active ? 'success' : 'amber'}>{r.active ? 'Active' : 'Paused'}</Badge>
+          : <><Badge tone={r.active ? 'neutral' : 'amber'}>{r.active ? 'Registered' : 'Paused'}</Badge>{r.champion && !r.champion.verified && <small className="block">Email not verified</small>}</>}</td>
+        <td className="progress-cell"><div className="row-between"><Badge tone={STAGES[r.stage].tone}>{STAGES[r.stage].label}</Badge>{(r.stage === 'in_progress' || r.stage === 'submitted') && <small>{r.answeredCount}/40{r.stage === 'in_progress' ? ` · ${40 - r.answeredCount} left` : ''}</small>}</div>{(r.stage === 'in_progress' || r.stage === 'submitted') && <Progress value={r.answeredCount} label={`${r.name ?? 'Company'} completion`} />}</td>
+        <td>{r.overall !== null ? <><strong>{r.overall.toFixed(1)}%</strong>{r.band && <><br /><BandBadge band={r.band} /></>}</> : '—'}</td>
+        <td>{r.organizationId ? <Link to={`/app/organizations/${r.organizationId}`}>View company</Link> : <span className="muted">No company yet</span>}</td></tr>)}</tbody></table></div>{list.data && <Pager meta={list.data.meta} onPage={(p) => setParams((cur) => { const n = new URLSearchParams(cur); n.set('page', String(p)); return n; })} />}</Card>
+      : <EmptyState title="No champions match these filters">Try a different search, stage or band. New champions appear here as soon as they register.</EmptyState>}</>;
 }
 
 export function OrganizationDetail() {

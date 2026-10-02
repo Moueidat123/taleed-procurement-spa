@@ -12,6 +12,7 @@ use App\Models\SubmissionDomainResult;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -90,41 +91,63 @@ class StaffPortfolioService
     }
 
     /**
-     * Paginated company directory with stage and answered count only.
+     * Champion and company directory: every registered Champion appears from
+     * sign-up. A Champion without a company is stage no_profile; company rows
+     * carry stage and answered count only, never answers.
      *
      * @param  array<string, mixed>  $filters
      * @return array{data: list<array<string, mixed>>, meta: array{total: int, page: int, perPage: int, lastPage: int}}
      */
     public function organizations(AssessmentCycle $cycle, array $filters, int $perPage): array
     {
-        $query = Organization::query()
+        $companies = DB::table('organizations')
             ->where('organizations.is_test', false)
             ->leftJoin('assessments', fn ($join) => $join->on('assessments.organization_id', '=', 'organizations.id')
                 ->where('assessments.cycle_id', '=', $cycle->id))
             ->leftJoin('submission_snapshots', 'submission_snapshots.revision_id', '=', 'assessments.current_submission_id')
+            ->leftJoin('app_users as champion', fn ($join) => $join->on('champion.organization_id', '=', 'organizations.id')
+                ->where('champion.role', '=', 'champion'))
             ->select([
-                'organizations.*',
-                'assessments.id as assessment_id',
-                'assessments.current_submission_id',
-                'submission_snapshots.overall_percent',
-                'submission_snapshots.band',
+                DB::raw("'company' as row_type"),
+                'organizations.id as org_id', 'organizations.display_name as company_name',
+                'organizations.country_code as country', 'organizations.size_band as size', 'organizations.active as company_active',
+                'champion.id as user_id', 'champion.name as champion_name', 'champion.email as champion_email',
+                'champion.email_verified_at as verified_at', 'champion.active as user_active',
+                'assessments.id as assessment_id', 'assessments.current_submission_id',
+                'submission_snapshots.overall_percent', 'submission_snapshots.band',
             ]);
+        $pending = DB::table('app_users')
+            ->where('role', 'champion')->whereNull('organization_id')
+            ->select([
+                DB::raw("'champion' as row_type"),
+                DB::raw('null as org_id'), DB::raw('null as company_name'),
+                DB::raw('null as country'), DB::raw('null as size'), DB::raw('null as company_active'),
+                'id as user_id', 'name as champion_name', 'email as champion_email',
+                'email_verified_at as verified_at', 'active as user_active',
+                DB::raw('null as assessment_id'), DB::raw('null as current_submission_id'),
+                DB::raw('null as overall_percent'), DB::raw('null as band'),
+            ]);
+        $query = DB::query()->fromSub($companies->unionAll($pending), 'd');
 
         $search = trim((string) ($filters['search'] ?? ''));
         if ($search !== '') {
-            $query->where('organizations.display_name', 'like', '%'.addcslashes($search, '%_\\').'%');
+            $like = '%'.addcslashes($search, '%_\\').'%';
+            $query->where(fn ($q) => $q->where('d.company_name', 'like', $like)
+                ->orWhere('d.champion_name', 'like', $like)->orWhere('d.champion_email', 'like', $like));
         }
         match ($filters['stage'] ?? null) {
-            'submitted' => $query->whereNotNull('assessments.current_submission_id'),
-            'in_progress' => $query->whereNotNull('assessments.id')->whereNull('assessments.current_submission_id'),
-            'not_started' => $query->whereNull('assessments.id'),
+            'submitted' => $query->whereNotNull('d.current_submission_id'),
+            'in_progress' => $query->whereNotNull('d.assessment_id')->whereNull('d.current_submission_id'),
+            'not_started' => $query->where('d.row_type', 'company')->whereNull('d.assessment_id'),
+            'no_profile' => $query->where('d.row_type', 'champion'),
             default => null,
         };
         if (in_array($filters['band'] ?? null, self::BANDS, true)) {
-            $query->where('submission_snapshots.band', $filters['band']);
+            $query->where('d.band', $filters['band']);
         }
 
-        $page = $query->orderBy('organizations.display_name')->orderBy('organizations.id')->paginate($perPage);
+        $page = $query->orderByRaw('coalesce(d.company_name, d.champion_name)')
+            ->orderBy('d.org_id')->orderBy('d.user_id')->paginate($perPage);
 
         $assessmentIds = $page->getCollection()->pluck('assessment_id')->filter()->values()->all();
         $answered = AssessmentAnswer::query()
@@ -136,60 +159,35 @@ class StaffPortfolioService
             ->selectRaw('assessment_revisions.assessment_id as aid, count(*) as answered')
             ->pluck('answered', 'aid');
 
-        $items = $page->getCollection()->map(function (Organization $o) use ($answered) {
-            $assessmentId = $o->getAttribute('assessment_id');
-            $overall = $o->getAttribute('overall_percent');
-            $stage = $o->getAttribute('current_submission_id') ? 'submitted' : ($assessmentId ? 'in_progress' : 'not_started');
+        $items = $page->getCollection()->map(function (mixed $row) use ($answered): array {
+            $r = (object) $row;
+            $isCompany = $r->row_type === 'company';
+            $stage = ! $isCompany ? 'no_profile'
+                : ($r->current_submission_id !== null ? 'submitted' : ($r->assessment_id !== null ? 'in_progress' : 'not_started'));
 
             return [
-                'id' => $o->id,
-                'name' => $o->display_name,
-                'country' => $o->country_code,
-                'size' => $o->size_band,
-                'active' => (bool) $o->active,
+                'id' => $isCompany ? $r->org_id : $r->user_id,
+                'organizationId' => $isCompany ? $r->org_id : null,
+                'name' => $isCompany ? $r->company_name : null,
+                'country' => $r->country,
+                'size' => $r->size,
+                'active' => (bool) ($isCompany ? $r->company_active : $r->user_active),
+                'champion' => $r->user_id !== null
+                    ? ['name' => $r->champion_name, 'email' => $r->champion_email, 'verified' => $r->verified_at !== null]
+                    : null,
                 'stage' => $stage,
                 'answeredCount' => match ($stage) {
                     'submitted' => 40,
-                    'in_progress' => (int) ($answered[$assessmentId] ?? 0),
+                    'in_progress' => (int) ($answered[$r->assessment_id] ?? 0),
                     default => 0,
                 },
-                'overall' => $overall !== null ? (float) $overall : null,
-                'band' => $o->getAttribute('band'),
+                'overall' => $r->overall_percent !== null ? (float) $r->overall_percent : null,
+                'band' => $r->band,
             ];
         })->values()->all();
 
         return [
             'data' => $items,
-            'meta' => ['total' => $page->total(), 'page' => $page->currentPage(), 'perPage' => $page->perPage(), 'lastPage' => $page->lastPage()],
-        ];
-    }
-
-    /**
-     * Champions who registered but have no company profile yet (never shown in
-     * the company directory). Contact fields only; no answers exist yet.
-     *
-     * @return array{data: list<array<string, mixed>>, meta: array{total: int, page: int, perPage: int, lastPage: int}}
-     */
-    public function pendingChampions(?string $search, int $perPage): array
-    {
-        $query = AppUser::query()->where('role', 'champion')->whereNull('organization_id');
-        $search = trim((string) $search);
-        if ($search !== '') {
-            $like = '%'.addcslashes($search, '%_\\').'%';
-            $query->where(fn ($q) => $q->where('name', 'like', $like)->orWhere('email', 'like', $like));
-        }
-        $page = $query->orderByDesc('created_at')->orderBy('id')->paginate($perPage);
-
-        return [
-            'data' => $page->getCollection()->map(fn (AppUser $u) => [
-                'id' => $u->id,
-                'name' => $u->name,
-                'email' => $u->email,
-                'jobTitle' => $u->job_title,
-                'verified' => $u->email_verified_at !== null,
-                'active' => (bool) $u->active,
-                'registeredAt' => $u->created_at?->toISOString(),
-            ])->values()->all(),
             'meta' => ['total' => $page->total(), 'page' => $page->currentPage(), 'perPage' => $page->perPage(), 'lastPage' => $page->lastPage()],
         ];
     }

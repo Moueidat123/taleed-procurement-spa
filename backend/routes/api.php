@@ -73,7 +73,6 @@ Route::middleware('auth:sanctum')->group(function () {
         // Staff read models (Phase 2B): Analyst and Super Admin; never draft answers.
         Route::get('/staff/portfolio', [StaffPortfolioController::class, 'portfolio'])->name('procurement.staff.portfolio');
         Route::get('/staff/organizations', [StaffPortfolioController::class, 'organizations'])->name('procurement.staff.organizations.index');
-        Route::get('/staff/champions/pending', [StaffPortfolioController::class, 'pendingChampions'])->name('procurement.staff.champions.pending');
         Route::get('/staff/organizations/{organizationId}', [StaffPortfolioController::class, 'organization'])->name('procurement.staff.organizations.show');
         Route::get('/staff/assessments/{revisionId}', [StaffPortfolioController::class, 'submission'])->name('procurement.staff.assessments.show');
         Route::post('/staff/comparisons', [StaffPortfolioController::class, 'compare'])->name('procurement.staff.comparisons');
