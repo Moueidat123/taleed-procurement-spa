@@ -24,6 +24,7 @@ class OrganizationResource extends JsonResource
             'sizeBand' => $this->size_band,
             'registrationId' => $this->registration_id,
             'active' => $this->active,
+            'authorityConfirmed' => $this->authority_confirmed_at !== null,
         ];
     }
 }

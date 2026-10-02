@@ -81,6 +81,9 @@ jobs:
         run: vendor/bin/pint --test
       - name: Static analysis (Larastan)
         run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+        env:
+          # Test-only key so Laravel can boot for analysis; not a real secret.
+          APP_KEY: base64:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
       - name: PHPUnit on MySQL 8.4
         run: php artisan test
         env:

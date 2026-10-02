@@ -49,6 +49,7 @@ class OrganizationController
             'registrationId' => $request->filled('registrationId')
                 ? $request->string('registrationId')->trim()->value()
                 : null,
+            'authorityConfirmed' => $request->has('authorityConfirmed') ? $request->boolean('authorityConfirmed') : null,
         ]);
 
         AuditEvent::record(

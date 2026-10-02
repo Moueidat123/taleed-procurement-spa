@@ -1,14 +1,18 @@
 <?php
 
 use App\Http\Controllers\Procurement\AcceptInvitationController;
+use App\Http\Controllers\Procurement\AssessmentController;
 use App\Http\Controllers\Procurement\ConfirmVerificationController;
+use App\Http\Controllers\Procurement\FrameworkContentController;
 use App\Http\Controllers\Procurement\HealthController;
 use App\Http\Controllers\Procurement\IssueInvitationController;
 use App\Http\Controllers\Procurement\ListStaffUsersController;
 use App\Http\Controllers\Procurement\MeController;
+use App\Http\Controllers\Procurement\OpenCorrectionController;
 use App\Http\Controllers\Procurement\OrganizationController;
 use App\Http\Controllers\Procurement\RegisterController;
 use App\Http\Controllers\Procurement\SendVerificationController;
+use App\Http\Controllers\Procurement\StaffPortfolioController;
 use App\Http\Controllers\Procurement\UpdateOrganizationAccessController;
 use App\Http\Controllers\Procurement\UpdateStaffAccessController;
 use Illuminate\Support\Facades\Route;
@@ -46,12 +50,32 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/organization', [OrganizationController::class, 'update'])
         ->name('procurement.organization.update');
 
+    // Open cycles and published framework content (Phase 2B).
+    Route::get('/cycles/available', [FrameworkContentController::class, 'cycles'])->name('procurement.cycles.available');
+    Route::get('/frameworks/{version}', [FrameworkContentController::class, 'show'])->name('procurement.frameworks.show');
+
+    // Champion assessments (Phase 2B): own company only; forged IDs are 404.
+    Route::post('/assessments', [AssessmentController::class, 'start'])->name('procurement.assessments.start');
+    Route::get('/assessments/history', [AssessmentController::class, 'history'])->name('procurement.assessments.history');
+    Route::get('/assessments/{revisionId}', [AssessmentController::class, 'show'])->name('procurement.assessments.show');
+    Route::patch('/assessments/{revisionId}/answers', [AssessmentController::class, 'saveAnswers'])->name('procurement.assessments.answers');
+    Route::post('/assessments/{revisionId}/submit', [AssessmentController::class, 'submit'])->name('procurement.assessments.submit');
+    Route::get('/assessments/{revisionId}/result', [AssessmentController::class, 'result'])->name('procurement.assessments.result');
+
     // Staff people & access and organization pause/enable (D-10, D-17): Super
     // Admin only, gated behind confirmed TOTP two-factor for staff.
     Route::middleware('staff.2fa')->group(function () {
         // Staff invitations (D-10): token emailed, never returned.
         Route::post('/staff/invitations', IssueInvitationController::class)
             ->name('procurement.staff.invitations.issue');
+        Route::post('/staff/assessments/{revisionId}/corrections', OpenCorrectionController::class)
+            ->name('procurement.staff.corrections.open');
+        // Staff read models (Phase 2B): Analyst and Super Admin; never draft answers.
+        Route::get('/staff/portfolio', [StaffPortfolioController::class, 'portfolio'])->name('procurement.staff.portfolio');
+        Route::get('/staff/organizations', [StaffPortfolioController::class, 'organizations'])->name('procurement.staff.organizations.index');
+        Route::get('/staff/organizations/{organizationId}', [StaffPortfolioController::class, 'organization'])->name('procurement.staff.organizations.show');
+        Route::get('/staff/assessments/{revisionId}', [StaffPortfolioController::class, 'submission'])->name('procurement.staff.assessments.show');
+        Route::post('/staff/comparisons', [StaffPortfolioController::class, 'compare'])->name('procurement.staff.comparisons');
         Route::get('/staff/users', ListStaffUsersController::class)
             ->name('procurement.staff.users.index');
         Route::patch('/staff/users/{user}/access', UpdateStaffAccessController::class)

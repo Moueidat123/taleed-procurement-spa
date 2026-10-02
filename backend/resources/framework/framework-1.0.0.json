@@ -1,0 +1,604 @@
+{
+  "version": "1.0.0",
+  "title": "Procurement Performance Self-Assessment Framework",
+  "attribution": "Aramco Taleed & Roland Berger",
+  "sourceFile": "Procurement_Self Assessment Tool_v01.xlsx",
+  "sourceSha256": "e86755a94db9bb4c2d14c3bf1f60eb237189d4a5bc1fd04efbb8d4faf197eecd",
+  "sourceStatus": "Extracted source content; formal content approval is separate from prototype design approval.",
+  "domains": [
+    {
+      "key": "category_management",
+      "name": "Category Management",
+      "order": 1,
+      "questions": [
+        {
+          "id": "1.1",
+          "text": "Do you have formally documented category strategies for your top 3–5 spend categories, reviewed and updated at least annually?",
+          "sourceCell": "'2. Self-Assessment'!C8"
+        },
+        {
+          "id": "1.2",
+          "text": "Are your category strategies developed cross-functionally, involving stakeholders from operations, finance, and business units — not solely by procurement?",
+          "sourceCell": "'2. Self-Assessment'!C9"
+        },
+        {
+          "id": "1.3",
+          "text": "Have you segmented your entire spend portfolio into a structured category hierarchy with a minimum of 3 levels (category → sub-category → commodity)?",
+          "sourceCell": "'2. Self-Assessment'!C10"
+        },
+        {
+          "id": "1.4",
+          "text": "Does each major spend category have a formally designated category owner, accountable for strategy execution and performance tracking?",
+          "sourceCell": "'2. Self-Assessment'!C11"
+        },
+        {
+          "id": "1.5",
+          "text": "Do your category strategies explicitly define the preferred buying channel for each category (e.g., framework agreements, catalogue purchasing, spot buy)?",
+          "sourceCell": "'2. Self-Assessment'!C12"
+        },
+        {
+          "id": "1.6",
+          "text": "Are category strategies updated whenever there is a significant change in supply market conditions, pricing dynamics, or internal demand patterns?",
+          "sourceCell": "'2. Self-Assessment'!C13"
+        },
+        {
+          "id": "1.7",
+          "text": "Do you conduct formal category performance reviews at least quarterly, measuring against defined KPIs such as savings delivered, contract compliance, and supplier performance?",
+          "sourceCell": "'2. Self-Assessment'!C14"
+        },
+        {
+          "id": "1.8",
+          "text": "Do your category strategies include a structured assessment of supply market dynamics — including supplier concentration risk, pricing trends, and alternative sourcing options?",
+          "sourceCell": "'2. Self-Assessment'!C15"
+        },
+        {
+          "id": "1.9",
+          "text": "Do you apply differentiated sourcing and negotiation approaches by category, based on strategic importance and supply risk (e.g., Kraljic-style segmentation logic)?",
+          "sourceCell": "'2. Self-Assessment'!C16"
+        },
+        {
+          "id": "1.10",
+          "text": "Are your category strategies explicitly designed to maximize local content spend and aligned with your organization's local content or LCGPA compliance objectives?",
+          "sourceCell": "'2. Self-Assessment'!C17"
+        }
+      ],
+      "recommendations": {
+        "foundational": [
+          {
+            "id": "category_management.foundational.1",
+            "text": "Establish a prioritized list of top spend categories and assign clear category ownership.",
+            "sourceCell": "'4. Recommendations'!C8"
+          },
+          {
+            "id": "category_management.foundational.2",
+            "text": "Develop a standard category strategy template covering market, suppliers, demand, and levers.",
+            "sourceCell": "'4. Recommendations'!C8"
+          },
+          {
+            "id": "category_management.foundational.3",
+            "text": "Run quick-win sourcing waves on the largest, simplest categories to build credibility.",
+            "sourceCell": "'4. Recommendations'!C8"
+          },
+          {
+            "id": "category_management.foundational.4",
+            "text": "Introduce a basic category classification (e.g. Kraljic matrix) to differentiate strategies.",
+            "sourceCell": "'4. Recommendations'!C8"
+          }
+        ],
+        "developing": [
+          {
+            "id": "category_management.developing.1",
+            "text": "Roll out category strategies across all material categories with consistent quality standards.",
+            "sourceCell": "'4. Recommendations'!C9"
+          },
+          {
+            "id": "category_management.developing.2",
+            "text": "Embed annual refresh cycles linked to budget planning and demand forecasting.",
+            "sourceCell": "'4. Recommendations'!C9"
+          },
+          {
+            "id": "category_management.developing.3",
+            "text": "Strengthen stakeholder governance with formal category steering committees.",
+            "sourceCell": "'4. Recommendations'!C9"
+          },
+          {
+            "id": "category_management.developing.4",
+            "text": "Build a category-level initiative pipeline tracking savings, risk, and ESG impact.",
+            "sourceCell": "'4. Recommendations'!C9"
+          }
+        ],
+        "advanced": [
+          {
+            "id": "category_management.advanced.1",
+            "text": "Differentiate strategies further by tiering categories on strategic value and complexity.",
+            "sourceCell": "'4. Recommendations'!C10"
+          },
+          {
+            "id": "category_management.advanced.2",
+            "text": "Integrate market intelligence subscriptions and structured supplier scouting per category.",
+            "sourceCell": "'4. Recommendations'!C10"
+          },
+          {
+            "id": "category_management.advanced.3",
+            "text": "Tie category KPIs to business outcomes (e.g. margin, time-to-market, resilience).",
+            "sourceCell": "'4. Recommendations'!C10"
+          },
+          {
+            "id": "category_management.advanced.4",
+            "text": "Drive cross-category synergies through coordinated demand and specification management.",
+            "sourceCell": "'4. Recommendations'!C10"
+          }
+        ],
+        "best_in_class": [
+          {
+            "id": "category_management.best_in_class.1",
+            "text": "Use category strategies as enterprise value engines linked to corporate strategy.",
+            "sourceCell": "'4. Recommendations'!C11"
+          },
+          {
+            "id": "category_management.best_in_class.2",
+            "text": "Embed scenario planning and dynamic re-prioritization in response to market shifts.",
+            "sourceCell": "'4. Recommendations'!C11"
+          },
+          {
+            "id": "category_management.best_in_class.3",
+            "text": "Benchmark externally and share leading practices across business units and geographies.",
+            "sourceCell": "'4. Recommendations'!C11"
+          },
+          {
+            "id": "category_management.best_in_class.4",
+            "text": "Position category managers as trusted business advisors to senior leadership.",
+            "sourceCell": "'4. Recommendations'!C11"
+          }
+        ]
+      }
+    },
+    {
+      "key": "spend_analysis",
+      "name": "Spend Analysis",
+      "order": 2,
+      "questions": [
+        {
+          "id": "2.1",
+          "text": "Do you consolidate all purchasing data from ERP, invoices, purchase orders, and contracts into a single, centralized spend repository — rather than across disconnected systems and spreadsheets?",
+          "sourceCell": "'2. Self-Assessment'!C21"
+        },
+        {
+          "id": "2.2",
+          "text": "Do you apply a standardized, minimum 3-level spend taxonomy consistently across all business units, departments, and procurement systems?",
+          "sourceCell": "'2. Self-Assessment'!C22"
+        },
+        {
+          "id": "2.3",
+          "text": "Do you conduct formal spend reviews at least monthly, supported by a live or regularly refreshed dashboard?",
+          "sourceCell": "'2. Self-Assessment'!C23"
+        },
+        {
+          "id": "2.4",
+          "text": "Is there a formally designated individual or role explicitly responsible for spend data quality, classification governance, and the delivery of spend insights?",
+          "sourceCell": "'2. Self-Assessment'!C24"
+        },
+        {
+          "id": "2.5",
+          "text": "Does every spend review generate a documented, prioritized list of concrete sourcing actions or savings opportunities for follow-up?",
+          "sourceCell": "'2. Self-Assessment'!C25"
+        },
+        {
+          "id": "2.6",
+          "text": "Is your local content (ICV-eligible) spend tracked, categorized, and automatically reported within your spend taxonomy — rather than managed manually or separately?",
+          "sourceCell": "'2. Self-Assessment'!C26"
+        },
+        {
+          "id": "2.7",
+          "text": "Can you accurately identify your top 20 suppliers by total spend value within 24 hours, using your current procurement systems and data?",
+          "sourceCell": "'2. Self-Assessment'!C27"
+        },
+        {
+          "id": "2.8",
+          "text": "Have you cleansed your supplier master data in the past 12 months to eliminate duplicates, inconsistent naming conventions, and misclassified records?",
+          "sourceCell": "'2. Self-Assessment'!C28"
+        },
+        {
+          "id": "2.9",
+          "text": "Do you actively analyze off-contract and maverick spend as part of your regular spend review process to identify and remediate compliance leakage?",
+          "sourceCell": "'2. Self-Assessment'!C29"
+        },
+        {
+          "id": "2.10",
+          "text": "Is spend data used proactively to inform sourcing decisions, annual budget planning, and supplier negotiations — rather than only for retrospective finance reporting or audit purposes?",
+          "sourceCell": "'2. Self-Assessment'!C30"
+        }
+      ],
+      "recommendations": {
+        "foundational": [
+          {
+            "id": "spend_analysis.foundational.1",
+            "text": "Consolidate spend data from all ERP and P2P systems into a single, clean baseline.",
+            "sourceCell": "'4. Recommendations'!C15"
+          },
+          {
+            "id": "spend_analysis.foundational.2",
+            "text": "Implement a standardized spend taxonomy and classify the top 80% of spend.",
+            "sourceCell": "'4. Recommendations'!C15"
+          },
+          {
+            "id": "spend_analysis.foundational.3",
+            "text": "Quantify off-contract and maverick spend and report it to procurement leadership.",
+            "sourceCell": "'4. Recommendations'!C15"
+          },
+          {
+            "id": "spend_analysis.foundational.4",
+            "text": "Establish a quarterly spend review routine with key stakeholders.",
+            "sourceCell": "'4. Recommendations'!C15"
+          }
+        ],
+        "developing": [
+          {
+            "id": "spend_analysis.developing.1",
+            "text": "Move from one-off analyses to a continuously refreshed spend analytics dashboard.",
+            "sourceCell": "'4. Recommendations'!C16"
+          },
+          {
+            "id": "spend_analysis.developing.2",
+            "text": "Increase coverage of addressable spend under active procurement management.",
+            "sourceCell": "'4. Recommendations'!C16"
+          },
+          {
+            "id": "spend_analysis.developing.3",
+            "text": "Apply spend cube analysis (category × supplier × business unit × geography) systematically.",
+            "sourceCell": "'4. Recommendations'!C16"
+          },
+          {
+            "id": "spend_analysis.developing.4",
+            "text": "Link spend insights directly into the sourcing initiative pipeline and savings tracking.",
+            "sourceCell": "'4. Recommendations'!C16"
+          }
+        ],
+        "advanced": [
+          {
+            "id": "spend_analysis.advanced.1",
+            "text": "Augment spend analytics with predictive insights (price forecasts, demand patterns, risk signals).",
+            "sourceCell": "'4. Recommendations'!C17"
+          },
+          {
+            "id": "spend_analysis.advanced.2",
+            "text": "Integrate external benchmarks (e.g. should-cost, market price indices) into the analytics layer.",
+            "sourceCell": "'4. Recommendations'!C17"
+          },
+          {
+            "id": "spend_analysis.advanced.3",
+            "text": "Automate classification using machine-learning enabled spend tools.",
+            "sourceCell": "'4. Recommendations'!C17"
+          },
+          {
+            "id": "spend_analysis.advanced.4",
+            "text": "Use analytics to identify cross-category and cross-BU consolidation opportunities proactively.",
+            "sourceCell": "'4. Recommendations'!C17"
+          }
+        ],
+        "best_in_class": [
+          {
+            "id": "spend_analysis.best_in_class.1",
+            "text": "Deploy real-time spend intelligence accessible across the enterprise.",
+            "sourceCell": "'4. Recommendations'!C18"
+          },
+          {
+            "id": "spend_analysis.best_in_class.2",
+            "text": "Use AI-driven anomaly detection on transactions to identify leakage and risk.",
+            "sourceCell": "'4. Recommendations'!C18"
+          },
+          {
+            "id": "spend_analysis.best_in_class.3",
+            "text": "Integrate spend analytics with sustainability, risk, and resilience reporting.",
+            "sourceCell": "'4. Recommendations'!C18"
+          },
+          {
+            "id": "spend_analysis.best_in_class.4",
+            "text": "Position spend analytics as a strategic decision-support capability for the business.",
+            "sourceCell": "'4. Recommendations'!C18"
+          }
+        ]
+      }
+    },
+    {
+      "key": "strategic_sourcing",
+      "name": "Strategic Sourcing",
+      "order": 3,
+      "questions": [
+        {
+          "id": "3.1",
+          "text": "Do you apply a structured, multi-step sourcing process — covering market analysis, demand planning, tendering, negotiation preparation, and contracting — for all categories above a defined spend threshold?",
+          "sourceCell": "'2. Self-Assessment'!C34"
+        },
+        {
+          "id": "3.2",
+          "text": "Do you calculate and apply Total Cost of Ownership (TCO) analysis — not unit price alone — when evaluating supplier bids for strategic or high-value categories?",
+          "sourceCell": "'2. Self-Assessment'!C35"
+        },
+        {
+          "id": "3.3",
+          "text": "Do you mandate a minimum of three competitive quotes or bids for all purchases above a formally defined spend threshold?",
+          "sourceCell": "'2. Self-Assessment'!C36"
+        },
+        {
+          "id": "3.4",
+          "text": "Do you conduct formal supply market analysis — including price benchmarking, supplier landscape mapping, and competitive dynamics assessment — before launching a sourcing event?",
+          "sourceCell": "'2. Self-Assessment'!C37"
+        },
+        {
+          "id": "3.5",
+          "text": "Do you develop a documented negotiation strategy — including defined targets, walk-away positions, and specific negotiation levers — before entering any major supplier negotiation?",
+          "sourceCell": "'2. Self-Assessment'!C38"
+        },
+        {
+          "id": "3.6",
+          "text": "Do you use standardized RFX templates (RFI, RFQ, RFP) for sourcing events, aligned with internal stakeholders before distribution to the supplier market?",
+          "sourceCell": "'2. Self-Assessment'!C39"
+        },
+        {
+          "id": "3.7",
+          "text": "Do you evaluate and shortlist suppliers based on pre-defined qualitative and quantitative criteria beyond price — such as quality, delivery reliability, financial stability, and local content contribution?",
+          "sourceCell": "'2. Self-Assessment'!C40"
+        },
+        {
+          "id": "3.8",
+          "text": "Do you maintain and regularly update a vendor longlist or approved supplier database that is formally integrated into the sourcing process for each spend category?",
+          "sourceCell": "'2. Self-Assessment'!C41"
+        },
+        {
+          "id": "3.9",
+          "text": "Do you formally evaluate supplier performance post-award and feed the results back into your sourcing strategy, supplier segmentation, and future sourcing decisions?",
+          "sourceCell": "'2. Self-Assessment'!C42"
+        },
+        {
+          "id": "3.10",
+          "text": "Do you track and formally report realized sourcing savings against pre-defined targets on a category-by-category basis, with validation from finance or senior leadership?",
+          "sourceCell": "'2. Self-Assessment'!C43"
+        }
+      ],
+      "recommendations": {
+        "foundational": [
+          {
+            "id": "strategic_sourcing.foundational.1",
+            "text": "Define a standard end-to-end strategic sourcing process and roll it out for major events.",
+            "sourceCell": "'4. Recommendations'!C22"
+          },
+          {
+            "id": "strategic_sourcing.foundational.2",
+            "text": "Introduce structured RFx templates and basic e-sourcing tooling.",
+            "sourceCell": "'4. Recommendations'!C22"
+          },
+          {
+            "id": "strategic_sourcing.foundational.3",
+            "text": "Move from price-only to a TCO-based evaluation approach on top categories.",
+            "sourceCell": "'4. Recommendations'!C22"
+          },
+          {
+            "id": "strategic_sourcing.foundational.4",
+            "text": "Establish a savings tracking discipline linking negotiated savings to budgets.",
+            "sourceCell": "'4. Recommendations'!C22"
+          }
+        ],
+        "developing": [
+          {
+            "id": "strategic_sourcing.developing.1",
+            "text": "Embed pre-event market intelligence and supplier capability assessments as a standard step.",
+            "sourceCell": "'4. Recommendations'!C23"
+          },
+          {
+            "id": "strategic_sourcing.developing.2",
+            "text": "Scale e-sourcing tools across categories and harmonize RFx templates globally.",
+            "sourceCell": "'4. Recommendations'!C23"
+          },
+          {
+            "id": "strategic_sourcing.developing.3",
+            "text": "Develop negotiation playbooks differentiated by category type and supplier power.",
+            "sourceCell": "'4. Recommendations'!C23"
+          },
+          {
+            "id": "strategic_sourcing.developing.4",
+            "text": "Introduce contract management discipline covering performance, risk, and ESG clauses.",
+            "sourceCell": "'4. Recommendations'!C23"
+          }
+        ],
+        "advanced": [
+          {
+            "id": "strategic_sourcing.advanced.1",
+            "text": "Integrate advanced techniques: should-cost modelling, scenario-based bidding, and bundling.",
+            "sourceCell": "'4. Recommendations'!C24"
+          },
+          {
+            "id": "strategic_sourcing.advanced.2",
+            "text": "Build a sourcing center of excellence to support complex and high-value events.",
+            "sourceCell": "'4. Recommendations'!C24"
+          },
+          {
+            "id": "strategic_sourcing.advanced.3",
+            "text": "Measure realized (not just negotiated) savings and feed results back to the business.",
+            "sourceCell": "'4. Recommendations'!C24"
+          },
+          {
+            "id": "strategic_sourcing.advanced.4",
+            "text": "Use sourcing data to inform supplier consolidation and strategic supplier selection.",
+            "sourceCell": "'4. Recommendations'!C24"
+          }
+        ],
+        "best_in_class": [
+          {
+            "id": "strategic_sourcing.best_in_class.1",
+            "text": "Apply digital sourcing platforms with AI-supported bid analysis and award optimization.",
+            "sourceCell": "'4. Recommendations'!C25"
+          },
+          {
+            "id": "strategic_sourcing.best_in_class.2",
+            "text": "Use sourcing as a lever for innovation, ESG, and resilience — not only cost.",
+            "sourceCell": "'4. Recommendations'!C25"
+          },
+          {
+            "id": "strategic_sourcing.best_in_class.3",
+            "text": "Continuously optimize cycle time and effectiveness across the sourcing pipeline.",
+            "sourceCell": "'4. Recommendations'!C25"
+          },
+          {
+            "id": "strategic_sourcing.best_in_class.4",
+            "text": "Position strategic sourcing as a recognized competitive advantage internally and externally.",
+            "sourceCell": "'4. Recommendations'!C25"
+          }
+        ]
+      }
+    },
+    {
+      "key": "supplier_relationship_management",
+      "name": "Supplier Relationship Management",
+      "order": 4,
+      "questions": [
+        {
+          "id": "4.1",
+          "text": "Do you maintain a structured, up-to-date supplier database that includes qualification status, performance history, risk rating, and strategic classification for all active suppliers?",
+          "sourceCell": "'2. Self-Assessment'!C47"
+        },
+        {
+          "id": "4.2",
+          "text": "Have you formally classified all active suppliers into distinct tiers (e.g., Priority, Strategic/Niche, Leverage, Commodity) based on spend level and business criticality?",
+          "sourceCell": "'2. Self-Assessment'!C48"
+        },
+        {
+          "id": "4.3",
+          "text": "Do you conduct formal, structured supplier performance reviews at least quarterly for your top-tier and strategic suppliers, using pre-defined and consistently applied KPIs?",
+          "sourceCell": "'2. Self-Assessment'!C49"
+        },
+        {
+          "id": "4.4",
+          "text": "Do you have a documented supplier development plan for your most strategic suppliers, covering a 1–3 year horizon with defined targets, milestones, and mutual commitments signed off by both parties?",
+          "sourceCell": "'2. Self-Assessment'!C50"
+        },
+        {
+          "id": "4.5",
+          "text": "Do you systematically assess and monitor supply chain risks — including financial health, geopolitical exposure, single-source dependency, and cybersecurity — for your critical suppliers on an ongoing basis?",
+          "sourceCell": "'2. Self-Assessment'!C51"
+        },
+        {
+          "id": "4.6",
+          "text": "Do you have a formally defined and actively applied supplier phase-out process, triggered automatically when a supplier's performance consistently falls below acceptable thresholds?",
+          "sourceCell": "'2. Self-Assessment'!C52"
+        },
+        {
+          "id": "4.7",
+          "text": "Do you apply a clearly differentiated engagement model by supplier tier — with structured partnership governance for strategic suppliers and transactional, automated management for commodity suppliers?",
+          "sourceCell": "'2. Self-Assessment'!C53"
+        },
+        {
+          "id": "4.8",
+          "text": "Do your supplier qualification and selection criteria explicitly include local content scoring or ICV contribution as a formal, weighted evaluation factor?",
+          "sourceCell": "'2. Self-Assessment'!C54"
+        },
+        {
+          "id": "4.9",
+          "text": "Do you apply a Total Cost of Ownership (TCO) perspective when making supplier selection and make-or-buy decisions — rather than evaluating suppliers on unit price or short-term cost alone?",
+          "sourceCell": "'2. Self-Assessment'!C55"
+        },
+        {
+          "id": "4.10",
+          "text": "Do you have a structured, documented onboarding process for new suppliers — including compliance verification, data capture, and system setup — completed before the first purchase order is placed?",
+          "sourceCell": "'2. Self-Assessment'!C56"
+        }
+      ],
+      "recommendations": {
+        "foundational": [
+          {
+            "id": "supplier_relationship_management.foundational.1",
+            "text": "Segment suppliers based on spend, strategic importance, and risk to identify the critical few.",
+            "sourceCell": "'4. Recommendations'!C29"
+          },
+          {
+            "id": "supplier_relationship_management.foundational.2",
+            "text": "Define a basic SRM framework and assign relationship owners for top suppliers.",
+            "sourceCell": "'4. Recommendations'!C29"
+          },
+          {
+            "id": "supplier_relationship_management.foundational.3",
+            "text": "Introduce structured supplier performance reviews with key suppliers.",
+            "sourceCell": "'4. Recommendations'!C29"
+          },
+          {
+            "id": "supplier_relationship_management.foundational.4",
+            "text": "Implement basic supplier qualification and onboarding processes.",
+            "sourceCell": "'4. Recommendations'!C29"
+          }
+        ],
+        "developing": [
+          {
+            "id": "supplier_relationship_management.developing.1",
+            "text": "Roll out differentiated engagement models (strategic, preferred, transactional) consistently.",
+            "sourceCell": "'4. Recommendations'!C30"
+          },
+          {
+            "id": "supplier_relationship_management.developing.2",
+            "text": "Deploy balanced supplier scorecards covering quality, delivery, cost, service, and innovation.",
+            "sourceCell": "'4. Recommendations'!C30"
+          },
+          {
+            "id": "supplier_relationship_management.developing.3",
+            "text": "Operationalize a supplier risk management process across financial, operational, and ESG risks.",
+            "sourceCell": "'4. Recommendations'!C30"
+          },
+          {
+            "id": "supplier_relationship_management.developing.4",
+            "text": "Establish executive sponsorship and governance routines for top strategic suppliers.",
+            "sourceCell": "'4. Recommendations'!C30"
+          }
+        ],
+        "advanced": [
+          {
+            "id": "supplier_relationship_management.advanced.1",
+            "text": "Launch joint value-creation programs (innovation, cost-out, sustainability) with top suppliers.",
+            "sourceCell": "'4. Recommendations'!C31"
+          },
+          {
+            "id": "supplier_relationship_management.advanced.2",
+            "text": "Integrate ESG performance and compliance into supplier scorecards and governance.",
+            "sourceCell": "'4. Recommendations'!C31"
+          },
+          {
+            "id": "supplier_relationship_management.advanced.3",
+            "text": "Use SRM analytics to anticipate supplier risk and proactively manage performance issues.",
+            "sourceCell": "'4. Recommendations'!C31"
+          },
+          {
+            "id": "supplier_relationship_management.advanced.4",
+            "text": "Develop differentiated talent and capabilities for SRM (relationship managers, analysts).",
+            "sourceCell": "'4. Recommendations'!C31"
+          }
+        ],
+        "best_in_class": [
+          {
+            "id": "supplier_relationship_management.best_in_class.1",
+            "text": "Co-invest with strategic suppliers in capability building, R&D, and shared infrastructure.",
+            "sourceCell": "'4. Recommendations'!C32"
+          },
+          {
+            "id": "supplier_relationship_management.best_in_class.2",
+            "text": "Use supplier ecosystems as a source of competitive differentiation and resilience.",
+            "sourceCell": "'4. Recommendations'!C32"
+          },
+          {
+            "id": "supplier_relationship_management.best_in_class.3",
+            "text": "Apply real-time supplier intelligence (financial, ESG, geopolitical) to dynamic decision-making.",
+            "sourceCell": "'4. Recommendations'!C32"
+          },
+          {
+            "id": "supplier_relationship_management.best_in_class.4",
+            "text": "Benchmark SRM externally and continuously raise the bar on supplier collaboration.",
+            "sourceCell": "'4. Recommendations'!C32"
+          }
+        ]
+      }
+    }
+  ],
+  "interpretations": {
+    "foundational": "The procurement function sits at a foundational maturity level. Core capabilities are not yet consistently in place. Priority should be given to establishing standardized processes, a clean spend baseline, and category ownership before pursuing advanced value levers.",
+    "developing": "The procurement function shows developing maturity. Capabilities are in place in parts of the organization but are applied inconsistently. Focus on standardizing processes across categories, scaling proven practices, and closing the most material capability gaps identified in the dimension scores.",
+    "advanced": "The procurement function demonstrates good performance. Most strategic levers are in place and operating effectively. The next horizon is selective excellence: deepen supplier collaboration, sharpen analytics-driven decision-making, and embed procurement more strongly into business strategy.",
+    "best_in_class": "The procurement function is performing at a best-in-class level. The focus should now shift from building capability to sustaining excellence, scaling innovation with strategic suppliers, and using procurement as a competitive differentiator."
+  }
+}

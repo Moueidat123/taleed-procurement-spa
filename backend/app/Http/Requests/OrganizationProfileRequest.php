@@ -31,6 +31,7 @@ class OrganizationProfileRequest extends FormRequest
             'countryCode' => ['required', 'string', 'size:2', 'alpha'],
             'sizeBand' => ['required', 'string', 'max:40'],
             'registrationId' => ['nullable', 'string', 'max:120'],
+            'authorityConfirmed' => ['sometimes', 'boolean'],
         ];
     }
 }

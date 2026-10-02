@@ -234,3 +234,40 @@ Commands, exit statuses and evidence:
 Reviewer findings and resolutions:
 Unresolved blockers:
 Exact next phase and approval required:
+
+## Phase 2B — 02B-ASSESSMENTS
+### Scope and acceptance
+Server-side assessment engine: versioned framework import/publish, annual cycles, Champion drafts with versioned saves, atomic idempotent submission with immutable snapshots, Super Admin corrections, and staff portfolio/directory/comparison read models. Local logic only; no deployment.
+
+### Branch and commits
+Branch `implementation/phase-2b` from `main` (`23069e5e`, PR #2 merge). Commits in order: scoring engine (`0cdf7ddd`), framework/cycle tables (`2a44f0d2`), importer/publish (`08f8a45c`), operator commands (`46b4a995`), assessment tables (`3a4a40db`) and models (`bec65a94`), Champion endpoints (`d326b265`), corrections (`616a81d9`), staff views (`18e0099e`), race tests and journeys (`2fa66815`), read endpoints/OpenAPI/schema/Larastan (`a9ab38e2`), docs (this commit).
+
+### What was built
+- `App\Domain\Scoring\ScoringEngine` — PHP port of `src/domain/scoring.ts`; matches all 14,641 cases in `tests/Fixtures/scoring-count-oracle.json`. Integer basis points; string question IDs (`1.10` ≠ `1.1`); null is not "no".
+- `FrameworkImporter` + `procurement:framework:import` / `procurement:framework:publish --approval-ref=` / `procurement:cycle:create` (Asia/Riyadh business dates). Import verifies the workbook SHA-256 and exactly 4 domains × 10 questions × 4 actions per band (64). Published versions are immutable; all three are audited.
+- Champion API: `POST /assessments`, `GET /assessments/{id}`, `PATCH /assessments/{id}/answers` (expectedVersion; 409 when stale or submitted), `POST /assessments/{id}/submit` (Idempotency-Key + declaration; snapshot + checksum + 4 domain rows + audit + outbox in one transaction), `GET /assessments/{id}/result`, `GET /assessments/history`, `GET /cycles/available`, `GET /frameworks/{version}`.
+- `POST /staff/assessments/{id}/corrections` — Super Admin with TOTP, reason 10–1000 chars, allowed after cycle close; prior submission stays effective until the correction is submitted.
+- Staff (Analyst/Super Admin with TOTP): `GET /staff/portfolio`, `GET /staff/organizations` (server filters + pagination; stage and answered count only, never draft answers), `GET /staff/organizations/{id}`, `GET /staff/assessments/{id}` (submitted only), `POST /staff/comparisons` (2–4 companies, same framework). Test companies are excluded everywhere.
+- Gap found and fixed: a Champion had no way to confirm authority to submit. `PATCH /organization` now accepts `authorityConfirmed`, required before an assessment can start.
+
+### Database, schema and contract changes
+Migrations `2026_10_01_000001_create_framework_and_cycle_tables` and `2026_10_02_000001_create_assessment_tables`. Exported structure: `docs/production/schema.sql` (27 tables); diagram: `docs/production/schema-erd.md`. OpenAPI `docs/production/api/openapi-v1.yaml` is `1.0.0-phase2b`; also corrected email verification confirm to 201. Only the Phase 3 export endpoint remains `planned`.
+
+### Commands, exit statuses and evidence (`docs/production/evidence/phase-2b/`)
+| Check | Result |
+|---|---|
+| `ops/local/dev test` (MySQL) — `mysql-suite.txt` | 123 passed, exit 0 (run by the director, 2 Oct 2026) |
+| Larastan — `larastan.txt` | No errors, exit 0 (72 type errors found and fixed) |
+| Pint `--test` — `pint.txt` | exit 0 |
+| OpenAPI parse — `openapi-parse.txt` | 31 paths, exit 0 |
+
+Concurrency (real MySQL locks on a second connection): duplicate assessment and second open draft refused by the database; save blocked during submit; stale save after submit is 409; crossing submits create one snapshot and one outbox event; same-key retry waits then returns the original; overlapping corrections open one draft. Real-session journeys: Champion register → email code → profile → answer → submit → result; Super Admin password + TOTP → correction → Champion submits it.
+
+### Unresolved and open items
+- Outbox events are written but no dispatcher sends them yet (Phase 3 notifications).
+- No app endpoint to mark a company as a test company (`is_test`); set by an operator only.
+- Locally the framework is published with test reference `LOCAL-TEST`; the real content approval reference (D-19) is still required before production.
+- Closing a cycle is not exposed as a command yet; tests close it directly.
+
+### Exact next phase and approval required
+Independent review of the Phase 2B PR and the director's merge. Phase 3 (connect the React SPA to these endpoints, exports and reports) starts only after that. Phases 4–5 remain frozen until the director provides production inputs and written approval.

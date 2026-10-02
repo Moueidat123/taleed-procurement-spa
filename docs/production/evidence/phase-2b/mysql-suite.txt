@@ -1,0 +1,164 @@
+
+   PASS  Tests\Unit\ScoringEngineTest
+  ✓ all oracle cases match exactly                                       0.14s  
+  ✓ band boundaries with data set #0
+  ✓ band boundaries with data set #1
+  ✓ band boundaries with data set #40
+  ✓ band boundaries with data set #2
+  ✓ band boundaries with data set #65
+  ✓ band boundaries with data set #3
+  ✓ band boundaries with data set #80
+  ✓ band boundaries with data set #4
+  ✓ each domain band has actions copied from the framework
+  ✓ focus area ties break by domain order
+  ✓ all one hundred
+  ✓ null is not no and incomplete answers are refused
+  ✓ unknown question ids are refused
+
+   PASS  Tests\Feature\Accounts\AccountsSecurityTest
+  ✓ every staff route requires confirmed two factor with data set "anal… 1.02s  
+  ✓ every staff route requires confirmed two factor with data set "supe… 0.04s  
+  ✓ champions are not subject to the mfa gate but are still forbidden    0.03s  
+  ✓ super admin pauses and enables an organization with audit            0.03s  
+  ✓ an analyst with two factor cannot pause an organization              0.02s  
+  ✓ forged user and organization ids return 404                          0.03s  
+  ✓ access change ignores role email and password in input               0.03s  
+  ✓ invitation acceptance is rate limited                                0.04s  
+  ✓ identical email in app and cms are independent principals            0.12s  
+  ✓ bootstrap command creates one audited super admin and is idempotent  0.03s  
+  ✓ bootstrap command rejects an invalid email                           0.02s  
+
+   PASS  Tests\Feature\Accounts\OrganizationProfileTest
+  ✓ verified champion creates a profile and is linked                    0.03s  
+  ✓ get returns profile or 404 before creation                           0.03s  
+  ✓ update edits in place without creating a second company              0.03s  
+  ✓ duplicate company name in same country is blocked                    0.02s  
+  ✓ duplicate registration id is blocked                                 0.02s  
+  ✓ unverified champion cannot set a profile                             0.02s  
+  ✓ staff cannot use the champion profile endpoint                       0.02s  
+  ✓ sector and privileged fields are never persisted                     0.02s  
+
+   PASS  Tests\Feature\Accounts\RegistrationTest
+  ✓ champion can register and receives a code                            0.04s  
+  ✓ registration never sets privileged fields from input                 0.02s  
+  ✓ duplicate email is rejected without enumeration                      0.02s  
+  ✓ weak password and missing consent are rejected                       0.03s  
+  ✓ confirming the correct code verifies the user                        0.03s  
+  ✓ wrong code counts an attempt and locks after five                    0.03s  
+
+   PASS  Tests\Feature\Accounts\StaffAdministrationTest
+  ✓ super admin lists staff and excludes champions                       0.03s  
+  ✓ staff without confirmed two factor are blocked by the gate           0.02s  
+  ✓ a champion cannot list staff                                         0.02s  
+  ✓ a guest cannot list staff                                            0.02s  
+  ✓ super admin toggles analyst export                                   0.02s  
+  ✓ super admin deactivates an analyst                                   0.02s  
+  ✓ super admin cannot change their own access                           0.02s  
+  ✓ the last active super admin cannot be deactivated                    0.02s  
+  ✓ a champion cannot change staff access                                0.02s  
+
+   PASS  Tests\Feature\Accounts\StaffInvitationTest
+  ✓ super admin issues an invitation and token is emailed not stored     0.03s  
+  ✓ a champion cannot issue                                              0.02s  
+  ✓ an analyst cannot issue                                              0.02s  
+  ✓ a guest cannot issue                                                 0.02s  
+  ✓ accepting a valid token creates a signed in staff user               0.02s  
+  ✓ role and email come from the invitation not from input               0.02s  
+  ✓ a token cannot be used twice                                         0.03s  
+  ✓ an expired token is rejected                                         0.02s  
+  ✓ a random token is rejected without enumeration                       0.02s  
+  ✓ duplicate pending invitation is refused                              0.02s  
+
+   PASS  Tests\Feature\Assessments\AssessmentFlowTest
+  ✓ start creates a draft then resumes the same one                      0.06s  
+  ✓ save requires the current version and null is not no                 0.06s  
+  ✓ unknown questions and bad values are refused                         0.06s  
+  ✓ incomplete submission and missing declaration or key are refused     0.06s  
+  ✓ submit scores snapshots and a retry returns the same result          0.07s  
+  ✓ history lists own revisions with the effective one                   0.11s  
+  ✓ another company and forged ids get 404                               0.06s  
+  ✓ staff cannot start                                                   0.04s  
+  ✓ a company without confirmed authority cannot start                   0.05s  
+
+   PASS  Tests\Feature\Assessments\CorrectionTest
+  ✓ super admin opens a correction copying the answers                   0.07s  
+  ✓ reason must be at least ten characters                               0.06s  
+  ✓ an analyst is refused                                                0.06s  
+  ✓ a super admin without two factor is refused                          0.06s  
+  ✓ a second open correction and correcting a stale revision are 409     0.07s  
+  ✓ correction works after the cycle closes and advances the pointer on… 0.07s  
+  ✓ forged revision ids are 404                                          0.06s  
+
+   PASS  Tests\Feature\Assessments\EndToEndJourneyTest
+  ✓ champion journey from registration to result                         0.08s  
+  ✓ super admin with totp opens a correction the champion submits        0.12s  
+
+   PASS  Tests\Feature\Assessments\FrameworkCommandsTest
+  ✓ import creates a draft with 64 actions                               0.04s  
+  ✓ import fails on a checksum mismatch                                  0.02s  
+  ✓ publish requires an approval reference                               0.05s  
+  ✓ cycle create uses riyadh business dates and is audited               0.04s  
+  ✓ cycle create refuses a draft framework bad dates and a second open…  0.06s  
+
+   PASS  Tests\Feature\Assessments\FrameworkContentTest
+  ✓ published framework content is returned without internal ids         0.06s  
+  ✓ a draft framework is 404                                             0.04s  
+  ✓ open cycles are listed with their framework                          0.05s  
+  ✓ guests are refused                                                   0.04s  
+
+   PASS  Tests\Feature\Assessments\FrameworkImportTest
+  ✓ import creates a draft with all content and verifies the workbook    0.04s  
+  ✓ a wrong workbook checksum is refused                                 0.02s  
+  ✓ the same version cannot be imported twice                            0.05s  
+  ✓ malformed content is refused                                         0.02s  
+  ✓ publish requires an approval reference and then locks the version    0.04s  
+  ✓ a published version cannot be deleted                                0.04s  
+  ✓ only one cycle can be open                                           0.04s  
+
+   PASS  Tests\Feature\Assessments\StaffPortfolioTest
+  ✓ portfolio counts effective submissions and excludes test companies   0.09s  
+  ✓ directory shows stage and answered count but never answers           0.08s  
+  ✓ directory filters and paginates on the server                        0.14s  
+  ✓ company detail lists submissions and staff cannot open drafts        0.09s  
+  ✓ compare two to four companies with submissions                       0.09s  
+  ✓ champions are refused                                                0.08s  
+  ✓ analysts without two factor are refused                              0.08s  
+
+   PASS  Tests\Feature\Concurrency\AssessmentRaceTest
+  ✓ the database refuses a second assessment and a second open draft     0.07s  
+  ✓ a save waits while a submit holds the assessment lock                1.18s  
+  ✓ a save after a committed submit is a conflict not success            0.20s  
+  ✓ crossing submits with different keys create one submission           0.20s  
+  ✓ a retry with the same key waits for the first and returns its resul… 1.21s  
+  ✓ overlapping corrections open only one draft                          1.26s  
+
+   PASS  Tests\Feature\Concurrency\LastAdminLockTest
+  ✓ deactivation waits for a concurrent admin row lock                   1.18s  
+  ✓ after the first commit the second crossing deactivation is refused   0.07s  
+
+   PASS  Tests\Feature\Foundation\CoreEditionTest
+  ✓ statamic runs as core with headless apis disabled                    0.02s  
+  ✓ cms admin command creates exactly one user and never enables pro     0.04s  
+
+   PASS  Tests\Feature\Foundation\PrincipalIsolationTest
+  ✓ application user logs in through the business api                    0.03s  
+  ✓ inactive and wrong password fail identically                         0.03s  
+  ✓ cms only session cannot call the business api                        0.15s  
+  ✓ cms administrator can reach the control panel                        0.68s  
+  ✓ application super admin has no control panel access                  0.06s  
+  ✓ password reset brokers never cross providers                         0.91s  
+  ✓ forgot password response does not reveal accounts                    0.75s  
+  ✓ application login does not write statamic user state                 0.05s  
+
+   PASS  Tests\Feature\Foundation\RoutingTest
+  ✓ health is json and reports database                                  0.02s  
+  ✓ unknown business routes return the json error envelope               0.02s  
+  ✓ protected business route requires application identity               0.02s  
+  ✓ root serves the built spa shell or a clear 503                       0.02s  
+  ✓ cms privacy placeholder is server rendered by statamic               0.09s  
+  ✓ csrf cookie endpoint is reserved                                     0.02s  
+
+  Tests:    123 passed (73861 assertions)
+  Duration: 13.49s
+
+exit=0
