@@ -284,3 +284,9 @@ Independent review of the Phase 2B PR and the director's merge. Phase 3 (connect
 - **Retired:** `tests/e2e/prototype.spec.ts` and `playwright.config.ts`. `npm run test:e2e` now runs the local suite, and CI no longer runs browser tests.
 - **API:** `/staff/exports` is documented as implemented in `openapi-v1.yaml`.
 - **Open items:** the director confirms the read-only Framework library; independent review and merge.
+
+## 2 Oct 2026 — after Phase 3
+- **Merged:** PR #4 (Phase 3) was merged on director instruction without an independent review. PR #5 merged (pending champions list; superseded by PR #6).
+- **PR #6, open:** the staff directory lists every champion from registration ("Awaiting profile setup"), then the company with its progress.
+- **D-17 changed by the director:** staff two-step verification is optional in every environment. The `EnsureStaffTwoFactor` middleware and the `staff.2fa` group are removed. Tests now assert that staff without TOTP can use staff routes, while role checks still hold (analyst cannot manage access; champion is refused). `two_factor_required` is removed from `openapi-v1.yaml`. The Two-step verification page stays as an optional setting. Checks: PHPUnit 128/128, Larastan and Pint clean, tsc pass, Playwright 7 passed and 2 skipped.
+- **Deployment track:** Phases 4–5 remain frozen by director instruction (2 Oct 2026); no work started.

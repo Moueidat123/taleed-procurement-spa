@@ -1,8 +1,8 @@
 # Project status — read this first
 
 **Last updated:** 2 October 2026 · **Updated by:** GitHub Copilot
-**Current phase:** Phase 1 (Foundation) merged (PR #1). Phase 2A (Accounts, login and security) merged (PR #2). **Phase 2B (Assessment engine and scoring) is implemented on `implementation/phase-2b` and awaiting independent review and the director's merge.** Phase 3 (connect the React app, staff views and reports) is implemented locally on top of 2B and awaits review.
-**Branch:** `main` (Phase 1 merged) · new phase work happens on `implementation/<phase>` branches.
+**Current phase:** Local track complete. Phases 1, 2A, 2B and 3 are merged to `main` (PRs #1–#5). PR #6 (staff champion directory) is open. The deployment track (Phases 4–5) stays frozen by director instruction.
+**Branch:** `main` · new phase work happens on `implementation/<phase>` branches.
 
 > **Working mode (director instruction, 1 Oct 2026):** continue all **local logic and application** work (Phases 2A, 2B, 3). **Deployment phases (4 Release readiness, 5 Production launch) stay frozen** until the director provides the §5 inputs and a written go-ahead. Nothing in this repo touches production, pushes credentials, or provisions paid resources.
 
@@ -22,8 +22,8 @@ This file is the short entry point for any agent or colleague (Claude Code, Code
 | 0 Discovery | `prompts/production/00-DISCOVERY.md` | ✅ Done (commit `43640c4`) |
 | 1 Foundation | `prompts/production/01-FOUNDATION.md` | ✅ Done and **merged to `main`** (`ef9cc3d`, PR #1 `1dc49c9`) |
 | 2A Accounts, login and security | `02A-ACCOUNTS.md` | ✅ Merged (PR #2) |
-| 2B Assessment engine and scoring | `02B-ASSESSMENTS.md` | 🔍 **Implemented; PR open, awaiting review** — local logic only (123 MySQL tests, Larastan clean) |
-| 3 Connect the React app, staff views and reports | `03-UI-AND-REPORTS.md` | 🔍 Implemented locally (2 Oct 2026); evidence `docs/production/evidence/phase-3/`; awaiting review. Privacy text remains a launch gate |
+| 2B Assessment engine and scoring | `02B-ASSESSMENTS.md` | ✅ Merged (PR #3) |
+| 3 Connect the React app, staff views and reports | `03-UI-AND-REPORTS.md` | ✅ Merged (PR #4, 2 Oct 2026; merged on director instruction without independent review). Follow-up PR #5 merged. Evidence `docs/production/evidence/phase-3/`. Privacy text remains a launch gate |
 
 ### Deployment track — FROZEN (kept as-is; director inputs required)
 | Phase | Prompt | State |
@@ -33,7 +33,11 @@ This file is the short entry point for any agent or colleague (Claude Code, Code
 
 Every phase: branch `implementation/<phase>`, then evidence, then `STATUS.md` and `HANDOFF.md` updates, then a PR, then an independent review, then the director merges and approves the next phase (D-27, D-28). The deployment track does not start until it is explicitly unfrozen.
 
-## What works now (verified 30 Sep 2026)
+## What works now
+- **Staff two-step verification is optional** (D-17 changed by the director, 2 Oct 2026). Analysts and Super Admins sign in with a password only unless they choose to enable TOTP. Risk accepted by the director: a staff password alone exposes all company results and exports.
+- Latest checks (2 Oct 2026): PHPUnit 128/128 (MySQL), Larastan 0 errors, Pint clean, type check pass, local Playwright 7 passed and 2 skipped.
+
+### Foundation baseline (verified 30 Sep 2026)
 - **Stack:** Laravel 13.34 + Statamic 6.34.1 **Core** (no Pro, no licence key) in `backend/`; MySQL 8.4.11; PHP 8.4.26.
 - **Docker:** app, queue, one scheduler, MySQL, Vite, Mailpit and an nginx HTTPS edge.
 - **Origin:** `https://procurement.taleed.test` serves the approved React SPA, the business API `/api/procurement/v1/*`, CMS pages `/pages/*` and the Statamic CP `/cp`.
@@ -42,7 +46,7 @@ Every phase: branch `implementation/<phase>`, then evidence, then `STATUS.md` an
   - The single CMS admin uses the `statamic` guard.
   - Each has its own password brokers. Neither can use the other's area.
   - Covered by tests.
-- **Implemented endpoints:** `health`, `auth/login`, `auth/logout`, `auth/me`, `auth/forgot-password` (non-enumerating), `auth/reset-password`, TOTP two-factor routes. Contract: `docs/production/api/openapi-v1.yaml`.
+- **Implemented endpoints:** `health`, `auth/login`, `auth/logout`, `auth/me`, `auth/forgot-password` (non-enumerating), `auth/reset-password`, optional TOTP two-factor routes. Contract: `docs/production/api/openapi-v1.yaml`.
 - **Checks:**
 
   | Check | Result |
@@ -58,14 +62,15 @@ Every phase: branch `implementation/<phase>`, then evidence, then `STATUS.md` an
 
 ## How to resume (any agent)
 1. Read `AGENTS.md`, this file, `docs/production/HANDOFF.md` and `docs/production/decisions.md`.
-2. Run `git status`. Phase 1 is on `main`. For new work, create `git switch -c implementation/phase-2a`. Never discard uncommitted work.
+2. Run `git status`. Phase 1 is on `main`. For new work, create a new `implementation/<topic>` branch from `main`. Never discard uncommitted work.
 3. Local environment: `ops/local/dev init` (once), then `ops/local/dev up`, `ops/local/dev test` and `ops/local/checks/https-smoke.sh`. See `docs/production/LOCAL-DEVELOPMENT.md`.
 4. Start the phase marked **Next** only when the owner has approved it. Use that phase's prompt.
 5. At the end of a phase, update **this file** and `HANDOFF.md`, open a PR, and let the director merge. Do not start the frozen deployment track (Phases 4–5) without an explicit unfreeze.
 
 ## Open decisions and blockers
 All product decisions are made (PLAN-CONTRACT §3). What remains are **director inputs** with deadlines (§5):
-- privacy notice text (end of Phase 3);
+- privacy notice text (launch gate);
+- confirm the read-only Framework library (versions published by server commands);
 - retention policy (end of Phase 4);
 - programme-owner content sign-off, GCP access, static IP and VM cost, SendGrid key and sender address on `myprototype.cloud`, `/cp` allow-list IPs, alert emails, first real admin identities, written release go-ahead (all before Phase 5).
 
@@ -73,7 +78,7 @@ Host changes for local development (the hosts entry and trusting the local CA) a
 
 ## Known limits
 - The SPA now uses only the server API; the browser-local demo store is removed (2 Oct 2026). Authenticated browser journeys (assessment, conflict, submit, results, staff filters, compare, exports, correction) pass locally; browser tests are not run in CI.
-- The Framework library screen is read-only; versioning and publishing happen through server commands. Escalated to the director to confirm this matches the plan.
+- The Framework library screen is read-only; versioning and publishing happen through server commands (awaiting director confirmation).
 - CI workflows run on GitHub (Phase 1 was pushed and merged via PR #1). Deployment workflows remain manual-only (D-16).
 - Only macOS/arm64 has been verified.
 

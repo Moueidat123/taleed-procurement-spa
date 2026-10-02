@@ -62,9 +62,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/assessments/{revisionId}/submit', [AssessmentController::class, 'submit'])->name('procurement.assessments.submit');
     Route::get('/assessments/{revisionId}/result', [AssessmentController::class, 'result'])->name('procurement.assessments.result');
 
-    // Staff people & access and organization pause/enable (D-10, D-17): Super
-    // Admin only, gated behind confirmed TOTP two-factor for staff.
-    Route::middleware('staff.2fa')->group(function () {
+    // Staff routes (D-10). Two-step verification is optional for staff (D-17 as
+    // changed 2 Oct 2026); role checks are enforced in each controller/service.
+    Route::group([], function () {
         // Staff invitations (D-10): token emailed, never returned.
         Route::post('/staff/invitations', IssueInvitationController::class)
             ->name('procurement.staff.invitations.issue');
