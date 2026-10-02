@@ -26,6 +26,7 @@ class CurrentUserResource extends JsonResource
             'verified' => $this->email_verified_at !== null,
             'active' => $this->active,
             'canExport' => $this->role === 'admin' || ($this->role === 'analyst' && $this->can_export),
+            'twoFactorEnabled' => $this->two_factor_confirmed_at !== null,
         ];
     }
 }

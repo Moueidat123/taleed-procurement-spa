@@ -28,19 +28,8 @@ jobs:
         run: npm run check
       - name: Backend-mode SPA build (same-origin /spa)
         run: npm run build:backend
-      - name: Install browser
-        run: npx playwright install --with-deps chromium
-      - name: Browser acceptance checks (approved prototype journeys)
-        run: npm run test:e2e
-      - name: Upload browser evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-evidence
-          path: |
-            playwright-report/
-            test-results/
-          if-no-files-found: ignore
+      # Browser journeys need the Docker backend + MySQL; they run locally
+      # (npm run test:e2e after ops/local/dev up), not in this job.
 
   backend:
     runs-on: ubuntu-latest

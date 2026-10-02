@@ -1,7 +1,7 @@
 # Project status — read this first
 
-**Last updated:** 1 October 2026 · **Updated by:** GitHub Copilot
-**Current phase:** Phase 1 (Foundation) merged (PR #1). Phase 2A (Accounts, login and security) merged (PR #2). **Phase 2B (Assessment engine and scoring) is implemented on `implementation/phase-2b` and awaiting independent review and the director's merge.** Phase 3 does not start until then.
+**Last updated:** 2 October 2026 · **Updated by:** GitHub Copilot
+**Current phase:** Phase 1 (Foundation) merged (PR #1). Phase 2A (Accounts, login and security) merged (PR #2). **Phase 2B (Assessment engine and scoring) is implemented on `implementation/phase-2b` and awaiting independent review and the director's merge.** Phase 3 (connect the React app, staff views and reports) is implemented locally on top of 2B and awaits review.
 **Branch:** `main` (Phase 1 merged) · new phase work happens on `implementation/<phase>` branches.
 
 > **Working mode (director instruction, 1 Oct 2026):** continue all **local logic and application** work (Phases 2A, 2B, 3). **Deployment phases (4 Release readiness, 5 Production launch) stay frozen** until the director provides the §5 inputs and a written go-ahead. Nothing in this repo touches production, pushes credentials, or provisions paid resources.
@@ -23,7 +23,7 @@ This file is the short entry point for any agent or colleague (Claude Code, Code
 | 1 Foundation | `prompts/production/01-FOUNDATION.md` | ✅ Done and **merged to `main`** (`ef9cc3d`, PR #1 `1dc49c9`) |
 | 2A Accounts, login and security | `02A-ACCOUNTS.md` | ✅ Merged (PR #2) |
 | 2B Assessment engine and scoring | `02B-ASSESSMENTS.md` | 🔍 **Implemented; PR open, awaiting review** — local logic only (123 MySQL tests, Larastan clean) |
-| 3 Connect the React app, staff views and reports | `03-UI-AND-REPORTS.md` | ⏳ Local app; privacy text is a launch gate, not a local blocker |
+| 3 Connect the React app, staff views and reports | `03-UI-AND-REPORTS.md` | 🔍 Implemented locally (2 Oct 2026); evidence `docs/production/evidence/phase-3/`; awaiting review. Privacy text remains a launch gate |
 
 ### Deployment track — FROZEN (kept as-is; director inputs required)
 | Phase | Prompt | State |
@@ -72,7 +72,8 @@ All product decisions are made (PLAN-CONTRACT §3). What remains are **director 
 Host changes for local development (the hosts entry and trusting the local CA) are optional. `ops/local/dev trust-help` explains them.
 
 ## Known limits
-- The SPA still uses its browser-local demo repository. Switching it to the API is Phase 2/3.
+- The SPA now uses only the server API; the browser-local demo store is removed (2 Oct 2026). Authenticated browser journeys (assessment, conflict, submit, results, staff filters, compare, exports, correction) pass locally; browser tests are not run in CI.
+- The Framework library screen is read-only; versioning and publishing happen through server commands. Escalated to the director to confirm this matches the plan.
 - CI workflows run on GitHub (Phase 1 was pushed and merged via PR #1). Deployment workflows remain manual-only (D-16).
 - Only macOS/arm64 has been verified.
 

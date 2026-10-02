@@ -1,0 +1,18 @@
+
+Running 9 tests using 2 workers
+
+
+  ✓  1 [local-https-chromium] › tests/e2e-local/foundation.spec.ts:24:1 › trusted HTTPS origin serves the approved SPA without console errors (734ms)
+  -  3 [local-https-chromium] › tests/e2e-local/foundation.spec.ts:39:1 › same-origin API: session login, secure host-only cookie, logout
+  ✓  4 [local-https-chromium] › tests/e2e-local/foundation.spec.ts:65:1 › Statamic page is server-rendered with the approved design tokens (142ms)
+  ✓  5 [local-https-chromium] › tests/e2e-local/foundation.spec.ts:73:1 › Statamic control panel login is available on /cp (402ms)
+  -  6 [local-https-chromium] › tests/e2e-local/foundation.spec.ts:78:1 › CMS administrator signs in to /cp, and that session is rejected by the business API
+
+  ✓  2 [local-https-chromium] › tests/e2e-local/journeys.spec.ts:56:1 › champion answers with autosave, resolves a version conflict, submits and sees frozen results (6.0s)
+  ✓  7 [local-https-chromium] › tests/e2e-local/journeys.spec.ts:104:1 › analyst filters on the server, compares companies and cannot export (2.2s)
+  ✓  8 [local-https-chromium] › tests/e2e-local/journeys.spec.ts:125:1 › analyst with the export grant downloads CSV and XLSX of effective submissions (1.4s)
+  ✓  9 [local-https-chromium] › tests/e2e-local/journeys.spec.ts:138:1 › super admin opens a correction; the original result stays effective (2.0s)
+
+  2 skipped
+  7 passed (14.4s)
+PW=0

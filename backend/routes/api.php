@@ -76,6 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/staff/organizations/{organizationId}', [StaffPortfolioController::class, 'organization'])->name('procurement.staff.organizations.show');
         Route::get('/staff/assessments/{revisionId}', [StaffPortfolioController::class, 'submission'])->name('procurement.staff.assessments.show');
         Route::post('/staff/comparisons', [StaffPortfolioController::class, 'compare'])->name('procurement.staff.comparisons');
+        Route::post('/staff/exports', [StaffPortfolioController::class, 'export'])->name('procurement.staff.exports');
         Route::get('/staff/users', ListStaffUsersController::class)
             ->name('procurement.staff.users.index');
         Route::patch('/staff/users/{user}/access', UpdateStaffAccessController::class)

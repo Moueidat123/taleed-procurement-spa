@@ -8,7 +8,7 @@ A working local foundation exists:
 - Served same-origin over local HTTPS (`https://procurement.taleed.test`) with the approved React SPA.
 - Independent app and CMS guards, verified by tests.
 
-The SPA is still wired to its browser-local demo repository, since API integration is Phase 2/3. No production resource has been touched.
+The SPA is wired to the server API only (Phase 3, 2 Oct 2026); the browser-local demo store is removed. No production resource has been touched.
 
 **Working mode (1 Oct 2026):** local-track phases (2A accounts/security, 2B assessment engine/scoring, 3 React wiring + staff views + reports) are actively buildable on this machine. The deployment track (4 Release readiness, 5 Production launch) is frozen and unchanged until the director unfreezes it with the section 5 inputs.
 
@@ -271,3 +271,16 @@ Concurrency (real MySQL locks on a second connection): duplicate assessment and 
 
 ### Exact next phase and approval required
 Independent review of the Phase 2B PR and the director's merge. Phase 3 (connect the React SPA to these endpoints, exports and reports) starts only after that. Phases 4–5 remain frozen until the director provides production inputs and written approval.
+
+## Phase 3 — 03-UI-AND-REPORTS (2 Oct 2026, local)
+- **Assessment.tsx:** autosave sends one batch at a time with `expectedVersion`. On a 409 the user's unsaved answers are kept, and the user chooses to keep them or load the latest. Pending answers are saved before navigation and before submit, and submit uses an idempotency key. Cycle-open checks use the server cycle dates; the fixed demo date is gone.
+- **Results.tsx:** reads the frozen submitted snapshot (`/assessments/{id}/result` for champions, `/staff/assessments/{id}` for staff). It never re-scores. Includes print/PDF through the browser and JSON export.
+- **Staff screens:** Portfolio, Organizations (server filter and paging), organization detail (pause/resume, open correction), Compare (2–4 companies, server-side) and Frameworks (read-only, published version).
+- **Exports:** new `POST /staff/exports` endpoint. It needs Super Admin or the `can_export` grant, is audited as `portfolio.exported`, returns effective submissions only, and builds CSV/XLSX in the browser with formula-injection protection.
+- **Removed:** `domain/seed.ts`, `commands.ts`, `policies.ts`, `validation.ts` and `infrastructure/localRepository.ts`. Framework checks moved to `domain/framework.ts`. Core tests were cut to 9 scoring/framework/CSV tests; demo-store tests were deleted.
+- **Evidence:** `docs/production/evidence/phase-3/README.md`, including the gaps.
+- **Browser journeys:** `tests/e2e-local/journeys.spec.ts` (4 journeys, local Docker and MySQL) uses the local-only `procurement:dev:seed-e2e` command. Final run: 7 passed and 2 skipped (credentials not set).
+- **Fixes found by the journeys:** the `/auth/me` 401 loop that cancelled sign-in; the two-factor input reusing the email value; drafts now reload when an assessment screen opens; `exceljs` is pre-bundled in Vite.
+- **Retired:** `tests/e2e/prototype.spec.ts` and `playwright.config.ts`. `npm run test:e2e` now runs the local suite, and CI no longer runs browser tests.
+- **API:** `/staff/exports` is documented as implemented in `openapi-v1.yaml`.
+- **Open items:** the director confirms the read-only Framework library; independent review and merge.

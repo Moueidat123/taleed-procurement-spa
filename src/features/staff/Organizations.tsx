@@ -1,53 +1,59 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { useCommand, useCurrentUser, useDatabase } from '../../app/hooks';
-import { useAppSelector } from '../../app/store';
-import { canManage, effectiveSubmissions } from '../../domain/policies';
-import { completion } from '../../domain/scoring';
-import { Alert, Badge, BandBadge, Button, Card, Dialog, EmptyState, Field, Icon, LinkButton, Metric, PageHeading, Progress, formatDate } from '../../components/ui';
-import type { Assessment, Database, User } from '../../domain/types';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useCurrentUser } from '../../app/hooks';
+import { BANDS, BAND_LABELS } from '../../domain/scoring';
+import type { Band } from '../../domain/types';
+import { toApiError } from '../../infrastructure/api';
+import { useOpenCorrectionMutation, useSetOrganizationActiveMutation, useStaffOrganizationQuery, useStaffOrganizationsQuery, type Stage } from '../../infrastructure/staffApi';
+import { Alert, Badge, BandBadge, Button, Card, Dialog, EmptyState, Field, Icon, LinkButton, PageHeading, Progress, formatDate } from '../../components/ui';
+import { Pager } from './Pager';
 
-/** Champion progress across profile setup, draft answering and submitted results — for staff visibility. */
-export type ChampionProgress = {
-  user: User; org: Database['organizations'][string] | null;
-  stage: 'no-profile' | 'not-started' | 'in-progress' | 'submitted';
-  label: string; tone: string; answered: number; remaining: number;
-  overall: number | null; band: import('../../domain/types').Band | null;
+const STAGES: Record<Stage, { label: string; tone: string }> = {
+  not_started: { label: 'Not started', tone: 'amber' }, in_progress: { label: 'In progress', tone: 'blue' }, submitted: { label: 'Completed', tone: 'success' },
 };
-export function championProgress(db: Database, user: User): ChampionProgress {
-  const org = user.orgId ? db.organizations[user.orgId] ?? null : null;
-  const all = user.orgId ? Object.values(db.assessments).filter((a) => a.orgId === user.orgId) : [];
-  const submitted = all.filter((a) => a.status === 'submitted').sort((a, b) => (b.submittedAt ?? '').localeCompare(a.submittedAt ?? ''));
-  const draft = all.find((a) => a.status === 'draft');
-  const effective = user.orgId ? effectiveSubmissions(db).find((a) => a.orgId === user.orgId) : undefined;
-  if (!org) return { user, org, stage: 'no-profile', label: 'Awaiting profile setup', tone: 'neutral', answered: 0, remaining: 40, overall: null, band: null };
-  if (draft) { const answered = completion(draft.answers); return { user, org, stage: 'in-progress', label: 'In progress', tone: 'blue', answered, remaining: 40 - answered, overall: null, band: null }; }
-  if (submitted.length) { const snap = (effective ?? submitted[0])?.snapshot ?? null; return { user, org, stage: 'submitted', label: 'Completed', tone: 'success', answered: 40, remaining: 0, overall: snap?.result.overall ?? null, band: snap?.result.band ?? null }; }
-  return { user, org, stage: 'not-started', label: 'Not started', tone: 'amber', answered: 0, remaining: 40, overall: null, band: null };
-}
+
+/** Company directory: search, stage and band filters and paging all run on the server. Drafts show answered count only. */
 export function Organizations() {
-  const db=useDatabase(); const [search,setSearch]=useState('');const [stage,setStage]=useState('');
-  const champions=Object.values(db.users).filter((u)=>u.role==='champion');
-  const rows=champions.map((u)=>championProgress(db,u))
-    .filter((r)=>(r.user.name.toLowerCase().includes(search.toLowerCase())||(r.org?.name??'').toLowerCase().includes(search.toLowerCase()))&&(!stage||r.stage===stage))
-    .sort((a,b)=>(a.org?.name??a.user.name).localeCompare(b.org?.name??b.user.name));
-  const count=(st:string)=>champions.map((u)=>championProgress(db,u)).filter((r)=>r.stage===st).length;
-  return <><PageHeading eyebrow="PARTICIPATION" title="Organizations & champion progress" description="Every registered Company Champion appears here from sign-up — track profile setup, live answering progress and submitted results."/>
-    <div className="metrics-grid four"><Metric label="Champions" value={champions.length} foot="Registered company representatives" icon="users"/><Metric label="Awaiting profile" value={count('no-profile')} foot="Registered, company profile not set" icon="clock"/><Metric label="In progress" value={count('in-progress')} foot="Answering the assessment now" icon="file"/><Metric label="Completed" value={count('submitted')} foot="Submitted at least one assessment" icon="check"/></div>
-    <Card className="filters compact"><Field label="Company or champion" htmlFor="org-search"><input id="org-search" type="search" value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search champions…"/></Field><Field label="Assessment stage" htmlFor="org-stage"><select id="org-stage" value={stage} onChange={(e)=>setStage(e.target.value)}><option value="">All stages</option><option value="no-profile">Awaiting profile setup</option><option value="not-started">Not started</option><option value="in-progress">In progress</option><option value="submitted">Completed</option></select></Field><span className="filter-count">{rows.length} champions</span></Card>
-    {rows.length?<Card className="table-card"><div className="table-wrap"><table><caption className="sr-only">Champion progress directory</caption><thead><tr><th>Company / champion</th><th>Size</th><th>Account</th><th>Assessment progress</th><th>Result</th><th>Details</th></tr></thead><tbody>{rows.map((r)=><tr key={r.user.id}><td><strong>{r.org?.name??'Profile not set yet'}</strong><small className="block">{r.user.name} · {r.user.email}</small></td><td>{r.org?.size??'—'}</td><td>{r.org?<Badge tone={r.org.active?'success':'amber'}>{r.org.active?'Active':'Paused'}</Badge>:<Badge tone={r.user.active?'neutral':'amber'}>{r.user.active?'Registered':'Paused'}</Badge>}</td><td className="progress-cell"><div className="row-between"><Badge tone={r.tone}>{r.label}</Badge>{r.stage==='in-progress'&&<small>{r.answered}/40 · {r.remaining} left</small>}{r.stage==='submitted'&&<small>40/40 answered</small>}</div>{(r.stage==='in-progress'||r.stage==='submitted')&&<Progress value={r.answered} label={`${r.org?.name??r.user.name} completion`}/>}</td><td>{r.stage==='submitted'&&r.overall!==null?<><strong>{r.overall.toFixed(1)}%</strong>{r.band&&<><br/><BandBadge band={r.band}/></>}</>:'—'}</td><td>{r.org?<Link to={`/app/organizations/${r.org.id}`}>View company</Link>:<span className="muted">No company yet</span>}</td></tr>)}</tbody></table></div></Card>:<EmptyState title="No champions match these filters">Try a different search or stage filter. New champions appear here the moment they register.</EmptyState>}</>;
+  const [params, setParams] = useSearchParams();
+  const search = params.get('q') ?? ''; const stage = (params.get('stage') ?? '') as Stage | ''; const band = (params.get('band') ?? '') as Band | '';
+  const page = Math.max(1, Number(params.get('page') ?? 1) || 1);
+  const list = useStaffOrganizationsQuery({ search, stage, band, page, perPage: 25 });
+  const setFilter = (key: string, value: string) => setParams((cur) => { const next = new URLSearchParams(cur); if (value) next.set(key, value); else next.delete(key); next.delete('page'); return next; });
+  const rows = list.data?.data ?? []; const total = list.data?.meta.total ?? 0;
+  return <><PageHeading eyebrow="PARTICIPATION" title="Organizations & progress" description="Every registered company with its stage in the current cycle. Draft answers are never shown to staff." />
+    <Card className="filters compact"><Field label="Company name" htmlFor="org-search"><input id="org-search" type="search" value={search} onChange={(e) => setFilter('q', e.target.value)} placeholder="Search companies…" /></Field>
+      <Field label="Assessment stage" htmlFor="org-stage"><select id="org-stage" value={stage} onChange={(e) => setFilter('stage', e.target.value)}><option value="">All stages</option>{(Object.keys(STAGES) as Stage[]).map((s) => <option key={s} value={s}>{STAGES[s].label}</option>)}</select></Field>
+      <Field label="Maturity band" htmlFor="org-band"><select id="org-band" value={band} onChange={(e) => setFilter('band', e.target.value)}><option value="">All bands</option>{BANDS.map((b) => <option key={b} value={b}>{BAND_LABELS[b]}</option>)}</select></Field>
+      <span className="filter-count" role="status">{total} compan{total === 1 ? 'y' : 'ies'}</span></Card>
+    {list.isLoading ? <Card><p className="muted">Loading organizations…</p></Card>
+      : list.isError ? <Alert kind="error" title="The directory could not be loaded">{toApiError(list.error as never).message} <Button variant="secondary" onClick={() => void list.refetch()}>Try again</Button></Alert>
+      : rows.length ? <Card className="table-card"><div className="table-wrap"><table><caption className="sr-only">Company directory</caption><thead><tr><th>Company</th><th>Size</th><th>Account</th><th>Assessment progress</th><th>Result</th><th>Details</th></tr></thead><tbody>{rows.map((r) => <tr key={r.id}>
+        <td><strong>{r.name}</strong><small className="block">{r.country}</small></td><td>{r.size}</td><td><Badge tone={r.active ? 'success' : 'amber'}>{r.active ? 'Active' : 'Paused'}</Badge></td>
+        <td className="progress-cell"><div className="row-between"><Badge tone={STAGES[r.stage].tone}>{STAGES[r.stage].label}</Badge>{r.stage !== 'not_started' && <small>{r.answeredCount}/40</small>}</div>{r.stage !== 'not_started' && <Progress value={r.answeredCount} label={`${r.name} completion`} />}</td>
+        <td>{r.overall !== null ? <><strong>{r.overall.toFixed(1)}%</strong>{r.band && <><br /><BandBadge band={r.band} /></>}</> : '—'}</td><td><Link to={`/app/organizations/${r.id}`}>View company</Link></td></tr>)}</tbody></table></div>{list.data && <Pager meta={list.data.meta} onPage={(p) => setParams((cur) => { const n = new URLSearchParams(cur); n.set('page', String(p)); return n; })} />}</Card>
+      : <EmptyState title="No companies match these filters">Try a different search, stage or band.</EmptyState>}</>;
 }
+
 export function OrganizationDetail() {
-  const {id=''}=useParams();const db=useDatabase();const user=useCurrentUser();const {run,busy}=useCommand();
-  const error=useAppSelector((s)=>s.ui.error);const [correction,setCorrection]=useState<Assessment|null>(null);const [reason,setReason]=useState('');const [pause,setPause]=useState(false);
-  const org=db.organizations[id];if(!org)return <EmptyState title="Organization not found" action={<LinkButton to="/app/organizations">Organization directory</LinkButton>}>This record does not exist in the current local dataset.</EmptyState>;
-  const submissions=Object.values(db.assessments).filter((a)=>a.orgId===id&&a.status==='submitted').sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
-  const drafts=Object.values(db.assessments).filter((a)=>a.orgId===id&&a.status==='draft');
-  const effective=new Set(effectiveSubmissions(db).map((a)=>a.id));
-  return <><PageHeading eyebrow="ORGANIZATION DETAIL" title={org.name} description={`${org.country} · ${org.size} employees`} actions={canManage(user)&&<Button variant={org.active?'secondary':'primary'} onClick={()=>setPause(true)}>{org.active?'Pause organization':'Resume organization'}</Button>}/><div className="two-column"><Card><div className="card-heading"><h2>Company information</h2><Badge tone={org.active?'success':'amber'}>{org.active?'Active':'Paused'}</Badge></div><dl className="definition-list"><dt>Company reference</dt><dd>{org.registrationId||'Not provided'}</dd><dt>Authority declaration</dt><dd>{org.authorityConfirmed?'Confirmed by respondent':'Pending'}</dd><dt>Data context</dt><dd>Synthetic local demonstration</dd></dl></Card><Card><h2>Company representatives</h2>{Object.values(db.users).filter((u)=>u.orgId===id).map((u)=><div className="person-row" key={u.id}><span className="avatar">{u.name.slice(0,1)}</span><div><strong>{u.name}</strong><small>{u.jobTitle} · {u.email}</small></div><Badge tone={u.active?'success':'amber'}>{u.active?'Active':'Paused'}</Badge></div>)}</Card></div>
-    {drafts.length>0&&<Alert title={`${drafts.length} draft${drafts.length===1?' is':'s are'} in progress`}>Draft answer content is not exposed in staff views, but you can track completion. {drafts.map((d)=>{const answered=completion(d.answers);return <div key={d.id} className="progress-cell" style={{marginTop:10}}><div className="row-between"><span>{db.cycles[d.cycleId]?.label} · Revision {d.revision}{d.supersedesId?' · Correction draft':''}</span><small>{answered}/40 answered · {40-answered} left</small></div><Progress value={answered} label={`${org.name} draft completion`}/></div>;})}</Alert>}
-    <div className="section-title"><h2>Submitted assessment history</h2><span>{submissions.length} revisions</span></div>{submissions.length?<Card className="table-card"><div className="table-wrap"><table><caption className="sr-only">Company submitted assessments</caption><thead><tr><th>Cycle</th><th>Revision</th><th>Result</th><th>Record status</th><th>Submitted</th><th>Actions</th></tr></thead><tbody>{submissions.map((a)=><tr key={a.id}><td>{db.cycles[a.cycleId]?.label}</td><td>v{a.revision}</td><td>{a.snapshot&&<><strong>{a.snapshot.result.overall.toFixed(1)}%</strong><br/><BandBadge band={a.snapshot.result.band}/></>}</td><td><Badge tone={effective.has(a.id)?'success':'neutral'}>{effective.has(a.id)?'Effective':'Earlier revision'}</Badge></td><td>{formatDate(a.submittedAt)}</td><td><div className="table-actions"><Link to={`/app/results/${a.id}`}>View result</Link>{canManage(user)&&effective.has(a.id)&&<Button variant="ghost" disabled={busy||drafts.some((d)=>d.cycleId===a.cycleId)} onClick={()=>{setCorrection(a);setReason('');}}><Icon name="refresh" size={16}/>Open correction</Button>}</div></td></tr>)}</tbody></table></div></Card>:<EmptyState title="No submitted assessments yet">The company's final results will appear after its authorized representative submits all 40 answers.</EmptyState>}
-    <Dialog open={!!correction} title="Open a controlled correction" onClose={()=>setCorrection(null)}><Alert kind="warning">The submitted result stays unchanged and effective until the Company Champion completes and submits a new revision. This is not an approval stage.</Alert><Field label="Reason for correction *" htmlFor="correction-reason" hint="At least 10 characters. This reason is visible to the company."><textarea id="correction-reason" rows={4} maxLength={1000} value={reason} onChange={(e)=>setReason(e.target.value)}/></Field>{error&&<Alert kind="error">{error}</Alert>}<div className="dialog-actions"><Button variant="secondary" onClick={()=>setCorrection(null)}>Cancel</Button><Button disabled={busy||reason.trim().length<10} onClick={async()=>{if(!correction)return;const created=await run({type:'openCorrection',assessmentId:correction.id,reason});if(created)setCorrection(null);}}>Create correction draft</Button></div></Dialog>
-    <Dialog open={pause} title={org.active?'Pause this organization?':'Resume this organization?'} onClose={()=>setPause(false)}><p>{org.active?'Company representatives will retain read access to submitted results, but cannot save new assessment answers or submit.':'Company representatives will be able to continue editing and submitting in open cycles.'} No history will be deleted.</p><div className="dialog-actions"><Button variant="secondary" onClick={()=>setPause(false)}>Cancel</Button><Button disabled={busy} onClick={async()=>{const saved=await run({type:'setOrganizationActive',orgId:id,active:!org.active});if(saved)setPause(false);}}>Confirm</Button></div></Dialog>
-  </>;
+  const { id = '' } = useParams(); const user = useCurrentUser(); const admin = user.role === 'admin';
+  const org = useStaffOrganizationQuery(id, { skip: !id });
+  const [openCorrection, correcting] = useOpenCorrectionMutation(); const [setActive, toggling] = useSetOrganizationActiveMutation();
+  const [correctionId, setCorrectionId] = useState<string | null>(null); const [reason, setReason] = useState(''); const [pause, setPause] = useState(false); const [error, setError] = useState('');
+  if (org.isLoading) return <Card><p className="muted">Loading organization…</p></Card>;
+  if (!org.data) return <EmptyState title="Organization not found" action={<LinkButton to="/app/organizations">Organization directory</LinkButton>}>This organization does not exist or could not be loaded.</EmptyState>;
+  const o = org.data; const subs = [...o.submissions].reverse();
+  const run = async (fn: () => Promise<unknown>, done: () => void) => { setError(''); try { await fn(); done(); } catch (e) { setError(toApiError(e as never).message); } };
+  return <><PageHeading eyebrow="ORGANIZATION DETAIL" title={o.name} description={`${o.country} · ${o.size} employees`} actions={admin && <Button variant={o.active ? 'secondary' : 'primary'} onClick={() => { setError(''); setPause(true); }}>{o.active ? 'Pause organization' : 'Resume organization'}</Button>} />
+    <Card><div className="card-heading"><h2>Company information</h2><Badge tone={o.active ? 'success' : 'amber'}>{o.active ? 'Active' : 'Paused'}</Badge></div><dl className="definition-list"><dt>Company reference</dt><dd>{o.registrationId || 'Not provided'}</dd>{o.isTest && <><dt>Data</dt><dd>Test company — excluded from portfolio figures</dd></>}</dl></Card>
+    <div className="section-title"><h2>Submitted assessment history</h2><span>{subs.length} revisions</span></div>
+    {subs.length ? <Card className="table-card"><div className="table-wrap"><table><caption className="sr-only">Company submitted assessments</caption><thead><tr><th>Revision</th><th>Result</th><th>Record status</th><th>Submitted</th><th>Actions</th></tr></thead><tbody>{subs.map((s) => <tr key={s.id}>
+      <td>v{s.revisionNumber}{s.isCorrection ? ' · correction' : ''}</td><td>{s.overall !== null && <><strong>{s.overall.toFixed(1)}%</strong><br /></>}{s.band && <BandBadge band={s.band} />}</td>
+      <td><Badge tone={s.effective ? 'success' : 'neutral'}>{s.effective ? 'Effective' : 'Earlier revision'}</Badge></td><td>{formatDate(s.submittedAt)}</td>
+      <td><div className="table-actions"><Link to={`/app/results/${s.id}`}>View result</Link>{admin && s.effective && <Button variant="ghost" onClick={() => { setError(''); setReason(''); setCorrectionId(s.id); }}><Icon name="refresh" size={16} />Open correction</Button>}</div></td></tr>)}</tbody></table></div></Card>
+      : <EmptyState title="No submitted assessments yet">Results appear after the company's representative submits all answers.</EmptyState>}
+    <Dialog open={!!correctionId} title="Open a controlled correction" onClose={() => setCorrectionId(null)}><Alert kind="warning">The submitted result stays effective until the Company Champion submits the new revision. This is not an approval stage.</Alert>
+      <Field label="Reason for correction *" htmlFor="correction-reason" hint="10–1,000 characters. Visible to the company."><textarea id="correction-reason" rows={4} maxLength={1000} value={reason} onChange={(e) => setReason(e.target.value)} /></Field>{error && <Alert kind="error">{error}</Alert>}
+      <div className="dialog-actions"><Button variant="secondary" onClick={() => setCorrectionId(null)}>Cancel</Button><Button disabled={correcting.isLoading || reason.trim().length < 10} onClick={() => void run(() => openCorrection({ revisionId: correctionId ?? '', reason: reason.trim() }).unwrap(), () => setCorrectionId(null))}>Create correction draft</Button></div></Dialog>
+    <Dialog open={pause} title={o.active ? 'Pause this organization?' : 'Resume this organization?'} onClose={() => setPause(false)}><p>{o.active ? 'Representatives keep read access to submitted results but cannot save or submit.' : 'Representatives can continue editing and submitting in open cycles.'} No history is deleted.</p>{error && <Alert kind="error">{error}</Alert>}
+      <div className="dialog-actions"><Button variant="secondary" onClick={() => setPause(false)}>Cancel</Button><Button disabled={toggling.isLoading} onClick={() => void run(() => setActive({ id, active: !o.active }).unwrap(), () => setPause(false))}>Confirm</Button></div></Dialog></>;
 }

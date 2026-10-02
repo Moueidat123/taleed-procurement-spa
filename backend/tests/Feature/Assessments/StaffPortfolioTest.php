@@ -143,6 +143,26 @@ class StaffPortfolioTest extends TestCase
         ])->assertStatus(422);
     }
 
+    public function test_export_is_refused_without_the_export_grant(): void
+    {
+        $this->actingAs($this->analyst())->postJson(self::API.'/staff/exports', ['format' => 'csv'])->assertForbidden();
+        $this->assertDatabaseMissing('audit_events', ['action' => 'portfolio.exported']);
+    }
+
+    public function test_export_returns_filtered_effective_rows_and_is_audited(): void
+    {
+        $granted = AppUser::factory()->role('analyst')->twoFactorConfirmed()->create(['can_export' => true]);
+        $res = $this->actingAs($granted)->postJson(self::API.'/staff/exports', ['format' => 'xlsx'])->assertOk();
+        $this->assertSame(['Alpha', 'Bravo'], array_column($res->json('data.rows'), 'company'));
+        $this->assertCount(4, $res->json('data.rows.0.domains'));
+        $this->assertArrayNotHasKey('answers', $res->json('data.rows.0'));
+        $this->assertDatabaseHas('audit_events', ['action' => 'portfolio.exported', 'actor_id' => $granted->id]);
+
+        $this->actingAs($granted)->postJson(self::API.'/staff/exports', ['format' => 'csv', 'band' => 'developing'])
+            ->assertOk()->assertJsonCount(1, 'data.rows')->assertJsonPath('data.rows.0.company', 'Bravo');
+        $this->actingAs($granted)->postJson(self::API.'/staff/exports', ['format' => 'pdf'])->assertUnprocessable();
+    }
+
     public function test_champions_are_refused(): void
     {
         $champion = AppUser::factory()->role('champion')->create();
