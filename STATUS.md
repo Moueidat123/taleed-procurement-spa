@@ -1,7 +1,7 @@
 # Project status — read this first
 
 **Last updated:** 2 October 2026 · **Updated by:** GitHub Copilot
-**Current phase:** Local track complete. Phases 1, 2A, 2B and 3 are merged to `main` (PRs #1–#5). PR #6 (staff champion directory) is open. The deployment track (Phases 4–5) stays frozen by director instruction.
+**Current phase:** Local track complete. Phases 1, 2A, 2B and 3 are merged to `main` (PRs #1–#7), including the staff champion directory (PR #6) and optional staff two-step verification (PR #7). The deployment track (Phases 4–5) stays frozen by director instruction.
 **Branch:** `main` · new phase work happens on `implementation/<phase>` branches.
 
 > **Working mode (director instruction, 1 Oct 2026):** continue all **local logic and application** work (Phases 2A, 2B, 3). **Deployment phases (4 Release readiness, 5 Production launch) stay frozen** until the director provides the §5 inputs and a written go-ahead. Nothing in this repo touches production, pushes credentials, or provisions paid resources.
@@ -23,7 +23,7 @@ This file is the short entry point for any agent or colleague (Claude Code, Code
 | 1 Foundation | `prompts/production/01-FOUNDATION.md` | ✅ Done and **merged to `main`** (`ef9cc3d`, PR #1 `1dc49c9`) |
 | 2A Accounts, login and security | `02A-ACCOUNTS.md` | ✅ Merged (PR #2) |
 | 2B Assessment engine and scoring | `02B-ASSESSMENTS.md` | ✅ Merged (PR #3) |
-| 3 Connect the React app, staff views and reports | `03-UI-AND-REPORTS.md` | ✅ Merged (PR #4, 2 Oct 2026; merged on director instruction without independent review). Follow-up PR #5 merged. Evidence `docs/production/evidence/phase-3/`. Privacy text remains a launch gate |
+| 3 Connect the React app, staff views and reports | `03-UI-AND-REPORTS.md` | ✅ Merged (PR #4, 2 Oct 2026; merged on director instruction without independent review). Follow-ups PR #5 and PR #6 (champion directory) merged. Evidence `docs/production/evidence/phase-3/`. Privacy text remains a launch gate |
 
 ### Deployment track — FROZEN (kept as-is; director inputs required)
 | Phase | Prompt | State |
