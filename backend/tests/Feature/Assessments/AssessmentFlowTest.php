@@ -8,6 +8,7 @@ use App\Models\AssessmentRevision;
 use App\Models\Organization;
 use App\Models\OutboxEvent;
 use App\Models\SubmissionDomainResult;
+use App\Services\AssessmentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -149,7 +150,7 @@ class AssessmentFlowTest extends TestCase
     public function test_another_company_and_forged_ids_get_404(): void
     {
         $owner = $this->champion();
-        $id = app(\App\Services\AssessmentService::class)->start($owner)->id;
+        $id = app(AssessmentService::class)->start($owner)->id;
 
         $other = $this->champion();
         $this->actingAs($other)->getJson(self::API."/assessments/{$id}")->assertNotFound();

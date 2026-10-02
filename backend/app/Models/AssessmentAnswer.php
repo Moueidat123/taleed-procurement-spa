@@ -21,6 +21,7 @@ class AssessmentAnswer extends Model
 
     protected $casts = ['answer' => 'boolean'];
 
+    /** @return BelongsTo<FrameworkQuestion, $this> */
     public function question(): BelongsTo
     {
         return $this->belongsTo(FrameworkQuestion::class, 'question_id');

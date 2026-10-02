@@ -10,8 +10,7 @@ use App\Models\AssessmentRevision;
 use App\Models\Organization;
 use App\Models\SubmissionDomainResult;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -93,8 +92,9 @@ class StaffPortfolioService
      * Paginated company directory with stage and answered count only.
      *
      * @param  array<string, mixed>  $filters
+     * @return array{data: list<array<string, mixed>>, meta: array{total: int, page: int, perPage: int, lastPage: int}}
      */
-    public function organizations(AssessmentCycle $cycle, array $filters, int $perPage): LengthAwarePaginator
+    public function organizations(AssessmentCycle $cycle, array $filters, int $perPage): array
     {
         $query = Organization::query()
             ->where('organizations.is_test', false)
@@ -135,8 +135,10 @@ class StaffPortfolioService
             ->selectRaw('assessment_revisions.assessment_id as aid, count(*) as answered')
             ->pluck('answered', 'aid');
 
-        $page->setCollection($page->getCollection()->map(function (Organization $o) use ($answered) {
-            $stage = $o->current_submission_id ? 'submitted' : ($o->assessment_id ? 'in_progress' : 'not_started');
+        $items = $page->getCollection()->map(function (Organization $o) use ($answered) {
+            $assessmentId = $o->getAttribute('assessment_id');
+            $overall = $o->getAttribute('overall_percent');
+            $stage = $o->getAttribute('current_submission_id') ? 'submitted' : ($assessmentId ? 'in_progress' : 'not_started');
 
             return [
                 'id' => $o->id,
@@ -147,15 +149,18 @@ class StaffPortfolioService
                 'stage' => $stage,
                 'answeredCount' => match ($stage) {
                     'submitted' => 40,
-                    'in_progress' => (int) ($answered[$o->assessment_id] ?? 0),
+                    'in_progress' => (int) ($answered[$assessmentId] ?? 0),
                     default => 0,
                 },
-                'overall' => $o->overall_percent !== null ? (float) $o->overall_percent : null,
-                'band' => $o->band,
+                'overall' => $overall !== null ? (float) $overall : null,
+                'band' => $o->getAttribute('band'),
             ];
-        }));
+        })->values()->all();
 
-        return $page;
+        return [
+            'data' => $items,
+            'meta' => ['total' => $page->total(), 'page' => $page->currentPage(), 'perPage' => $page->perPage(), 'lastPage' => $page->lastPage()],
+        ];
     }
 
     /** @return array<string, mixed> */
@@ -192,7 +197,11 @@ class StaffPortfolioService
         ];
     }
 
-    /** A submitted snapshot (drafts are 404 for staff). @return array<string, mixed> */
+    /**
+     * A submitted snapshot (drafts are 404 for staff).
+     *
+     * @return array<string, mixed>
+     */
     public function submission(string $revisionId): array
     {
         $revision = AssessmentRevision::query()->whereKey($revisionId)->where('status', 'submitted')
@@ -253,7 +262,7 @@ class StaffPortfolioService
                     'revisionId' => $row->revision_id,
                     'overall' => (float) $row->overall_percent,
                     'band' => $row->band,
-                    'domains' => array_values(array_map(fn ($key, $d) => ['key' => $key] + $d, array_keys($byKey), $byKey)),
+                    'domains' => array_map(fn ($key, $d) => ['key' => $key] + $d, array_keys($byKey), $byKey),
                 ];
             }, $ids),
         ];
@@ -266,7 +275,8 @@ class StaffPortfolioService
             ->join('organizations', 'organizations.id', '=', 'assessments.organization_id')
             ->join('submission_snapshots', 'submission_snapshots.revision_id', '=', 'assessments.current_submission_id')
             ->where('assessments.cycle_id', $cycle->id)
-            ->where('organizations.is_test', false);
+            ->where('organizations.is_test', false)
+            ->toBase();
     }
 
     /**

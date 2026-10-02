@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Taleed Procurement business API
-  version: 1.0.0-phase2a
+  version: 1.0.0-phase2b
   description: |
     Same-origin JSON API for the approved React SPA (docs/production/07-API-CONTRACT.md).
     Authentication: Laravel session (`web` guard, Eloquent `app_users`) via Sanctum SPA
@@ -9,7 +9,7 @@ info:
     `X-XSRF-TOKEN` on state-changing requests (same-origin browsers are also accepted via
     `Sec-Fetch-Site: same-origin`, Laravel 13). The Statamic CMS session is never accepted.
 
-    `x-status: implemented` = Phase 1/2A, tested. `x-status: planned` = Phase 2 contract to
+    `x-status: implemented` = Phase 1/2A/2B, tested. `x-status: planned` = Phase 2 contract to
     implement; shapes may be refined by the migration/contract owner before Phase 2 starts.
     Field names follow src/domain/types.ts (camelCase). IDs are strings (ULIDs; source
     question IDs such as "1.10" are strings). Bands: foundational | developing | advanced |
@@ -143,26 +143,27 @@ paths:
   /auth/email/verify/send:
     post: { x-status: implemented, security: [{ appSession: [] }], summary: 'Send six-digit code (hashed, 15-minute expiry, throttled 5/min per account and 10/min per IP)', responses: { '202': { description: Sent }, '401': { $ref: '#/components/responses/Unauthenticated' }, '429': { description: Rate limited } } }
   /auth/email/verify/confirm:
-    post: { x-status: implemented, security: [{ appSession: [] }], summary: 'Confirm six-digit code (5 attempts, single use); returns the CurrentUser', responses: { '200': { description: Verified }, '401': { $ref: '#/components/responses/Unauthenticated' }, '422': { $ref: '#/components/responses/Validation' }, '429': { description: Rate limited } } }
+    post: { x-status: implemented, security: [{ appSession: [] }], summary: 'Confirm six-digit code (5 attempts, single use); returns the CurrentUser', responses: { '201': { description: Verified }, '401': { $ref: '#/components/responses/Unauthenticated' }, '422': { $ref: '#/components/responses/Validation' }, '429': { description: Rate limited } } }
   /auth/invitations/accept:
     post: { x-status: implemented, summary: 'Accept a single-use, 72-hour staff invitation. Role and email come from the invitation, never input. Throttled 5/min per IP; unknown, used and expired tokens fail identically.', responses: { '201': { description: 'Staff user created and signed in; returns the CurrentUser' }, '422': { $ref: '#/components/responses/Validation' }, '429': { description: Rate limited } } }
   /organization:
     get: { x-status: implemented, security: [{ appSession: [] }], summary: "Current Champion's company (no sector field)", responses: { '200': { description: OK }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: No company profile yet } } }
-    patch: { x-status: implemented, security: [{ appSession: [] }], summary: 'Create or update the profile (verified Champion only): name, country, size, registrationId, authorityConfirmed. Duplicate name+country or registrationId is refused.', responses: { '200': { description: Updated }, '201': { description: Created and linked }, '403': { $ref: '#/components/responses/Forbidden' }, '422': { $ref: '#/components/responses/Validation' } } }
+    patch: { x-status: implemented, security: [{ appSession: [] }], summary: 'Create or update the profile (verified Champion only): displayName, countryCode, sizeBand, registrationId, authorityConfirmed (boolean; required true before an assessment can start). Duplicate name+country or registrationId is refused.', responses: { '200': { description: Updated }, '201': { description: Created and linked }, '403': { $ref: '#/components/responses/Forbidden' }, '422': { $ref: '#/components/responses/Validation' } } }
   /cycles/available:
-    get: { x-status: planned, summary: 'Open cycles pinned to a published framework (UI uses the first)', responses: { '200': { description: OK } } }
+    get: { x-status: implemented, security: [{ appSession: [] }], summary: 'Open cycles on a published framework (id, title, frameworkVersion, opensAt, closesAt, timezone)', responses: { '200': { description: OK }, '401': { $ref: '#/components/responses/Unauthenticated' } } }
   /frameworks/{version}:
-    get: { x-status: planned, summary: 'Published framework content (domains, questions, actions, interpretations)', responses: { '200': { description: OK } } }
+    get: { x-status: implemented, security: [{ appSession: [] }], summary: 'Published framework content (domains, questions with string IDs, recommendations per band, interpretations). Drafts are 404.', responses: { '200': { description: OK }, '404': { description: Not found or not published } } }
   /assessments:
-    post: { x-status: planned, summary: 'Create or resume the draft for own organization + cycle (locks aggregate)', responses: { '200': { description: Existing draft }, '201': { description: Created } } }
+    post: { x-status: implemented, security: [{ appSession: [] }], summary: 'Create (201) or resume (200) the draft for own company + open cycle. Requires a verified Champion and authorityConfirmed. 409 once submitted.', responses: { '200': { description: Existing draft }, '201': { description: Created }, '403': { $ref: '#/components/responses/Forbidden' }, '409': { $ref: '#/components/responses/Conflict' }, '422': { description: No open cycle } } }
   /assessments/history:
-    get: { x-status: planned, summary: "Own organization's revisions", responses: { '200': { description: OK } } }
+    get: { x-status: implemented, security: [{ appSession: [] }], summary: "Own company's revisions with effective flag", responses: { '200': { description: OK } } }
   /assessments/{revisionId}:
-    get: { x-status: planned, summary: 'Own draft/submitted revision; staff: submitted only', responses: { '200': { description: OK }, '404': { description: Not found or not accessible } } }
+    get: { x-status: implemented, security: [{ appSession: [] }], summary: 'Own draft/submitted revision: answers keyed by question ID (yes/no/null), version, answeredCount', responses: { '200': { description: OK }, '404': { description: Not found or not accessible } } }
   /assessments/{revisionId}/answers:
     patch:
-      x-status: planned
-      summary: Save/clear answers with optimistic concurrency.
+      x-status: implemented
+      security: [{ appSession: [] }]
+      summary: Save/clear answers with optimistic concurrency. Unknown question IDs or values are 422; a stale expectedVersion or a submitted revision is 409.
       requestBody:
         content:
           application/json:
@@ -172,29 +173,32 @@ paths:
               properties:
                 expectedVersion: { type: integer }
                 answers: { type: object, additionalProperties: { type: [string, 'null'], enum: ['yes', 'no', null] } }
-      responses: { '200': { description: 'Committed; returns new version' }, '409': { $ref: '#/components/responses/Conflict' }, '422': { $ref: '#/components/responses/Validation' } }
+      responses: { '200': { description: 'Committed; returns new version' }, '404': { description: Not found }, '409': { $ref: '#/components/responses/Conflict' }, '422': { $ref: '#/components/responses/Validation' } }
   /assessments/{revisionId}/submit:
     post:
-      x-status: planned
-      summary: Atomic, idempotent submission (Idempotency-Key header required).
-      parameters: [{ name: Idempotency-Key, in: header, required: true, schema: { type: string } }]
+      x-status: implemented
+      security: [{ appSession: [] }]
+      summary: Atomic, idempotent submission. All 40 answers required. Same key + same request returns the original result; another key after submit is 409.
+      parameters: [{ name: Idempotency-Key, in: header, required: true, schema: { type: string, maxLength: 120 } }]
       requestBody:
         content: { application/json: { schema: { type: object, required: [expectedVersion, declaration], properties: { expectedVersion: { type: integer }, declaration: { const: true } } } } }
       responses: { '200': { description: Submitted (or original receipt on retry) }, '409': { $ref: '#/components/responses/Conflict' }, '422': { $ref: '#/components/responses/Validation' } }
   /assessments/{revisionId}/result:
-    get: { x-status: planned, summary: 'Immutable submitted result snapshot', responses: { '200': { description: OK } } }
+    get: { x-status: implemented, security: [{ appSession: [] }], summary: 'Immutable submitted snapshot and its SHA-256 checksum', responses: { '200': { description: OK }, '404': { description: Not found or still a draft } } }
   /staff/portfolio:
-    get: { x-status: planned, summary: 'Analyst/Super Admin aggregate over effective submissions', responses: { '200': { description: OK } } }
+    get: { x-status: implemented, security: [{ appSession: [] }], summary: 'Analyst/Super Admin with TOTP: counts, average, band and domain distribution over effective submissions; test companies excluded. Query: cycleId.', responses: { '200': { description: OK }, '403': { $ref: '#/components/responses/Forbidden' } } }
   /staff/organizations:
-    get: { x-status: planned, summary: 'Paginated directory with stage + answeredCount only (never answers)', responses: { '200': { description: OK } } }
-  /staff/organizations/{id}:
-    get: { x-status: planned, summary: 'Company details + permitted submissions', responses: { '200': { description: OK } } }
+    get: { x-status: implemented, security: [{ appSession: [] }], summary: 'Paginated directory: stage + answeredCount only (never answers). Query: cycleId, search, stage, band, perPage (1–100), page.', responses: { '200': { description: 'data + meta {total, page, perPage, lastPage}' }, '403': { $ref: '#/components/responses/Forbidden' }, '422': { $ref: '#/components/responses/Validation' } } }
+  /staff/organizations/{organizationId}:
+    get: { x-status: implemented, security: [{ appSession: [] }], summary: 'Company details + submitted revisions with effective flag', responses: { '200': { description: OK }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Not found } } }
+  /staff/assessments/{revisionId}:
+    get: { x-status: implemented, security: [{ appSession: [] }], summary: 'Submitted snapshot only; drafts are 404', responses: { '200': { description: OK }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Not found or draft } } }
   /staff/organizations/{id}/access:
     patch: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin with confirmed TOTP: pause/enable organization (body `{active: boolean}`); audited', responses: { '200': { description: OK }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Not found }, '422': { $ref: '#/components/responses/Validation' } } }
   /staff/assessments/{revisionId}/corrections:
-    post: { x-status: planned, summary: 'Super Admin: open correction draft with reason (>= 10 chars)', responses: { '201': { description: Created }, '409': { $ref: '#/components/responses/Conflict' } } }
+    post: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin with TOTP: open a correction draft from the effective submission (reason 10–1000 chars). Allowed after cycle close; prior submission stays effective until the correction is submitted.', responses: { '201': { description: Created }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Not found }, '409': { $ref: '#/components/responses/Conflict' }, '422': { $ref: '#/components/responses/Validation' } } }
   /staff/comparisons:
-    post: { x-status: planned, summary: 'Compare 2–4 compatible effective submissions', responses: { '200': { description: OK } } }
+    post: { x-status: implemented, security: [{ appSession: [] }], summary: 'Compare 2–4 companies with effective submissions in one cycle and the same framework (body organizationIds, cycleId)', responses: { '200': { description: OK }, '403': { $ref: '#/components/responses/Forbidden' }, '422': { $ref: '#/components/responses/Validation' } } }
   /staff/users:
     get: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin with confirmed TOTP: staff people & access list (Champions excluded)', responses: { '200': { description: OK }, '401': { $ref: '#/components/responses/Unauthenticated' }, '403': { $ref: '#/components/responses/Forbidden' } } }
   /staff/invitations:

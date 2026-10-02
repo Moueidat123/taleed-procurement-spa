@@ -34,12 +34,7 @@ class StaffPortfolioController
             'perPage' => ['nullable', 'integer', 'min:1', 'max:100'],
         ]);
 
-        $page = $this->service->organizations($this->service->cycle($data['cycleId'] ?? null), $data, (int) ($data['perPage'] ?? 25));
-
-        return new JsonResponse([
-            'data' => $page->items(),
-            'meta' => ['total' => $page->total(), 'page' => $page->currentPage(), 'perPage' => $page->perPage(), 'lastPage' => $page->lastPage()],
-        ]);
+        return new JsonResponse($this->service->organizations($this->service->cycle($data['cycleId'] ?? null), $data, (int) ($data['perPage'] ?? 25)));
     }
 
     public function organization(Request $request, string $organizationId): JsonResponse

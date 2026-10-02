@@ -4,7 +4,6 @@ namespace Tests\Feature\Assessments;
 
 use App\Domain\Framework\FrameworkImporter;
 use App\Models\AssessmentCycle;
-use App\Models\FrameworkVersion;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;

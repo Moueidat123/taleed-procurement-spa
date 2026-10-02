@@ -3,6 +3,7 @@
 use App\Http\Controllers\Procurement\AcceptInvitationController;
 use App\Http\Controllers\Procurement\AssessmentController;
 use App\Http\Controllers\Procurement\ConfirmVerificationController;
+use App\Http\Controllers\Procurement\FrameworkContentController;
 use App\Http\Controllers\Procurement\HealthController;
 use App\Http\Controllers\Procurement\IssueInvitationController;
 use App\Http\Controllers\Procurement\ListStaffUsersController;
@@ -48,6 +49,10 @@ Route::middleware('auth:sanctum')->group(function () {
         ->name('procurement.organization.show');
     Route::patch('/organization', [OrganizationController::class, 'update'])
         ->name('procurement.organization.update');
+
+    // Open cycles and published framework content (Phase 2B).
+    Route::get('/cycles/available', [FrameworkContentController::class, 'cycles'])->name('procurement.cycles.available');
+    Route::get('/frameworks/{version}', [FrameworkContentController::class, 'show'])->name('procurement.frameworks.show');
 
     // Champion assessments (Phase 2B): own company only; forged IDs are 404.
     Route::post('/assessments', [AssessmentController::class, 'start'])->name('procurement.assessments.start');

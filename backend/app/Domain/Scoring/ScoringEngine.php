@@ -150,7 +150,7 @@ final class ScoringEngine
             throw new InvalidArgumentException('Four counts from 0–10 are required.');
         }
         foreach ($counts as $n) {
-            if (! is_int($n) || $n < 0 || $n > 10) {
+            if ($n < 0 || $n > 10) {
                 throw new InvalidArgumentException('Four counts from 0–10 are required.');
             }
         }

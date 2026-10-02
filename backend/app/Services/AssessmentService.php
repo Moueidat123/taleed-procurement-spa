@@ -395,7 +395,11 @@ class AssessmentService
         return $map;
     }
 
-    /** Framework in the shape ScoringEngine expects, loaded from the pinned version. */
+    /**
+     * Framework in the shape ScoringEngine expects, loaded from the pinned version.
+     *
+     * @return array<string, mixed>
+     */
     public function framework(string $frameworkVersionId): array
     {
         if (isset($this->frameworks[$frameworkVersionId])) {
