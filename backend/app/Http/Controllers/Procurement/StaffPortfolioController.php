@@ -76,7 +76,15 @@ class StaffPortfolioController
             'format' => ['required', 'in:csv,xlsx'],
             'band' => ['nullable', 'in:foundational,developing,advanced,best_in_class'],
             'search' => ['nullable', 'string', 'max:100'],
+            'organizationId' => ['nullable', 'string', 'max:26'],
         ]);
+        if (! empty($data['organizationId'])) {
+            $rows = $this->service->organizationExportRows($data['organizationId']);
+            AuditEvent::record(action: 'organization.exported', actorId: $user->id, targetType: 'organization', targetId: $data['organizationId'],
+                organizationId: $data['organizationId'], metadata: ['format' => $data['format'], 'count' => count($rows)], ipAddress: $request->ip());
+
+            return new JsonResponse(['data' => ['cycleId' => null, 'frameworkVersion' => null, 'rows' => $rows]]);
+        }
         $cycle = $this->service->cycle($data['cycleId'] ?? null);
         $rows = $this->service->exportRows($cycle, $data);
         AuditEvent::record(action: 'portfolio.exported', actorId: $user->id, targetType: 'cycle', targetId: $cycle->id,

@@ -179,6 +179,14 @@ class StaffPortfolioTest extends TestCase
         $this->getJson(self::API.'/staff/organizations?stage=submitted')->assertOk()->assertJsonPath('meta.total', 2);
     }
 
+    public function test_one_company_export_returns_all_its_submitted_results_and_is_audited(): void
+    {
+        $exporter = AppUser::factory()->role('analyst')->create(['can_export' => true]);
+        $this->actingAs($exporter)->postJson(self::API.'/staff/exports', ['format' => 'csv', 'organizationId' => $this->orgs['Alpha']->id])
+            ->assertOk()->assertJsonCount(1, 'data.rows')->assertJsonPath('data.rows.0.company', 'Alpha');
+        $this->assertDatabaseHas('audit_events', ['action' => 'organization.exported', 'target_id' => $this->orgs['Alpha']->id]);
+    }
+
     public function test_champions_are_refused(): void
     {
         $champion = AppUser::factory()->role('champion')->create();

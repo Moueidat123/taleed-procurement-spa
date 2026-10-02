@@ -338,6 +338,36 @@ class StaffPortfolioService
         })->values()->all();
     }
 
+    /**
+     * Every submitted revision of one company (all cycles), oldest first.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function organizationExportRows(string $organizationId): array
+    {
+        $org = Organization::query()->findOrFail($organizationId);
+        $revisions = AssessmentRevision::query()->where('status', 'submitted')
+            ->whereHas('assessment', fn ($q) => $q->where('organization_id', $org->id))
+            ->with(['snapshot', 'assessment'])->orderBy('submitted_at')->orderBy('revision_number')->get();
+        $domains = $this->domainResults($revisions->pluck('id')->all());
+
+        return $revisions->map(function (AssessmentRevision $r) use ($org, $domains) {
+            $byKey = $domains[$r->id] ?? [];
+
+            return [
+                'company' => $org->display_name,
+                'country' => $org->country_code,
+                'size' => $org->size_band,
+                'revisionId' => $r->id,
+                'revisionNumber' => $r->revision_number,
+                'submittedAt' => $r->submitted_at?->toISOString(),
+                'overall' => (float) ($r->snapshot->overall_percent ?? 0),
+                'band' => $r->snapshot?->band,
+                'domains' => array_map(fn ($k, $d) => ['key' => $k, 'name' => $d['name'], 'score' => $d['score']], array_keys($byKey), $byKey),
+            ];
+        })->values()->all();
+    }
+
     /** Effective submissions of non-test companies in a cycle. */
     private function effective(AssessmentCycle $cycle): Builder
     {

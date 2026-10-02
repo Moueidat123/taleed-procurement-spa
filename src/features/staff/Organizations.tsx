@@ -4,9 +4,10 @@ import { useCurrentUser } from '../../app/hooks';
 import { BANDS, BAND_LABELS } from '../../domain/scoring';
 import type { Band } from '../../domain/types';
 import { toApiError } from '../../infrastructure/api';
-import { useOpenCorrectionMutation, useSetOrganizationActiveMutation, useStaffOrganizationQuery, useStaffOrganizationsQuery, type Stage } from '../../infrastructure/staffApi';
+import { useExportRowsMutation, useOpenCorrectionMutation, useSetOrganizationActiveMutation, useStaffOrganizationQuery, useStaffOrganizationsQuery, type Stage } from '../../infrastructure/staffApi';
 import { Alert, Badge, BandBadge, Button, Card, Dialog, EmptyState, Field, Icon, LinkButton, PageHeading, Progress, formatDate } from '../../components/ui';
 import { Pager } from './Pager';
+import { buildPortfolioExport, downloadBlob } from '../../infrastructure/downloads';
 
 const STAGES: Record<Stage, { label: string; tone: string }> = {
   no_profile: { label: 'Awaiting profile setup', tone: 'neutral' }, not_started: { label: 'Not started', tone: 'amber' },
@@ -47,6 +48,7 @@ export function OrganizationDetail() {
   const { id = '' } = useParams(); const user = useCurrentUser(); const admin = user.role === 'admin';
   const org = useStaffOrganizationQuery(id, { skip: !id });
   const [openCorrection, correcting] = useOpenCorrectionMutation(); const [setActive, toggling] = useSetOrganizationActiveMutation();
+  const [exportRows, exporting] = useExportRowsMutation(); const canExport = admin || user.canExport;
   const [correctionId, setCorrectionId] = useState<string | null>(null); const [reason, setReason] = useState(''); const [pause, setPause] = useState(false); const [error, setError] = useState('');
   if (org.isLoading) return <Card><p className="muted">Loading organization…</p></Card>;
   if (!org.data) return <EmptyState title="Organization not found" action={<LinkButton to="/app/organizations">Organization directory</LinkButton>}>This organization does not exist or could not be loaded.</EmptyState>;
@@ -54,11 +56,14 @@ export function OrganizationDetail() {
   const run = async (fn: () => Promise<unknown>, done: () => void) => { setError(''); try { await fn(); done(); } catch (e) { setError(toApiError(e as never).message); } };
   return <><PageHeading eyebrow="ORGANIZATION DETAIL" title={o.name} description={`${o.country} · ${o.size} employees`} actions={admin && <Button variant={o.active ? 'secondary' : 'primary'} onClick={() => { setError(''); setPause(true); }}>{o.active ? 'Pause organization' : 'Resume organization'}</Button>} />
     <Card><div className="card-heading"><h2>Company information</h2><Badge tone={o.active ? 'success' : 'amber'}>{o.active ? 'Active' : 'Paused'}</Badge></div><dl className="definition-list"><dt>Company reference</dt><dd>{o.registrationId || 'Not provided'}</dd>{o.isTest && <><dt>Data</dt><dd>Test company — excluded from portfolio figures</dd></>}</dl></Card>
-    <div className="section-title"><h2>Submitted assessment history</h2><span>{subs.length} revisions</span></div>
-    {subs.length ? <Card className="table-card"><div className="table-wrap"><table><caption className="sr-only">Company submitted assessments</caption><thead><tr><th>Revision</th><th>Result</th><th>Record status</th><th>Submitted</th><th>Actions</th></tr></thead><tbody>{subs.map((s) => <tr key={s.id}>
+    <div className="section-title"><h2>Submitted results</h2><span>{subs.length} revision{subs.length === 1 ? '' : 's'}</span></div>
+    {subs.length > 0 && <div className="heading-actions">{(['csv', 'xlsx'] as const).map((f) => <Button key={f} variant="secondary" disabled={!canExport || exporting.isLoading} title={!canExport ? 'Export permission is required.' : undefined}
+      onClick={() => void run(async () => { const r = await exportRows({ format: f, organizationId: id }).unwrap(); downloadBlob(`taleed-${o.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-results.${f}`, await buildPortfolioExport(r.rows, null, f)); }, () => undefined)}>
+      <Icon name="download" />{f === 'csv' ? 'Export CSV' : 'Export Excel'}</Button>)}</div>}
+    {subs.length ? <Card className="table-card"><div className="table-wrap"><table><caption className="sr-only">Company submitted assessments</caption><thead><tr><th>Revision</th><th>Result</th><th>Record status</th><th>Submitted</th>{admin && <th>Actions</th>}</tr></thead><tbody>{subs.map((s) => <tr key={s.id}>
       <td>v{s.revisionNumber}{s.isCorrection ? ' · correction' : ''}</td><td>{s.overall !== null && <><strong>{s.overall.toFixed(1)}%</strong><br /></>}{s.band && <BandBadge band={s.band} />}</td>
       <td><Badge tone={s.effective ? 'success' : 'neutral'}>{s.effective ? 'Effective' : 'Earlier revision'}</Badge></td><td>{formatDate(s.submittedAt)}</td>
-      <td><div className="table-actions"><Link to={`/app/results/${s.id}`}>View result</Link>{admin && s.effective && <Button variant="ghost" onClick={() => { setError(''); setReason(''); setCorrectionId(s.id); }}><Icon name="refresh" size={16} />Open correction</Button>}</div></td></tr>)}</tbody></table></div></Card>
+      {admin && <td><div className="table-actions">{s.effective && <Button variant="ghost" onClick={() => { setError(''); setReason(''); setCorrectionId(s.id); }}><Icon name="refresh" size={16} />Open correction</Button>}</div></td>}</tr>)}</tbody></table></div></Card>
       : <EmptyState title="No submitted assessments yet">Results appear after the company's representative submits all answers.</EmptyState>}
     <Dialog open={!!correctionId} title="Open a controlled correction" onClose={() => setCorrectionId(null)}><Alert kind="warning">The submitted result stays effective until the Company Champion submits the new revision. This is not an approval stage.</Alert>
       <Field label="Reason for correction *" htmlFor="correction-reason" hint="10–1,000 characters. Visible to the company."><textarea id="correction-reason" rows={4} maxLength={1000} value={reason} onChange={(e) => setReason(e.target.value)} /></Field>{error && <Alert kind="error">{error}</Alert>}
