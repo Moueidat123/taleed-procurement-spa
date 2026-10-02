@@ -3,15 +3,19 @@ import type { Answer, Framework } from './companyApi';
 import type { Band } from '../domain/types';
 
 interface Wrapped<T> { data: T }
-export type Stage = 'not_started' | 'in_progress' | 'submitted';
+export type Stage = 'no_profile' | 'not_started' | 'in_progress' | 'submitted';
 export interface CycleSummary { id: string; title: string; status: string; frameworkVersion: string | null }
 export interface PortfolioSummary {
   cycle: CycleSummary; submittedCount: number; inProgressCount: number; averageOverall: number | null;
   bands: Record<Band, number>; domains: { key: string; name: string; average: number; bands: Record<Band, number> }[];
 }
-export interface OrgRow { id: string; name: string; country: string; size: string; active: boolean; stage: Stage; answeredCount: number; overall: number | null; band: Band | null }
+export interface OrgRow {
+  /** Organization id for company rows; champion user id for no_profile rows. */
+  id: string; organizationId: string | null; name: string | null; country: string | null; size: string | null; active: boolean;
+  champion: { name: string; email: string; verified: boolean } | null;
+  stage: Stage; answeredCount: number; overall: number | null; band: Band | null;
+}
 export interface Page<T> { data: T[]; meta: { total: number; page: number; perPage: number; lastPage: number } }
-export interface PendingChampion { id: string; name: string; email: string; jobTitle: string | null; verified: boolean; active: boolean; registeredAt: string | null }
 export interface OrgFilters { cycleId?: string; search?: string; stage?: Stage | ''; band?: Band | ''; page?: number; perPage?: number }
 export interface OrgDetail {
   id: string; name: string; country: string; size: string; registrationId: string | null; active: boolean; isTest: boolean;
@@ -44,9 +48,6 @@ export const staffApi = api.injectEndpoints({
     staffOrganizations: build.query<Page<OrgRow>, OrgFilters>({
       query: (f) => ({ url: '/staff/organizations', params: clean(f) }), providesTags: ['Staff'],
     }),
-    pendingChampions: build.query<Page<PendingChampion>, { search?: string; page?: number }>({
-      query: (f) => ({ url: '/staff/champions/pending', params: clean({ ...f, perPage: 25 }) }), providesTags: ['Staff'],
-    }),
     staffOrganization: build.query<OrgDetail, string>({
       query: (id) => `/staff/organizations/${encodeURIComponent(id)}`,
       transformResponse: (r: Wrapped<OrgDetail>) => r.data, providesTags: ['Staff'],
@@ -76,6 +77,6 @@ export const staffApi = api.injectEndpoints({
 });
 
 export const {
-  usePortfolioQuery, useStaffOrganizationsQuery, usePendingChampionsQuery, useStaffOrganizationQuery, useStaffSubmissionQuery, useOwnResultQuery,
+  usePortfolioQuery, useStaffOrganizationsQuery, useStaffOrganizationQuery, useStaffSubmissionQuery, useOwnResultQuery,
   useCompareMutation, useExportRowsMutation, useOpenCorrectionMutation, useSetOrganizationActiveMutation,
 } = staffApi;

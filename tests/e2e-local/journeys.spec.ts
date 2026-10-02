@@ -104,11 +104,11 @@ test('champion answers with autosave, resolves a version conflict, submits and s
 test('analyst filters on the server, compares companies and cannot export', async ({ page }) => {
   await signIn(page, seed.staff.analyst.email, seed.staff.analyst.totpSecret);
   await page.goto('/#/app/organizations');
-  await page.getByLabel('Company name').fill(seed.run);
+  await page.getByLabel('Company or champion').fill(seed.run);
   await expect(page.locator('tbody tr')).toHaveCount(4);
   await page.getByLabel('Assessment stage').selectOption('submitted');
   await expect(page.locator('tbody tr')).toHaveCount(4); // alpha, bravo, charlie + fresh submitted in the previous test
-  await page.getByLabel('Company name').fill(`E2E Bravo ${seed.run}`);
+  await page.getByLabel('Company or champion').fill(`E2E Bravo ${seed.run}`);
   await expect(page.locator('tbody tr')).toHaveCount(1);
 
   await page.goto(`/#/app/compare?ids=${seed.champions.alpha.orgId},${seed.champions.bravo.orgId}`);

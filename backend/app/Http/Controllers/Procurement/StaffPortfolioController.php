@@ -30,23 +30,12 @@ class StaffPortfolioController
         $data = $request->validate([
             'cycleId' => ['nullable', 'string', 'max:26'],
             'search' => ['nullable', 'string', 'max:100'],
-            'stage' => ['nullable', 'in:not_started,in_progress,submitted'],
+            'stage' => ['nullable', 'in:no_profile,not_started,in_progress,submitted'],
             'band' => ['nullable', 'in:foundational,developing,advanced,best_in_class'],
             'perPage' => ['nullable', 'integer', 'min:1', 'max:100'],
         ]);
 
         return new JsonResponse($this->service->organizations($this->service->cycle($data['cycleId'] ?? null), $data, (int) ($data['perPage'] ?? 25)));
-    }
-
-    public function pendingChampions(Request $request): JsonResponse
-    {
-        $this->authorizeStaff($request);
-        $data = $request->validate([
-            'search' => ['nullable', 'string', 'max:100'],
-            'perPage' => ['nullable', 'integer', 'min:1', 'max:100'],
-        ]);
-
-        return new JsonResponse($this->service->pendingChampions($data['search'] ?? null, (int) ($data['perPage'] ?? 25)));
     }
 
     public function organization(Request $request, string $organizationId): JsonResponse
