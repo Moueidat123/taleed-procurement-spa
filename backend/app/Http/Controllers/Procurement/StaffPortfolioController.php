@@ -38,6 +38,17 @@ class StaffPortfolioController
         return new JsonResponse($this->service->organizations($this->service->cycle($data['cycleId'] ?? null), $data, (int) ($data['perPage'] ?? 25)));
     }
 
+    public function pendingChampions(Request $request): JsonResponse
+    {
+        $this->authorizeStaff($request);
+        $data = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'perPage' => ['nullable', 'integer', 'min:1', 'max:100'],
+        ]);
+
+        return new JsonResponse($this->service->pendingChampions($data['search'] ?? null, (int) ($data['perPage'] ?? 25)));
+    }
+
     public function organization(Request $request, string $organizationId): JsonResponse
     {
         $this->authorizeStaff($request);

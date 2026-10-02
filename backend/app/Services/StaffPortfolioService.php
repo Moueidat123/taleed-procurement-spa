@@ -164,6 +164,36 @@ class StaffPortfolioService
         ];
     }
 
+    /**
+     * Champions who registered but have no company profile yet (never shown in
+     * the company directory). Contact fields only; no answers exist yet.
+     *
+     * @return array{data: list<array<string, mixed>>, meta: array{total: int, page: int, perPage: int, lastPage: int}}
+     */
+    public function pendingChampions(?string $search, int $perPage): array
+    {
+        $query = AppUser::query()->where('role', 'champion')->whereNull('organization_id');
+        $search = trim((string) $search);
+        if ($search !== '') {
+            $like = '%'.addcslashes($search, '%_\\').'%';
+            $query->where(fn ($q) => $q->where('name', 'like', $like)->orWhere('email', 'like', $like));
+        }
+        $page = $query->orderByDesc('created_at')->orderBy('id')->paginate($perPage);
+
+        return [
+            'data' => $page->getCollection()->map(fn (AppUser $u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'email' => $u->email,
+                'jobTitle' => $u->job_title,
+                'verified' => $u->email_verified_at !== null,
+                'active' => (bool) $u->active,
+                'registeredAt' => $u->created_at?->toISOString(),
+            ])->values()->all(),
+            'meta' => ['total' => $page->total(), 'page' => $page->currentPage(), 'perPage' => $page->perPage(), 'lastPage' => $page->lastPage()],
+        ];
+    }
+
     /** @return array<string, mixed> */
     public function organization(string $id): array
     {

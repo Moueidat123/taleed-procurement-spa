@@ -11,6 +11,7 @@ export interface PortfolioSummary {
 }
 export interface OrgRow { id: string; name: string; country: string; size: string; active: boolean; stage: Stage; answeredCount: number; overall: number | null; band: Band | null }
 export interface Page<T> { data: T[]; meta: { total: number; page: number; perPage: number; lastPage: number } }
+export interface PendingChampion { id: string; name: string; email: string; jobTitle: string | null; verified: boolean; active: boolean; registeredAt: string | null }
 export interface OrgFilters { cycleId?: string; search?: string; stage?: Stage | ''; band?: Band | ''; page?: number; perPage?: number }
 export interface OrgDetail {
   id: string; name: string; country: string; size: string; registrationId: string | null; active: boolean; isTest: boolean;
@@ -43,6 +44,9 @@ export const staffApi = api.injectEndpoints({
     staffOrganizations: build.query<Page<OrgRow>, OrgFilters>({
       query: (f) => ({ url: '/staff/organizations', params: clean(f) }), providesTags: ['Staff'],
     }),
+    pendingChampions: build.query<Page<PendingChampion>, { search?: string; page?: number }>({
+      query: (f) => ({ url: '/staff/champions/pending', params: clean({ ...f, perPage: 25 }) }), providesTags: ['Staff'],
+    }),
     staffOrganization: build.query<OrgDetail, string>({
       query: (id) => `/staff/organizations/${encodeURIComponent(id)}`,
       transformResponse: (r: Wrapped<OrgDetail>) => r.data, providesTags: ['Staff'],
@@ -72,6 +76,6 @@ export const staffApi = api.injectEndpoints({
 });
 
 export const {
-  usePortfolioQuery, useStaffOrganizationsQuery, useStaffOrganizationQuery, useStaffSubmissionQuery, useOwnResultQuery,
+  usePortfolioQuery, useStaffOrganizationsQuery, usePendingChampionsQuery, useStaffOrganizationQuery, useStaffSubmissionQuery, useOwnResultQuery,
   useCompareMutation, useExportRowsMutation, useOpenCorrectionMutation, useSetOrganizationActiveMutation,
 } = staffApi;
