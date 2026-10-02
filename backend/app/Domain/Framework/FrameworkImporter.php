@@ -134,13 +134,34 @@ final class FrameworkImporter
                 throw new InvalidArgumentException("Domain {$d['key']} must have exactly 10 questions.");
             }
             foreach ($d['questions'] as $q) {
-                $ids[] = (string) $q['id'];
+                if (! is_string($q['id'] ?? null) || trim((string) ($q['sourceCell'] ?? '')) === '') {
+                    throw new InvalidArgumentException("Domain {$d['key']} has a question without a string ID or source cell.");
+                }
+                $ids[] = $q['id'];
             }
             foreach (self::BANDS as $band) {
-                if (empty($d['recommendations'][$band])) {
-                    throw new InvalidArgumentException("Domain {$d['key']} has no {$band} actions.");
+                $actions = $d['recommendations'][$band] ?? [];
+                if (count($actions) !== 4) {
+                    throw new InvalidArgumentException("Domain {$d['key']} must have exactly 4 {$band} actions.");
+                }
+                foreach ($actions as $a) {
+                    if (trim((string) ($a['id'] ?? '')) === '' || trim((string) ($a['sourceCell'] ?? '')) === '') {
+                        throw new InvalidArgumentException("Domain {$d['key']} has a {$band} action without an ID or source cell.");
+                    }
                 }
             }
+        }
+        $actions = 0;
+        foreach ($data['domains'] as $d) {
+            foreach (self::BANDS as $band) {
+                if (count($d['recommendations'][$band]) !== 4) {
+                    throw new InvalidArgumentException("Domain {$d['key']} must have exactly 4 {$band} actions.");
+                }
+                $actions += 4;
+            }
+        }
+        if ($actions !== 64) {
+            throw new InvalidArgumentException('Framework must have exactly 64 actions.');
         }
         if (count(array_unique($ids)) !== 40) {
             throw new InvalidArgumentException('Question IDs must be unique.');
