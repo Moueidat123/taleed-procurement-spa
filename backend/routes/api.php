@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Procurement\AcceptInvitationController;
+use App\Http\Controllers\Procurement\AssessmentController;
 use App\Http\Controllers\Procurement\ConfirmVerificationController;
 use App\Http\Controllers\Procurement\HealthController;
 use App\Http\Controllers\Procurement\IssueInvitationController;
@@ -45,6 +46,14 @@ Route::middleware('auth:sanctum')->group(function () {
         ->name('procurement.organization.show');
     Route::patch('/organization', [OrganizationController::class, 'update'])
         ->name('procurement.organization.update');
+
+    // Champion assessments (Phase 2B): own company only; forged IDs are 404.
+    Route::post('/assessments', [AssessmentController::class, 'start'])->name('procurement.assessments.start');
+    Route::get('/assessments/history', [AssessmentController::class, 'history'])->name('procurement.assessments.history');
+    Route::get('/assessments/{revisionId}', [AssessmentController::class, 'show'])->name('procurement.assessments.show');
+    Route::patch('/assessments/{revisionId}/answers', [AssessmentController::class, 'saveAnswers'])->name('procurement.assessments.answers');
+    Route::post('/assessments/{revisionId}/submit', [AssessmentController::class, 'submit'])->name('procurement.assessments.submit');
+    Route::get('/assessments/{revisionId}/result', [AssessmentController::class, 'result'])->name('procurement.assessments.result');
 
     // Staff people & access and organization pause/enable (D-10, D-17): Super
     // Admin only, gated behind confirmed TOTP two-factor for staff.
