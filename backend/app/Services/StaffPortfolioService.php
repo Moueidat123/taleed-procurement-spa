@@ -11,6 +11,7 @@ use App\Models\Organization;
 use App\Models\SubmissionDomainResult;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -266,6 +267,47 @@ class StaffPortfolioService
                 ];
             }, $ids),
         ];
+    }
+
+    /**
+     * Rows for CSV/XLSX export: effective submissions only, filtered server-side.
+     *
+     * @param  array<string, mixed>  $filters
+     * @return list<array<string, mixed>>
+     */
+    public function exportRows(AssessmentCycle $cycle, array $filters): array
+    {
+        $query = $this->effective($cycle)
+            ->join('assessment_revisions', 'assessment_revisions.id', '=', 'assessments.current_submission_id');
+        $search = trim((string) ($filters['search'] ?? ''));
+        if ($search !== '') {
+            $query->where('organizations.display_name', 'like', '%'.addcslashes($search, '%_\\').'%');
+        }
+        if (in_array($filters['band'] ?? null, self::BANDS, true)) {
+            $query->where('submission_snapshots.band', $filters['band']);
+        }
+        $rows = $query->orderBy('organizations.display_name')->get([
+            'organizations.display_name', 'organizations.country_code', 'organizations.size_band',
+            'assessments.current_submission_id as revision_id', 'assessment_revisions.revision_number',
+            'assessment_revisions.submitted_at', 'submission_snapshots.overall_percent', 'submission_snapshots.band',
+        ]);
+        $domains = $this->domainResults($rows->pluck('revision_id')->all());
+
+        return $rows->map(function ($r) use ($domains) {
+            $byKey = $domains[$r->revision_id] ?? [];
+
+            return [
+                'company' => $r->display_name,
+                'country' => $r->country_code,
+                'size' => $r->size_band,
+                'revisionId' => $r->revision_id,
+                'revisionNumber' => (int) $r->revision_number,
+                'submittedAt' => $r->submitted_at !== null ? Carbon::parse($r->submitted_at)->toISOString() : null,
+                'overall' => (float) $r->overall_percent,
+                'band' => $r->band,
+                'domains' => array_map(fn ($k, $d) => ['key' => $k, 'name' => $d['name'], 'score' => $d['score']], array_keys($byKey), $byKey),
+            ];
+        })->values()->all();
     }
 
     /** Effective submissions of non-test companies in a cycle. */

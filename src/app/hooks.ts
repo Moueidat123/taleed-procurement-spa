@@ -1,22 +1,13 @@
-import { useCallback } from 'react';
-import { execute, selectUser, useAppDispatch, useAppSelector } from './store';
-import type { Command, Database, User } from '../domain/types';
-export function useDatabase(): Database {
-  const db = useAppSelector((state) => state.data);
-  if (!db) throw new Error('The local dataset has not loaded.');
-  return db;
+import { useMeQuery } from '../infrastructure/authApi';
+import type { CurrentUser } from '../infrastructure/api';
+
+/** The signed-in user from the server session (`/auth/me`). Only call under the route guard. */
+export function useCurrentUser(): CurrentUser {
+  const { data } = useMeQuery();
+  if (!data) throw new Error('A signed-in session is required.');
+  return data;
 }
-export function useCurrentUser(): User {
-  const user = useAppSelector(selectUser);
-  if (!user) throw new Error('A demo session is required.');
-  return user;
-}
-export function useCommand() {
-  const dispatch = useAppDispatch();
-  const busy = useAppSelector((state) => state.ui.pending > 0 || state.ui.externalChange);
-  const run = useCallback(async (command: Command): Promise<string | null> => {
-    try { return await dispatch(execute(command)); }
-    catch { return null; } // The command boundary displays the exact failure in the application alert.
-  }, [dispatch]);
-  return { run, busy };
+
+export function workspacePath(user: Pick<CurrentUser, 'role'>): string {
+  return user.role === 'champion' ? '/app/dashboard' : '/app/portfolio';
 }

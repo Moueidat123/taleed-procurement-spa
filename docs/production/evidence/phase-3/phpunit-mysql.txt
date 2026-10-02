@@ -1,0 +1,171 @@
+ Container taleed-procurement-dev-mysql-1 Running 
+ Container taleed-procurement-dev-mysql-1 Waiting 
+ Container taleed-procurement-dev-mysql-1 Healthy 
+ Container taleed-procurement-dev-app-run-7060f4534a16 Creating 
+ Container taleed-procurement-dev-app-run-7060f4534a16 Created 
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Unit\ScoringEngineTest[39m
+  [32;1m✓[39;22m[90m [39m[90mall oracle cases match exactly[39m[90m                                      [39m [90m0.19s[39m  
+  [32;1m✓[39;22m[90m [39m[90mband boundaries with data set #0[39m
+  [32;1m✓[39;22m[90m [39m[90mband boundaries with data set #1[39m
+  [32;1m✓[39;22m[90m [39m[90mband boundaries with data set #40[39m
+  [32;1m✓[39;22m[90m [39m[90mband boundaries with data set #2[39m
+  [32;1m✓[39;22m[90m [39m[90mband boundaries with data set #65[39m
+  [32;1m✓[39;22m[90m [39m[90mband boundaries with data set #3[39m
+  [32;1m✓[39;22m[90m [39m[90mband boundaries with data set #80[39m
+  [32;1m✓[39;22m[90m [39m[90mband boundaries with data set #4[39m
+  [32;1m✓[39;22m[90m [39m[90meach domain band has actions copied from the framework[39m
+  [32;1m✓[39;22m[90m [39m[90mfocus area ties break by domain order[39m
+  [32;1m✓[39;22m[90m [39m[90mall one hundred[39m
+  [32;1m✓[39;22m[90m [39m[90mnull is not no and incomplete answers are refused[39m
+  [32;1m✓[39;22m[90m [39m[90munknown question ids are refused[39m
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Accounts\AccountsSecurityTest[39m
+  [32;1m✓[39;22m[90m [39m[90mevery staff route requires confirmed two factor with data set "anal[39m[90m…[39m [90m2.49s[39m  
+  [32;1m✓[39;22m[90m [39m[90mevery staff route requires confirmed two factor with data set "supe[39m[90m…[39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mchampions are not subject to the mfa gate but are still forbidden[39m[90m   [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90msuper admin pauses and enables an organization with audit[39m[90m           [39m [90m0.12s[39m  
+  [32;1m✓[39;22m[90m [39m[90man analyst with two factor cannot pause an organization[39m[90m             [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mforged user and organization ids return 404[39m[90m                         [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90maccess change ignores role email and password in input[39m[90m              [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90minvitation acceptance is rate limited[39m[90m                               [39m [90m0.11s[39m  
+  [32;1m✓[39;22m[90m [39m[90midentical email in app and cms are independent principals[39m[90m           [39m [90m0.92s[39m  
+  [32;1m✓[39;22m[90m [39m[90mbootstrap command creates one audited super admin and is idempotent[39m[90m [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mbootstrap command rejects an invalid email[39m[90m                          [39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Accounts\OrganizationProfileTest[39m
+  [32;1m✓[39;22m[90m [39m[90mverified champion creates a profile and is linked[39m[90m                   [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mget returns profile or 404 before creation[39m[90m                          [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mupdate edits in place without creating a second company[39m[90m             [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mduplicate company name in same country is blocked[39m[90m                   [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mduplicate registration id is blocked[39m[90m                                [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90munverified champion cannot set a profile[39m[90m                            [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mstaff cannot use the champion profile endpoint[39m[90m                      [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90msector and privileged fields are never persisted[39m[90m                    [39m [90m0.03s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Accounts\RegistrationTest[39m
+  [32;1m✓[39;22m[90m [39m[90mchampion can register and receives a code[39m[90m                           [39m [90m0.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90mregistration never sets privileged fields from input[39m[90m                [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mduplicate email is rejected without enumeration[39m[90m                     [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mweak password and missing consent are rejected[39m[90m                      [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mconfirming the correct code verifies the user[39m[90m                       [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mwrong code counts an attempt and locks after five[39m[90m                   [39m [90m0.03s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Accounts\StaffAdministrationTest[39m
+  [32;1m✓[39;22m[90m [39m[90msuper admin lists staff and excludes champions[39m[90m                      [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mstaff without confirmed two factor are blocked by the gate[39m[90m          [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma champion cannot list staff[39m[90m                                        [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma guest cannot list staff[39m[90m                                           [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90msuper admin toggles analyst export[39m[90m                                  [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90msuper admin deactivates an analyst[39m[90m                                  [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90msuper admin cannot change their own access[39m[90m                          [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mthe last active super admin cannot be deactivated[39m[90m                   [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma champion cannot change staff access[39m[90m                               [39m [90m0.02s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Accounts\StaffInvitationTest[39m
+  [32;1m✓[39;22m[90m [39m[90msuper admin issues an invitation and token is emailed not stored[39m[90m    [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma champion cannot issue[39m[90m                                             [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90man analyst cannot issue[39m[90m                                             [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma guest cannot issue[39m[90m                                                [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90maccepting a valid token creates a signed in staff user[39m[90m              [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mrole and email come from the invitation not from input[39m[90m              [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma token cannot be used twice[39m[90m                                        [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90man expired token is rejected[39m[90m                                        [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma random token is rejected without enumeration[39m[90m                      [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mduplicate pending invitation is refused[39m[90m                             [39m [90m0.03s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Assessments\AssessmentFlowTest[39m
+  [32;1m✓[39;22m[90m [39m[90mstart creates a draft then resumes the same one[39m[90m                     [39m [90m0.10s[39m  
+  [32;1m✓[39;22m[90m [39m[90msave requires the current version and null is not no[39m[90m                [39m [90m0.09s[39m  
+  [32;1m✓[39;22m[90m [39m[90munknown questions and bad values are refused[39m[90m                        [39m [90m0.06s[39m  
+  [32;1m✓[39;22m[90m [39m[90mincomplete submission and missing declaration or key are refused[39m[90m    [39m [90m0.06s[39m  
+  [32;1m✓[39;22m[90m [39m[90msubmit scores snapshots and a retry returns the same result[39m[90m         [39m [90m0.08s[39m  
+  [32;1m✓[39;22m[90m [39m[90mhistory lists own revisions with the effective one[39m[90m                  [39m [90m0.09s[39m  
+  [32;1m✓[39;22m[90m [39m[90manother company and forged ids get 404[39m[90m                              [39m [90m0.06s[39m  
+  [32;1m✓[39;22m[90m [39m[90mstaff cannot start[39m[90m                                                  [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma company without confirmed authority cannot start[39m[90m                  [39m [90m0.05s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Assessments\CorrectionTest[39m
+  [32;1m✓[39;22m[90m [39m[90msuper admin opens a correction copying the answers[39m[90m                  [39m [90m0.07s[39m  
+  [32;1m✓[39;22m[90m [39m[90mreason must be at least ten characters[39m[90m                              [39m [90m0.07s[39m  
+  [32;1m✓[39;22m[90m [39m[90man analyst is refused[39m[90m                                               [39m [90m0.06s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma super admin without two factor is refused[39m[90m                         [39m [90m0.06s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma second open correction and correcting a stale revision are 409[39m[90m    [39m [90m0.07s[39m  
+  [32;1m✓[39;22m[90m [39m[90mcorrection works after the cycle closes and advances the pointer on[39m[90m…[39m [90m0.08s[39m  
+  [32;1m✓[39;22m[90m [39m[90mforged revision ids are 404[39m[90m                                         [39m [90m0.06s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Assessments\EndToEndJourneyTest[39m
+  [32;1m✓[39;22m[90m [39m[90mchampion journey from registration to result[39m[90m                        [39m [90m0.09s[39m  
+  [32;1m✓[39;22m[90m [39m[90msuper admin with totp opens a correction the champion submits[39m[90m       [39m [90m0.13s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Assessments\FrameworkCommandsTest[39m
+  [32;1m✓[39;22m[90m [39m[90mimport creates a draft with 64 actions[39m[90m                              [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mimport fails on a checksum mismatch[39m[90m                                 [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mpublish requires an approval reference[39m[90m                              [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mcycle create uses riyadh business dates and is audited[39m[90m              [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90mcycle create refuses a draft framework bad dates and a second open[39m[90m… [39m [90m0.06s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Assessments\FrameworkContentTest[39m
+  [32;1m✓[39;22m[90m [39m[90mpublished framework content is returned without internal ids[39m[90m        [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma draft framework is 404[39m[90m                                            [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mopen cycles are listed with their framework[39m[90m                         [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mguests are refused[39m[90m                                                  [39m [90m0.05s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Assessments\FrameworkImportTest[39m
+  [32;1m✓[39;22m[90m [39m[90mimport creates a draft with all content and verifies the workbook[39m[90m   [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma wrong workbook checksum is refused[39m[90m                                [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mthe same version cannot be imported twice[39m[90m                           [39m [90m0.05s[39m  
+  [32;1m✓[39;22m[90m [39m[90mmalformed content is refused[39m[90m                                        [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mpublish requires an approval reference and then locks the version[39m[90m   [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma published version cannot be deleted[39m[90m                               [39m [90m0.04s[39m  
+  [32;1m✓[39;22m[90m [39m[90monly one cycle can be open[39m[90m                                          [39m [90m0.04s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Assessments\StaffPortfolioTest[39m
+  [32;1m✓[39;22m[90m [39m[90mportfolio counts effective submissions and excludes test companies[39m[90m  [39m [90m0.10s[39m  
+  [32;1m✓[39;22m[90m [39m[90mdirectory shows stage and answered count but never answers[39m[90m          [39m [90m0.10s[39m  
+  [32;1m✓[39;22m[90m [39m[90mdirectory filters and paginates on the server[39m[90m                       [39m [90m0.09s[39m  
+  [32;1m✓[39;22m[90m [39m[90mcompany detail lists submissions and staff cannot open drafts[39m[90m       [39m [90m0.09s[39m  
+  [32;1m✓[39;22m[90m [39m[90mcompare two to four companies with submissions[39m[90m                      [39m [90m0.10s[39m  
+  [32;1m✓[39;22m[90m [39m[90mexport is refused without the export grant[39m[90m                          [39m [90m0.09s[39m  
+  [32;1m✓[39;22m[90m [39m[90mexport returns filtered effective rows and is audited[39m[90m               [39m [90m0.10s[39m  
+  [32;1m✓[39;22m[90m [39m[90mchampions are refused[39m[90m                                               [39m [90m0.09s[39m  
+  [32;1m✓[39;22m[90m [39m[90manalysts without two factor are refused[39m[90m                             [39m [90m0.09s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Concurrency\AssessmentRaceTest[39m
+  [32;1m✓[39;22m[90m [39m[90mthe database refuses a second assessment and a second open draft[39m[90m    [39m [90m0.08s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma save waits while a submit holds the assessment lock[39m[90m               [39m [90m1.17s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma save after a committed submit is a conflict not success[39m[90m           [39m [90m0.19s[39m  
+  [32;1m✓[39;22m[90m [39m[90mcrossing submits with different keys create one submission[39m[90m          [39m [90m0.21s[39m  
+  [32;1m✓[39;22m[90m [39m[90ma retry with the same key waits for the first and returns its resul[39m[90m…[39m [90m1.21s[39m  
+  [32;1m✓[39;22m[90m [39m[90moverlapping corrections open only one draft[39m[90m                         [39m [90m1.24s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Concurrency\LastAdminLockTest[39m
+  [32;1m✓[39;22m[90m [39m[90mdeactivation waits for a concurrent admin row lock[39m[90m                  [39m [90m1.18s[39m  
+  [32;1m✓[39;22m[90m [39m[90mafter the first commit the second crossing deactivation is refused[39m[90m  [39m [90m0.05s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Foundation\CoreEditionTest[39m
+  [32;1m✓[39;22m[90m [39m[90mstatamic runs as core with headless apis disabled[39m[90m                   [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mcms admin command creates exactly one user and never enables pro[39m[90m    [39m [90m0.04s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Foundation\PrincipalIsolationTest[39m
+  [32;1m✓[39;22m[90m [39m[90mapplication user logs in through the business api[39m[90m                   [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90minactive and wrong password fail identically[39m[90m                        [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mcms only session cannot call the business api[39m[90m                       [39m [90m0.19s[39m  
+  [32;1m✓[39;22m[90m [39m[90mcms administrator can reach the control panel[39m[90m                       [39m [90m2.29s[39m  
+  [32;1m✓[39;22m[90m [39m[90mapplication super admin has no control panel access[39m[90m                 [39m [90m0.06s[39m  
+  [32;1m✓[39;22m[90m [39m[90mpassword reset brokers never cross providers[39m[90m                        [39m [90m2.63s[39m  
+  [32;1m✓[39;22m[90m [39m[90mforgot password response does not reveal accounts[39m[90m                   [39m [90m0.70s[39m  
+  [32;1m✓[39;22m[90m [39m[90mapplication login does not write statamic user state[39m[90m                [39m [90m0.05s[39m  
+
+  [30;42;1m PASS [39;49;22m[39m Tests\Feature\Foundation\RoutingTest[39m
+  [32;1m✓[39;22m[90m [39m[90mhealth is json and reports database[39m[90m                                 [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90munknown business routes return the json error envelope[39m[90m              [39m [90m0.03s[39m  
+  [32;1m✓[39;22m[90m [39m[90mprotected business route requires application identity[39m[90m              [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mroot serves the built spa shell or a clear 503[39m[90m                      [39m [90m0.02s[39m  
+  [32;1m✓[39;22m[90m [39m[90mcms privacy placeholder is server rendered by statamic[39m[90m              [39m [90m1.11s[39m  
+  [32;1m✓[39;22m[90m [39m[90mcsrf cookie endpoint is reserved[39m[90m                                    [39m [90m0.04s[39m  
+
+  [90mTests:[39m    [32;1m125 passed[39;22m[90m (73878 assertions)[39m
+  [90mDuration:[39m [39m27.76s[39m
+
+PHPUNIT=0

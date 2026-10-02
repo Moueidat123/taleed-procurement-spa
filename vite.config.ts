@@ -23,6 +23,8 @@ export default defineConfig({
         }
       : {}),
   },
+  // exceljs is loaded lazily on export; pre-bundle it so the dev server never serves a stale 504 for it.
+  optimizeDeps: { include: ['exceljs'] },
   preview: { port: 4173, strictPort: true },
   build: {
     target: 'es2022',

@@ -2,34 +2,83 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useCommand, useCurrentUser, useDatabase } from '../../app/hooks';
-import { useAppSelector } from '../../app/store';
-import { Alert, Badge, Button, Card, Dialog, EmptyState, Field, Icon, PageHeading, formatDate } from '../../components/ui';
-import { isDate } from '../../domain/validation';
-import { DEMO_DATE, demoNow } from '../../domain/seed';
-import { isCycleOpen } from '../../domain/policies';
-import type { Cycle, Role } from '../../domain/types';
-const cycleSchema=z.object({id:z.string().regex(/^[a-zA-Z0-9_-]{1,80}$/,'Use letters, digits, dashes or underscores.'),label:z.string().trim().min(2,'Enter a cycle label.').max(160),opensAt:z.string().refine(isDate,'Choose a valid date.'),closesAt:z.string().refine(isDate,'Choose a valid date.'),frameworkVersion:z.string().min(1,'Select a framework.'),status:z.enum(['open','closed'])}).refine((v)=>v.opensAt<=v.closesAt,{message:'Closing date must be on or after opening date.',path:['closesAt']});
-export function Cycles() {
-  const db=useDatabase();const {run,busy}=useCommand();const error=useAppSelector((s)=>s.ui.error);
-  const [open,setOpen]=useState(false);const [existing,setExisting]=useState(false);
-  const {register,handleSubmit,reset,formState:{errors}}=useForm<z.infer<typeof cycleSchema>>({resolver:zodResolver(cycleSchema)});
-  const edit=(cycle?:Cycle)=>{setExisting(!!cycle);reset(cycle??{id:`cycle-${Object.keys(db.cycles).length+1}`,label:'New procurement assessment cycle',opensAt:DEMO_DATE,closesAt:'2026-12-31',frameworkVersion:'1.0.0',status:'open'});setOpen(true);};
-  return <><PageHeading eyebrow="PROGRAM CONFIGURATION" title="Assessment cycles" description="Control availability and pin each assessment period to a published framework version." actions={<Button onClick={()=>edit()}><Icon name="calendar"/>Create cycle</Button>}/><Alert>Closing a cycle pauses answer changes and submission, not access to historical results. The demonstration uses a fixed date of {DEMO_DATE}.</Alert><div className="two-column">{Object.values(db.cycles).sort((a,b)=>b.opensAt.localeCompare(a.opensAt)).map((cycle)=>{const count=new Set(Object.values(db.assessments).filter((a)=>a.cycleId===cycle.id).map((a)=>a.orgId)).size;return <Card key={cycle.id}><div className="row-between"><span className="icon-box"><Icon name="calendar"/></span><Badge tone={isCycleOpen(cycle,demoNow())?'success':'neutral'}>{isCycleOpen(cycle,demoNow())?'Open now':cycle.status==='closed'?'Closed':'Outside date window'}</Badge></div><h2>{cycle.label}</h2><dl className="definition-list"><dt>Availability</dt><dd>{formatDate(cycle.opensAt)} – {formatDate(cycle.closesAt)}</dd><dt>Framework</dt><dd>v{cycle.frameworkVersion}</dd><dt>Participating companies</dt><dd>{count}</dd><dt>Cycle ID</dt><dd>{cycle.id}</dd></dl><Button variant="secondary" onClick={()=>edit(cycle)}>Edit cycle</Button></Card>;})}</div>
-    <Dialog open={open} title={existing?'Edit assessment cycle':'Create assessment cycle'} onClose={()=>setOpen(false)}><form noValidate onSubmit={handleSubmit(async(values)=>{const id=await run({type:'saveCycle',cycle:values});if(id)setOpen(false);})}><Field label="Cycle ID *" htmlFor="cycle-id" error={errors.id?.message}><input id="cycle-id" readOnly={existing} {...register('id')}/></Field><Field label="Cycle label *" htmlFor="cycle-label" error={errors.label?.message}><input id="cycle-label" {...register('label')}/></Field><div className="form-grid"><Field label="Opens on *" htmlFor="cycle-opens" error={errors.opensAt?.message}><input id="cycle-opens" type="date" {...register('opensAt')}/></Field><Field label="Closes on *" htmlFor="cycle-closes" error={errors.closesAt?.message}><input id="cycle-closes" type="date" {...register('closesAt')}/></Field><Field label="Published framework *" htmlFor="cycle-framework" error={errors.frameworkVersion?.message}><select id="cycle-framework" {...register('frameworkVersion')}>{Object.values(db.frameworks).filter((f)=>f.status==='published').map((f)=><option key={f.version} value={f.version}>v{f.version}</option>)}</select></Field><Field label="Availability *" htmlFor="cycle-status" error={errors.status?.message}><select id="cycle-status" {...register('status')}><option value="open">Open within dates</option><option value="closed">Closed</option></select></Field></div><small className="muted">A cycle with existing assessments cannot switch framework versions. Create another cycle instead.</small>{error&&<Alert kind="error">{error}</Alert>}<div className="dialog-actions"><Button variant="secondary" onClick={()=>setOpen(false)}>Cancel</Button><Button type="submit" disabled={busy}>Save cycle</Button></div></form></Dialog></>;
-}
-const roleLabel:Record<Role,string>={champion:'Company Champion',analyst:'Taleed Analyst',admin:'Super Admin'};
+import { useCurrentUser } from '../../app/hooks';
+import { Alert, Badge, Button, Card, Dialog, EmptyState, Field, Icon, PageHeading } from '../../components/ui';
+import { toApiError, type ApiError } from '../../infrastructure/api';
+import {
+  useConfirmPasswordMutation, useConfirmTwoFactorMutation, useEnableTwoFactorMutation, useInviteStaffMutation,
+  useLazyRecoveryCodesQuery, useLazyTwoFactorQrQuery, useStaffUsersQuery, useUpdateStaffAccessMutation,
+} from '../../infrastructure/staffAdminApi';
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+
+const roleLabel = { analyst: 'Taleed Analyst', admin: 'Super Admin' } as const;
+const errOf = (e: unknown): ApiError => toApiError(e as FetchBaseQueryError);
+
 export function Access() {
-  const db=useDatabase();const current=useCurrentUser();const {run,busy}=useCommand();const error=useAppSelector((s)=>s.ui.error);
-  const [search,setSearch]=useState('');const [open,setOpen]=useState(false);
-  const schema=z.object({name:z.string().trim().min(2,'Enter a name.').max(160),email:z.string().trim().email('Enter a valid email.').max(254),role:z.enum(['analyst','admin'])});
-  const {register,handleSubmit,reset,formState:{errors}}=useForm<z.infer<typeof schema>>({resolver:zodResolver(schema),defaultValues:{name:'',email:'',role:'analyst'}});
-  const people=Object.values(db.users).filter((u)=>`${u.name} ${u.email}`.toLowerCase().includes(search.toLowerCase()));
-  return <><PageHeading eyebrow="LOCAL DEMO PERMISSIONS" title="People & access" description="Manage simulated staff access and analyst export permissions. Public registration only creates Company Champions." actions={<Button onClick={()=>{reset({name:'',email:'',role:'analyst'});setOpen(true);}}><Icon name="users"/>Add demo staff</Button>}/><Alert kind="warning">This is a front-end permission demonstration, not real authentication. Anyone with access to the browser or demo role switcher can inspect the local dataset.</Alert><Card className="filters compact"><Field label="Find a person" htmlFor="people-search"><input id="people-search" type="search" value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search name or email…"/></Field><span className="filter-count">{people.length} people</span></Card><Card className="table-card"><div className="table-wrap"><table><caption className="sr-only">Demo users and export permissions</caption><thead><tr><th>Person</th><th>Role</th><th>Organization</th><th>Verification</th><th>Analyst exports</th><th>Access</th></tr></thead><tbody>{people.map((u)=>{const locked=u.id===current.id||(u.role==='admin'&&current.role!=='admin');return <tr key={u.id}><td><strong>{u.name}</strong><small className="block">{u.email}</small></td><td>{roleLabel[u.role]}</td><td>{u.orgId?db.organizations[u.orgId]?.name:'Taleed program'}</td><td><Badge tone={u.verified?'success':'amber'}>{u.verified?'Simulated verified':'Pending'}</Badge></td><td>{u.role==='analyst'?<label className="toggle-label"><input type="checkbox" checked={u.canExport} disabled={locked||busy} onChange={(e)=>{void run({type:'setUserAccess',userId:u.id,active:u.active,canExport:e.target.checked});}} aria-label={`Allow portfolio exports for ${u.name}`}/>{u.canExport?'Allowed':'Not allowed'}</label>:u.role==='champion'?'Own reports only':'Included by role'}</td><td><Button variant="ghost" disabled={locked||busy} onClick={()=>{void run({type:'setUserAccess',userId:u.id,active:!u.active,canExport:u.canExport});}}>{u.active?'Pause access':'Enable access'}</Button></td></tr>;})}</tbody></table></div></Card><p className="muted">You cannot change your own access. Only a Super Admin can change another Super Admin, and the last active administrator cannot be paused.</p>
-    <Dialog open={open} title="Add a demo staff member" onClose={()=>setOpen(false)}><form noValidate onSubmit={handleSubmit(async(values)=>{const id=await run({type:'createStaff',...values});if(id)setOpen(false);})}><Alert>No email invitation is sent. The new user can sign in with the shared demo password.</Alert><Field label="Full name *" htmlFor="staff-name" error={errors.name?.message}><input id="staff-name" {...register('name')}/></Field><Field label="Email address *" htmlFor="staff-email" error={errors.email?.message}><input id="staff-email" type="email" {...register('email')}/></Field><Field label="Staff role *" htmlFor="staff-role" error={errors.role?.message}><select id="staff-role" {...register('role')}><option value="analyst">Taleed Analyst</option>{current.role==='admin'&&<option value="admin">Super Admin</option>}</select></Field>{error&&<Alert kind="error">{error}</Alert>}<div className="dialog-actions"><Button variant="secondary" onClick={()=>setOpen(false)}>Cancel</Button><Button type="submit" disabled={busy}>Create local staff account</Button></div></form></Dialog></>;
+  const current = useCurrentUser();
+  const { data: people = [], isLoading, isError, refetch } = useStaffUsersQuery();
+  const [update, { isLoading: updating }] = useUpdateStaffAccessMutation();
+  const [invite, { isLoading: inviting }] = useInviteStaffMutation();
+  const [search, setSearch] = useState(''); const [open, setOpen] = useState(false);
+  const [error, setError] = useState(''); const [sent, setSent] = useState('');
+  const schema = z.object({ email: z.string().trim().email('Enter a valid email.').max(254), role: z.enum(['analyst', 'admin']) });
+  const { register, handleSubmit, reset, setError: setFieldError, formState: { errors } } = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema), defaultValues: { email: '', role: 'analyst' } });
+  const change = async (id: string, body: { active?: boolean; canExport?: boolean }) => {
+    setError('');
+    try { await update({ id, ...body }).unwrap(); } catch (e) { setError(errOf(e).message); }
+  };
+  const shown = people.filter((u) => `${u.name} ${u.email}`.toLowerCase().includes(search.toLowerCase()));
+  return <><PageHeading eyebrow="SUPER ADMIN" title="People & access" description="Invite Taleed staff, pause access and control analyst exports. Public registration only creates Company Champions." actions={<Button onClick={() => { reset({ email: '', role: 'analyst' }); setSent(''); setOpen(true); }}><Icon name="users"/>Invite staff</Button>}/>
+    {error && <Alert kind="error">{error}</Alert>}
+    <Card className="filters compact"><Field label="Find a person" htmlFor="people-search"><input id="people-search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search name or email…"/></Field><span className="filter-count">{shown.length} people</span></Card>
+    {isLoading ? <div className="loading-state" role="status"><span className="loader"/>Loading people…</div>
+      : isError ? <EmptyState title="People could not be loaded" action={<Button onClick={() => void refetch()}>Try again</Button>}>Check your connection and try again.</EmptyState>
+      : <Card className="table-card"><div className="table-wrap"><table><caption className="sr-only">Staff users and access</caption><thead><tr><th>Person</th><th>Role</th><th>Two-step verification</th><th>Portfolio exports</th><th>Access</th></tr></thead><tbody>{shown.map((u) => {
+        const self = u.id === current.id;
+        return <tr key={u.id}><td><strong>{u.name}</strong><small className="block">{u.email}</small></td><td>{roleLabel[u.role]}</td>
+          <td><Badge tone={u.twoFactorEnabled ? 'success' : 'amber'}>{u.twoFactorEnabled ? 'Enabled' : 'Not set up'}</Badge></td>
+          <td>{u.role === 'analyst' ? <label className="toggle-label"><input type="checkbox" checked={u.canExport} disabled={updating} onChange={(e) => void change(u.id, { canExport: e.target.checked })} aria-label={`Allow portfolio exports for ${u.name}`}/>{u.canExport ? 'Allowed' : 'Not allowed'}</label> : 'Included by role'}</td>
+          <td><Badge tone={u.active ? 'success' : 'neutral'}>{u.active ? 'Active' : 'Paused'}</Badge> <Button variant="ghost" disabled={self || updating} onClick={() => void change(u.id, { active: !u.active })}>{u.active ? 'Pause access' : 'Enable access'}</Button></td></tr>;
+      })}</tbody></table></div></Card>}
+    <p className="muted">You cannot change your own access, and the last active Super Admin cannot be paused. The server enforces these rules.</p>
+    <Dialog open={open} title="Invite a staff member" onClose={() => setOpen(false)}>{sent
+      ? <><Alert kind="success" title="Invitation sent">An invitation link was emailed to {sent}. It expires, and can be used once.</Alert><div className="dialog-actions"><Button onClick={() => setOpen(false)}>Done</Button></div></>
+      : <form noValidate onSubmit={handleSubmit(async (values) => {
+        try { await invite(values).unwrap(); setSent(values.email); }
+        catch (e) { const err = errOf(e); if (err.fields?.email) setFieldError('email', { message: err.fields.email[0] }); else setFieldError('root', { message: err.message }); }
+      })}><Field label="Email address *" htmlFor="staff-email" error={errors.email?.message}><input id="staff-email" type="email" autoComplete="off" {...register('email')}/></Field><Field label="Staff role *" htmlFor="staff-role" error={errors.role?.message}><select id="staff-role" {...register('role')}><option value="analyst">Taleed Analyst</option><option value="admin">Super Admin</option></select></Field>{errors.root && <Alert kind="error">{errors.root.message}</Alert>}<div className="dialog-actions"><Button variant="secondary" onClick={() => setOpen(false)}>Cancel</Button><Button type="submit" disabled={inviting}>Send invitation</Button></div></form>}</Dialog></>;
 }
-export function Audit() {
-  const db=useDatabase();const [search,setSearch]=useState('');
-  const events=db.audit.filter((e)=>`${e.action} ${e.detail} ${db.users[e.actorId]?.name??e.actorId}`.toLowerCase().includes(search.toLowerCase()));
-  return <><PageHeading eyebrow="SUPER ADMIN" title="Audit activity" description="A chronological demonstration of application activity, including revisions, publication and exports."/><Alert>This browser-local log retains the latest 500 events and omits answer values. It is editable through browser tools and is not a tamper-evident compliance audit.</Alert><Card className="filters compact"><Field label="Search activity" htmlFor="audit-search"><input id="audit-search" type="search" placeholder="Search action, person or detail…" value={search} onChange={(e)=>setSearch(e.target.value)}/></Field><span className="filter-count">{events.length} matching events</span></Card>{events.length?<Card className="table-card"><div className="table-wrap"><table><caption className="sr-only">Local demonstration audit events</caption><thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Detail</th><th>Target</th></tr></thead><tbody>{events.map((e)=><tr key={e.id}><td className="nowrap">{formatDate(e.at)}<small className="block">{new Date(e.at).toLocaleTimeString('en-GB')}</small></td><td>{db.users[e.actorId]?.name??'System / recovery'}</td><td><Badge>{e.action}</Badge></td><td>{e.detail}</td><td><code className="break-word">{e.targetId}</code></td></tr>)}</tbody></table></div></Card>:<EmptyState title="No matching activity">Change the search terms or explore the demo to generate activity.</EmptyState>}</>;
+
+/** Staff must confirm two-step verification before any staff API is available (server-enforced). */
+export function Security() {
+  const user = useCurrentUser();
+  const [confirmPassword, { isLoading: confirming }] = useConfirmPasswordMutation();
+  const [enable] = useEnableTwoFactorMutation();
+  const [loadQr] = useLazyTwoFactorQrQuery();
+  const [confirm, { isLoading: verifying }] = useConfirmTwoFactorMutation();
+  const [loadCodes] = useLazyRecoveryCodesQuery();
+  const [step, setStep] = useState<'password' | 'scan' | 'codes'>('password');
+  const [qr, setQr] = useState(''); const [codes, setCodes] = useState<string[]>([]);
+  const [password, setPassword] = useState(''); const [code, setCode] = useState(''); const [error, setError] = useState('');
+  if (user.twoFactorEnabled && step !== 'codes') return <><PageHeading eyebrow="ACCOUNT SECURITY" title="Two-step verification" description="Your account is protected with an authenticator app."/><Alert kind="success" title="Two-step verification is on">You will be asked for a code from your authenticator app each time you sign in. Keep your recovery codes somewhere safe.</Alert></>;
+  return <><PageHeading eyebrow="ACCOUNT SECURITY" title="Set up two-step verification" description="Staff accounts must use an authenticator app before program data is available."/>
+    {error && <Alert kind="error">{error}</Alert>}
+    <Card>{step === 'password' && <form noValidate onSubmit={async (e) => {
+      e.preventDefault(); setError('');
+      try {
+        await confirmPassword({ password }).unwrap();
+        await enable().unwrap();
+        const r = await loadQr().unwrap(); setQr(r.svg); setStep('scan'); setPassword('');
+      } catch (err) { setError(errOf(err).status === 422 ? 'That password is not correct.' : errOf(err).message); }
+    }}><p>Confirm your password to begin.</p><Field label="Current password" htmlFor="sec-password"><input id="sec-password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)}/></Field><Button type="submit" disabled={confirming || !password}>Continue</Button></form>}
+    {step === 'scan' && <form noValidate onSubmit={async (e) => {
+      e.preventDefault(); setError('');
+      try { await confirm({ code: code.trim() }).unwrap(); setCodes(await loadCodes().unwrap()); setStep('codes'); }
+      catch (err) { setError(errOf(err).status === 422 ? 'That code is not valid. Check the time on your device and try again.' : errOf(err).message); }
+    }}><p>Scan this QR code with your authenticator app, then enter the six-digit code it shows.</p>
+      {/* SVG is generated by the server (Fortify/BaconQrCode) for this user only. */}
+      <div className="qr-code" aria-label="Authenticator QR code" role="img" dangerouslySetInnerHTML={{ __html: qr }}/>
+      <Field label="Authentication code" htmlFor="sec-code"><input id="sec-code" className="code-input" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(e) => setCode(e.target.value)}/></Field><Button type="submit" disabled={verifying || !/^\d{6}$/.test(code.trim())}>Turn on two-step verification</Button></form>}
+    {step === 'codes' && <><Alert kind="success" title="Two-step verification is on">Save these recovery codes now. Each can be used once if you lose your device. They will not be shown again here.</Alert><ul className="recovery-codes">{codes.map((c) => <li key={c}><code>{c}</code></li>)}</ul></>}
+    </Card></>;
 }
