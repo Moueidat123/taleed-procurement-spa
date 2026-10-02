@@ -163,6 +163,17 @@ class StaffPortfolioTest extends TestCase
         $this->actingAs($granted)->postJson(self::API.'/staff/exports', ['format' => 'pdf'])->assertUnprocessable();
     }
 
+    public function test_registered_champions_without_a_company_are_listed_for_staff(): void
+    {
+        $pending = AppUser::factory()->role('champion')->create(['name' => 'Pending Person', 'email' => 'pending@newco.test']);
+        $res = $this->actingAs($this->analyst())->getJson(self::API.'/staff/champions/pending')->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.email', 'pending@newco.test');
+        $this->assertArrayHasKey('verified', $res->json('data.0'));
+        $this->getJson(self::API.'/staff/champions/pending?search=nobody')->assertOk()->assertJsonPath('meta.total', 0);
+        $this->assertNotNull($pending->id);
+    }
+
     public function test_champions_are_refused(): void
     {
         $champion = AppUser::factory()->role('champion')->create();
