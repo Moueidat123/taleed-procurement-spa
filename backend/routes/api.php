@@ -7,6 +7,7 @@ use App\Http\Controllers\Procurement\HealthController;
 use App\Http\Controllers\Procurement\IssueInvitationController;
 use App\Http\Controllers\Procurement\ListStaffUsersController;
 use App\Http\Controllers\Procurement\MeController;
+use App\Http\Controllers\Procurement\OpenCorrectionController;
 use App\Http\Controllers\Procurement\OrganizationController;
 use App\Http\Controllers\Procurement\RegisterController;
 use App\Http\Controllers\Procurement\SendVerificationController;
@@ -61,6 +62,8 @@ Route::middleware('auth:sanctum')->group(function () {
         // Staff invitations (D-10): token emailed, never returned.
         Route::post('/staff/invitations', IssueInvitationController::class)
             ->name('procurement.staff.invitations.issue');
+        Route::post('/staff/assessments/{revisionId}/corrections', OpenCorrectionController::class)
+            ->name('procurement.staff.corrections.open');
         Route::get('/staff/users', ListStaffUsersController::class)
             ->name('procurement.staff.users.index');
         Route::patch('/staff/users/{user}/access', UpdateStaffAccessController::class)

@@ -238,6 +238,56 @@ class AssessmentService
         });
     }
 
+    /**
+     * Super Admin opens a correction draft from the effective submission
+     * (allowed after cycle close). The prior submission stays effective until
+     * the Champion submits the correction.
+     */
+    public function openCorrection(AppUser $admin, string $revisionId, string $reason): AssessmentRevision
+    {
+        if ($admin->role !== 'admin' || ! $admin->active) {
+            throw new AuthorizationException;
+        }
+        $reason = trim($reason);
+        if (mb_strlen($reason) < 10 || mb_strlen($reason) > 1000) {
+            throw ValidationException::withMessages(['reason' => __('Give a reason of at least 10 characters.')]);
+        }
+
+        return DB::transaction(function () use ($admin, $revisionId, $reason) {
+            $assessmentId = AssessmentRevision::query()->whereKey($revisionId)->value('assessment_id');
+            /** @var Assessment $assessment */
+            $assessment = Assessment::query()->whereKey($assessmentId)->lockForUpdate()->firstOrFail();
+            $source = AssessmentRevision::query()->whereKey($revisionId)->firstOrFail();
+
+            if ($assessment->current_submission_id !== $source->id) {
+                abort(409, 'Only the effective submission can be corrected.');
+            }
+            if ($assessment->revisions()->where('status', 'draft')->exists()) {
+                abort(409, 'A correction is already open.');
+            }
+
+            // Allocated under the aggregate lock, so MAX + 1 is safe here.
+            $next = (int) AssessmentRevision::query()->where('assessment_id', $assessment->id)->max('revision_number') + 1;
+            $draft = AssessmentRevision::create([
+                'assessment_id' => $assessment->id,
+                'framework_version_id' => $assessment->framework_version_id,
+                'revision_number' => $next,
+                'parent_revision_id' => $source->id,
+                'status' => 'draft',
+                'correction_reason' => $reason,
+                'lock_version' => 0,
+                'created_by' => $admin->id,
+            ]);
+            $this->seedAnswers($draft, $source);
+
+            AuditEvent::record(action: 'assessment.correction_opened', actorId: $admin->id, targetType: 'assessment_revision',
+                targetId: $draft->id, organizationId: $assessment->organization_id,
+                metadata: ['parentRevisionId' => $source->id, 'reason' => $reason]);
+
+            return $draft;
+        });
+    }
+
     /** Own-company revision (404 for anything else, including forged IDs). */
     public function ownedRevision(AppUser $user, string $revisionId): AssessmentRevision
     {
