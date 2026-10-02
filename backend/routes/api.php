@@ -11,6 +11,7 @@ use App\Http\Controllers\Procurement\OpenCorrectionController;
 use App\Http\Controllers\Procurement\OrganizationController;
 use App\Http\Controllers\Procurement\RegisterController;
 use App\Http\Controllers\Procurement\SendVerificationController;
+use App\Http\Controllers\Procurement\StaffPortfolioController;
 use App\Http\Controllers\Procurement\UpdateOrganizationAccessController;
 use App\Http\Controllers\Procurement\UpdateStaffAccessController;
 use Illuminate\Support\Facades\Route;
@@ -64,6 +65,12 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('procurement.staff.invitations.issue');
         Route::post('/staff/assessments/{revisionId}/corrections', OpenCorrectionController::class)
             ->name('procurement.staff.corrections.open');
+        // Staff read models (Phase 2B): Analyst and Super Admin; never draft answers.
+        Route::get('/staff/portfolio', [StaffPortfolioController::class, 'portfolio'])->name('procurement.staff.portfolio');
+        Route::get('/staff/organizations', [StaffPortfolioController::class, 'organizations'])->name('procurement.staff.organizations.index');
+        Route::get('/staff/organizations/{organizationId}', [StaffPortfolioController::class, 'organization'])->name('procurement.staff.organizations.show');
+        Route::get('/staff/assessments/{revisionId}', [StaffPortfolioController::class, 'submission'])->name('procurement.staff.assessments.show');
+        Route::post('/staff/comparisons', [StaffPortfolioController::class, 'compare'])->name('procurement.staff.comparisons');
         Route::get('/staff/users', ListStaffUsersController::class)
             ->name('procurement.staff.users.index');
         Route::patch('/staff/users/{user}/access', UpdateStaffAccessController::class)
