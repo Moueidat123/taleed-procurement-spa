@@ -20,7 +20,7 @@ class OrganizationService
      * check and write happen in one transaction so two concurrent first-time
      * profiles cannot both succeed.
      *
-     * @param  array{displayName:string,countryCode:string,sizeBand:string,registrationId:?string}  $data
+     * @param  array{displayName:string,countryCode:string,sizeBand:string,registrationId:?string,authorityConfirmed?:bool}  $data
      */
     public function upsertForChampion(AppUser $champion, array $data): Organization
     {
@@ -45,6 +45,12 @@ class OrganizationService
             $org->size_band = $data['sizeBand'];
             $org->registration_id = $data['registrationId'] ?: null;
             $org->normalized_registration_id = $normalizedReg;
+            // Champion confirms authority to submit for the company (required to start).
+            if (($data['authorityConfirmed'] ?? null) === true && $org->authority_confirmed_at === null) {
+                $org->authority_confirmed_at = now();
+            } elseif (($data['authorityConfirmed'] ?? null) === false) {
+                $org->authority_confirmed_at = null;
+            }
             if ($existingId === null) {
                 $org->active = true;
                 $org->is_test = false;
