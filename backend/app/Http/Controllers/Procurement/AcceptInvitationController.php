@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 /**
  * Accept a staff invitation (decisions.md D-10). Public + throttled. On success
  * the new staff user is created and signed in so they can proceed to the
- * mandatory TOTP enrolment.
+ * optional TOTP enrolment.
  */
 class AcceptInvitationController
 {

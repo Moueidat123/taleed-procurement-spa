@@ -34,7 +34,7 @@ components:
           properties:
             code:
               type: string
-              enum: [validation_failed, unauthenticated, forbidden, two_factor_required, not_found, method_not_allowed, conflict, csrf_token_mismatch, rate_limited, unavailable, server_error, http_error]
+              enum: [validation_failed, unauthenticated, forbidden, not_found, method_not_allowed, conflict, csrf_token_mismatch, rate_limited, unavailable, server_error, http_error]
             message: { type: string }
             fields:
               type: object
@@ -61,7 +61,7 @@ components:
       description: Invalid input
       content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
     Forbidden:
-      description: 'Role not permitted, or `two_factor_required` for staff without confirmed TOTP'
+      description: 'Role not permitted'
       content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
     Conflict:
       description: Stale expectedVersion / state conflict / last active Super Admin
@@ -194,16 +194,16 @@ paths:
   /staff/assessments/{revisionId}:
     get: { x-status: implemented, security: [{ appSession: [] }], summary: 'Submitted snapshot only; drafts are 404', responses: { '200': { description: OK }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Not found or draft } } }
   /staff/organizations/{id}/access:
-    patch: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin with confirmed TOTP: pause/enable organization (body `{active: boolean}`); audited', responses: { '200': { description: OK }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Not found }, '422': { $ref: '#/components/responses/Validation' } } }
+    patch: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin : pause/enable organization (body `{active: boolean}`); audited', responses: { '200': { description: OK }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Not found }, '422': { $ref: '#/components/responses/Validation' } } }
   /staff/assessments/{revisionId}/corrections:
     post: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin with TOTP: open a correction draft from the effective submission (reason 10–1000 chars). Allowed after cycle close; prior submission stays effective until the correction is submitted.', responses: { '201': { description: Created }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Not found }, '409': { $ref: '#/components/responses/Conflict' }, '422': { $ref: '#/components/responses/Validation' } } }
   /staff/comparisons:
     post: { x-status: implemented, security: [{ appSession: [] }], summary: 'Compare 2–4 companies with effective submissions in one cycle and the same framework (body organizationIds, cycleId)', responses: { '200': { description: OK }, '403': { $ref: '#/components/responses/Forbidden' }, '422': { $ref: '#/components/responses/Validation' } } }
   /staff/users:
-    get: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin with confirmed TOTP: staff people & access list (Champions excluded)', responses: { '200': { description: OK }, '401': { $ref: '#/components/responses/Unauthenticated' }, '403': { $ref: '#/components/responses/Forbidden' } } }
+    get: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin : staff people & access list (Champions excluded)', responses: { '200': { description: OK }, '401': { $ref: '#/components/responses/Unauthenticated' }, '403': { $ref: '#/components/responses/Forbidden' } } }
   /staff/invitations:
-    post: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin with confirmed TOTP: invite analyst/admin (D-10). Token is emailed, never returned. Duplicate pending invitation is refused.', responses: { '201': { description: 'Invited: id, email, role, expiresAt' }, '403': { $ref: '#/components/responses/Forbidden' }, '422': { $ref: '#/components/responses/Validation' } } }
+    post: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin : invite analyst/admin (D-10). Token is emailed, never returned. Duplicate pending invitation is refused.', responses: { '201': { description: 'Invited: id, email, role, expiresAt' }, '403': { $ref: '#/components/responses/Forbidden' }, '422': { $ref: '#/components/responses/Validation' } } }
   /staff/users/{id}/access:
-    patch: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin with confirmed TOTP: active / canExport only (other fields ignored). Self-change refused (422); last active Super Admin protected under row locks (409); audited.', responses: { '200': { description: OK }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Not found }, '409': { $ref: '#/components/responses/Conflict' }, '422': { $ref: '#/components/responses/Validation' } } }
+    patch: { x-status: implemented, security: [{ appSession: [] }], summary: 'Super Admin : active / canExport only (other fields ignored). Self-change refused (422); last active Super Admin protected under row locks (409); audited.', responses: { '200': { description: OK }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Not found }, '409': { $ref: '#/components/responses/Conflict' }, '422': { $ref: '#/components/responses/Validation' } } }
   /staff/exports:
-    post: { x-status: implemented, security: [{ appSession: [] }], summary: 'Analyst/Super Admin with confirmed TOTP; requires Super Admin or the canExport grant. Body format (csv|xlsx), optional cycleId, band, search. Returns cycleId, frameworkVersion and rows of effective submissions only (company, country, size, revisionId, revisionNumber, submittedAt, overall, band, domains[key,name,score]); never answers. The SPA builds the file. Audited as portfolio.exported.', responses: { '200': { description: OK }, '401': { $ref: '#/components/responses/Unauthenticated' }, '403': { $ref: '#/components/responses/Forbidden' }, '422': { $ref: '#/components/responses/Validation' } } }
+    post: { x-status: implemented, security: [{ appSession: [] }], summary: 'Analyst/Super Admin ; requires Super Admin or the canExport grant. Body format (csv|xlsx), optional cycleId, band, search. Returns cycleId, frameworkVersion and rows of effective submissions only (company, country, size, revisionId, revisionNumber, submittedAt, overall, band, domains[key,name,score]); never answers. The SPA builds the file. Audited as portfolio.exported.', responses: { '200': { description: OK }, '401': { $ref: '#/components/responses/Unauthenticated' }, '403': { $ref: '#/components/responses/Forbidden' }, '422': { $ref: '#/components/responses/Validation' } } }
