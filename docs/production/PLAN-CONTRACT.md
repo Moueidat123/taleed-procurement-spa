@@ -56,7 +56,7 @@ No phase starts before the previous one is merged.
 - `GET`/`PATCH /organization`: company profile; fields exactly as in the approved form; **no sector**.
 - Staff user list and access changes: active and export permission. The last active admin cannot be removed; admins cannot change their own access, and this holds under concurrency.
 - Organisation pause and enable.
-- TOTP two-factor: **mandatory for Super Admin and Analyst**, with enrolment on first login and recovery codes.
+- TOTP two-factor: **optional for every role** (D-17, changed 2 Oct 2026), with recovery codes. Staff can enable it under Two-step verification; nothing requires it.
 
 **Commands**
 - Audited operator command `procurement:admin:bootstrap`: creates the first Super Admin by invitation.
@@ -217,7 +217,7 @@ Full rationale is in `docs/production/decisions.md`.
 | ID | Decision |
 |---|---|
 | D-30 | Email verification by **six-digit code**: valid 15 minutes, 5 attempts, resend throttled |
-| D-17 | TOTP two-factor **mandatory for Super Admin and Analyst**; optional for Champions |
+| D-17 | TOTP two-factor **optional for all roles**, including Super Admin and Analyst. *Changed 2 Oct 2026 by director instruction (Mohamad Oueidat), replacing "mandatory for Super Admin and Analyst". Risk accepted: a staff password alone gives access to all company results and exports.* |
 | D-10 | New staff are added by **email invitation**: 72-hour single-use link |
 | D-31 | **Public sign-up**; **one Champion per company**; a duplicate company name or registration ID is blocked with "contact Taleed" |
 

@@ -90,11 +90,11 @@ class CorrectionTest extends TestCase
         $this->assertSame(1, AssessmentRevision::query()->count());
     }
 
-    public function test_a_super_admin_without_two_factor_is_refused(): void
+    public function test_a_super_admin_without_two_factor_can_open_a_correction(): void
     {
-        $this->open(AppUser::factory()->role('admin')->create())
-            ->assertForbidden()->assertJsonPath('error.code', 'two_factor_required');
-        $this->assertSame(1, AssessmentRevision::query()->count());
+        // D-17 (changed 2 Oct 2026): two-step verification is optional for staff.
+        $this->open(AppUser::factory()->role('admin')->create())->assertCreated();
+        $this->assertSame(2, AssessmentRevision::query()->count());
     }
 
     public function test_a_second_open_correction_and_correcting_a_stale_revision_are_409(): void

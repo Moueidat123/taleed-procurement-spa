@@ -27,7 +27,7 @@ Status values:
 | D-14 | Exports server-side CSV/XLSX; report stays browser print; no server PDF in first release | Proposed |
 | D-15 | Production placement and identities | **Production blocker** |
 | D-16 | GitHub Pages workflow restricted to manual dispatch | Proposed (needs Phase 1 approval: it edits CI) |
-| D-17 | Privileged MFA: Fortify TOTP for Super Admin and Analyst | Proposed |
+| D-17 | Staff MFA: Fortify TOTP optional for all roles | **Changed by director, 2 Oct 2026** |
 | D-18 | CI: MySQL 8.4 integration tests + frontend check | Proposed |
 | D-19 | Content approval separate from UX approval | **Owner decision** (before production publication) |
 
@@ -166,7 +166,9 @@ No methodology page is restored. Phase 1 needs only a placeholder entry to prove
 - Alternative: delete the workflow. **Owner may choose.**
 
 ## D-17 Privileged MFA
-- Fortify TOTP with recovery codes, required for `admin`; recommended for `analyst` and proposed as required.
+- **Changed 2 Oct 2026 by director instruction (Mohamad Oueidat):** two-step verification is **optional for every role, including Super Admin and Analyst, in all environments including production**. The server enforcement (`EnsureStaffTwoFactor`) is removed. Staff may still enable TOTP with recovery codes on the Two-step verification page; once enabled, sign-in asks for the code.
+- Risk accepted by the director against the developer's advice: a stolen staff password alone gives access to every company's submitted results and to exports.
+- Previous decision (superseded): Fortify TOTP with recovery codes, required for `admin` and `analyst`.
 - Enrolment is one added step after first login, styled with existing components.
 - The CMS admin uses Statamic's own 2FA.
 - Enforcement lands in Phase 2; the package is installed in Phase 1.

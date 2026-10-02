@@ -40,26 +40,36 @@ class AccountsSecurityTest extends TestCase
     }
 
     #[DataProvider('staffRoles')]
-    public function test_every_staff_route_requires_confirmed_two_factor(string $role): void
+    public function test_staff_routes_do_not_require_two_factor(string $role): void
     {
+        // D-17 (changed 2 Oct 2026): two-step verification is optional for staff.
         $user = AppUser::factory()->role($role)->create();
-        $org = Organization::factory()->create();
 
-        $this->actingAs($user)->getJson(self::API.'/staff/users')
-            ->assertStatus(403)->assertJsonPath('error.code', 'two_factor_required');
-        $this->actingAs($user)->postJson(self::API.'/staff/invitations', ['email' => 'x@example.test', 'role' => 'analyst'])
-            ->assertStatus(403)->assertJsonPath('error.code', 'two_factor_required');
-        $this->actingAs($user)->patchJson(self::API.'/staff/organizations/'.$org->id.'/access', ['active' => false])
-            ->assertStatus(403)->assertJsonPath('error.code', 'two_factor_required');
+        $org = Organization::factory()->create();
+        $response = $this->actingAs($user)->getJson(self::API.'/staff/organizations/'.$org->id);
+        $response->assertOk();
+        $this->assertNotSame('two_factor_required', $response->json('error.code'));
+    }
+
+    public function test_analyst_without_two_factor_still_cannot_manage_access(): void
+    {
+        $org = Organization::factory()->create();
+        $this->actingAs(AppUser::factory()->role('analyst')->create())
+            ->patchJson(self::API.'/staff/organizations/'.$org->id.'/access', ['active' => false])->assertForbidden();
         $this->assertTrue($org->fresh()->active);
     }
 
-    public function test_champions_are_not_subject_to_the_mfa_gate_but_are_still_forbidden(): void
+    public function test_super_admin_without_two_factor_can_manage_access(): void
     {
-        $champion = AppUser::factory()->role('champion')->create();
+        $org = Organization::factory()->create();
+        $this->actingAs(AppUser::factory()->role('admin')->create())
+            ->patchJson(self::API.'/staff/organizations/'.$org->id.'/access', ['active' => false])->assertOk();
+        $this->assertFalse($org->fresh()->active);
+    }
 
-        $response = $this->actingAs($champion)->getJson(self::API.'/staff/users')->assertStatus(403);
-        $this->assertNotSame('two_factor_required', $response->json('error.code'));
+    public function test_champions_are_still_forbidden_from_staff_routes(): void
+    {
+        $this->actingAs(AppUser::factory()->role('champion')->create())->getJson(self::API.'/staff/users')->assertStatus(403);
     }
 
     public function test_super_admin_pauses_and_enables_an_organization_with_audit(): void

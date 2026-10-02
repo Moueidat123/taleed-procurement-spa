@@ -180,9 +180,9 @@ class StaffPortfolioTest extends TestCase
         $this->actingAs($champion)->getJson(self::API.'/staff/portfolio')->assertForbidden();
     }
 
-    public function test_analysts_without_two_factor_are_refused(): void
+    public function test_analysts_without_two_factor_can_read_staff_views(): void
     {
-        $this->actingAs(AppUser::factory()->role('analyst')->create())->getJson(self::API.'/staff/organizations')
-            ->assertForbidden()->assertJsonPath('error.code', 'two_factor_required');
+        // D-17 (changed 2 Oct 2026): two-step verification is optional for staff.
+        $this->actingAs(AppUser::factory()->role('analyst')->create())->getJson(self::API.'/staff/organizations')->assertOk();
     }
 }

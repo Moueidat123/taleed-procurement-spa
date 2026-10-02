@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Phase 2B — Analyst/Super Admin read endpoints (behind the staff TOTP gate).
+ * Phase 2B — Analyst/Super Admin read endpoints (staff only).
  * Server-side filtering and pagination; never returns draft answers.
  */
 class StaffPortfolioController

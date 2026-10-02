@@ -7,7 +7,7 @@ use App\Services\AssessmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/** Phase 2B — Super Admin opens a correction draft (behind the staff TOTP gate). */
+/** Phase 2B — Super Admin opens a correction draft (Super Admin only). */
 class OpenCorrectionController
 {
     public function __invoke(Request $request, AssessmentService $service, string $revisionId): JsonResponse

@@ -52,11 +52,12 @@ class StaffAdministrationTest extends TestCase
         $this->assertCount(2, $ids, 'champions are organization users, not staff');
     }
 
-    public function test_staff_without_confirmed_two_factor_are_blocked_by_the_gate(): void
+    public function test_super_admin_without_two_factor_can_list_staff(): void
     {
-        $admin = AppUser::factory()->role('admin')->create(); // no 2FA
+        // D-17 (changed 2 Oct 2026): two-step verification is optional for staff.
+        $admin = AppUser::factory()->role('admin')->create();
 
-        $this->actingAs($admin)->getJson(self::USERS)->assertStatus(403);
+        $this->actingAs($admin)->getJson(self::USERS)->assertOk();
     }
 
     public function test_a_champion_cannot_list_staff(): void
